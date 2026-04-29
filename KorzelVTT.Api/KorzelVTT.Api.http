@@ -1,0 +1,6 @@
+@KorzelVTT.Api_HostAddress = http://localhost:5104
+
+GET {{KorzelVTT.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
