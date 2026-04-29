@@ -1,6 +1,16 @@
-@KorzelVTT.Api_HostAddress = http://localhost:5104
-
-GET {{KorzelVTT.Api_HostAddress}}/weatherforecast/
+### Listar Usuários (Teste do GET)
+GET http://localhost:5104/api/users
 Accept: application/json
 
 ###
+
+### Criar o Mestre Administrador (Teste do POST)
+POST http://localhost:5104/api/users
+Content-Type: application/json
+
+{
+  "username": "Guilherme",
+  "email": "dinofalco123@gmail.com",
+  "passwordHash": "Spectrovenator",
+  "role": 0
+}

@@ -3,17 +3,19 @@ using KorzelVTT.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Pegamos a frase de conexão que escrevemos no passo anterior
+// Configuração do Banco de Dados
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-// Registramos o banco de dados SQLite no sistema
 builder.Services.AddDbContext<KorzelContext>(options =>
     options.UseSqlite(connectionString));
 
+// Habilita os serviços de Controllers no container de dependências
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
-app.MapGet("/", () => "API do Korzel VTT conectada ao banco de dados!");
+// Mapeia as rotas para os Controllers (isso faz a mágica de ligar a URL ao código)
+app.MapControllers();
 
 app.Run();
