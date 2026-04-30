@@ -9,8 +9,34 @@ POST http://localhost:5104/api/users
 Content-Type: application/json
 
 {
-  "username": "Guilherme",
+  "username": "Varish",
   "email": "dinofalco123@gmail.com",
-  "passwordHash": "Spectrovenator",
+  "passwordHash": "Spectrovenator123",
   "role": 0
+}
+
+
+### Criar Ficha de Personagem (Teste)
+POST http://localhost:5104/api/characters
+Content-Type: application/json
+
+{
+  "userId": 1, 
+  "name": "Kael, o Quebra-Marés",
+  "race": "Korgath",
+  "class": "Guerreiro",
+  "level": 1,
+  "vigor": 3,
+  "agility": 0,
+  "strength": 4,
+  "intellect": -2,
+  "instinct": 1,
+  "presence": 0,
+  "currentHP": 25,
+  "maxHP": 25,
+  "currentPE": 6,
+  "maxPE": 6,
+  "corruption": 0,
+  "lascas": 1000,
+  "baseDefense": 11
 }

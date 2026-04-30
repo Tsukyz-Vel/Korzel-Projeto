@@ -30,4 +30,7 @@ public class User
     public UserRole Role { get; set; } = UserRole.Player; // Por padrão, todo mundo nasce como Player
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // NOVO: Lista que guarda os personagens vinculados a esta conta
+    public ICollection<Character> Characters { get; set; } = new List<Character>();
 }

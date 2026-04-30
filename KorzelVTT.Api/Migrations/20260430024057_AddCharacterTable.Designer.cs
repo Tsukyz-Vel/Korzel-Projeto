@@ -3,6 +3,7 @@ using System;
 using KorzelVTT.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KorzelVTT.Api.Migrations
 {
     [DbContext(typeof(KorzelContext))]
-    partial class KorzelContextModelSnapshot : ModelSnapshot
+    [Migration("20260430024057_AddCharacterTable")]
+    partial class AddCharacterTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.7");
@@ -91,36 +94,6 @@ namespace KorzelVTT.Api.Migrations
                     b.ToTable("Characters");
                 });
 
-            modelBuilder.Entity("KorzelVTT.Api.Models.CharacterSkill", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("AssociatedAttribute")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("CharacterId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsTrained")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MiscBonus")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CharacterId");
-
-                    b.ToTable("CharacterSkills");
-                });
-
             modelBuilder.Entity("KorzelVTT.Api.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -160,22 +133,6 @@ namespace KorzelVTT.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("KorzelVTT.Api.Models.CharacterSkill", b =>
-                {
-                    b.HasOne("KorzelVTT.Api.Models.Character", "Character")
-                        .WithMany("Skills")
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Character");
-                });
-
-            modelBuilder.Entity("KorzelVTT.Api.Models.Character", b =>
-                {
-                    b.Navigation("Skills");
                 });
 
             modelBuilder.Entity("KorzelVTT.Api.Models.User", b =>
