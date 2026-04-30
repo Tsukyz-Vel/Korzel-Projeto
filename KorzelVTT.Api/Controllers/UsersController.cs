@@ -24,11 +24,14 @@ public class UsersController : ControllerBase
         return await _context.Users.ToListAsync();
     }
 
-    // POST: api/users (Cria um novo usuário no banco)
+    // POST: api/users (Cria um novo usuário)
     [HttpPost]
     public async Task<ActionResult<User>> CreateUser(User user)
     {
-        // Por enquanto salvamos a senha direta, mas logo vamos adicionar o Hash de segurança
+        // 1. Pega a senha que o usuário digitou e transforma em um Hash seguro usando BCrypt
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
+
+        // 2. Salva no banco de dados com a senha já protegida
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
