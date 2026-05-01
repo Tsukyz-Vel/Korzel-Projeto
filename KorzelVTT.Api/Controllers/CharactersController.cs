@@ -49,4 +49,36 @@ public class CharactersController : ControllerBase
 
         return CreatedAtAction(nameof(GetCharacter), new { id = character.Id }, character);
     }
+    // PUT: api/characters/1 (Atualiza a Ficha Inteira)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateCharacter(int id, Character updatedCharacter)
+    {
+        // Trava de segurança: O ID da URL tem que ser o mesmo da ficha enviada
+        if (id != updatedCharacter.Id)
+        {
+            return BadRequest("O ID da magia de alteração falhou!");
+        }
+
+        // Avisa o banco de dados que essa ficha foi modificada
+        _context.Entry(updatedCharacter).State = EntityState.Modified;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            var characterExists = await _context.Characters.AnyAsync(c => c.Id == id);
+            if (!characterExists)
+            {
+                return NotFound("Personagem não encontrado nas terras de Korzel!");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        return NoContent(); // 204: Sucesso!
+    }
 }
