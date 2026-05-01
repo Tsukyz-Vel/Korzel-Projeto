@@ -16,4 +16,7 @@ public class KorzelContext : DbContext
 
     // NOVO: Tabela de Perícias
     public DbSet<CharacterSkill> CharacterSkills { get; set; }
+
+    // NOVO: Tabela do Inventário e Arsenal
+    public DbSet<CharacterItem> CharacterItems { get; set; }
 }
