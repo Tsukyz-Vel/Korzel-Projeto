@@ -48,4 +48,9 @@ public class Character
     
     // NOVO: A lista de perícias que este personagem possui
     public ICollection<CharacterSkill> Skills { get; set; } = new List<CharacterSkill>();
+
+    // NOVO: O Inventário do Personagem
+    public ICollection<CharacterItem> Inventory { get; set; } = new List<CharacterItem>();
+
+    
 }

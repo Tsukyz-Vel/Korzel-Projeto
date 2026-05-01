@@ -40,3 +40,34 @@ Content-Type: application/json
   "lascas": 1000,
   "baseDefense": 11
 }
+
+### Treinar o Kael em Atletismo
+POST http://localhost:5104/api/characterskills
+Content-Type: application/json
+
+{
+  "characterId": 1,
+  "name": "Atletismo",
+  "associatedAttribute": "Vigor",
+  "isTrained": true,
+  "miscBonus": 0
+}
+
+### Dar um Tridente de Guerra ao Kael
+POST http://localhost:5104/api/characteritems
+Content-Type: application/json
+
+{
+  "characterId": 1,
+  "name": "Tridente de Guerra",
+  "category": "Arma Exótica",
+  "description": "Versátil (1d10). Não sofre penalidade na água. +2 para imobilizar.",
+  "quantity": 1,
+  "isEquipped": true,
+  "damage": "1d8",
+  "critical": "x2",
+  "range": "6m",
+  "damageType": "Perfurante",
+  "defenseBonus": 0,
+  "armorPenalty": 0
+}

@@ -8,8 +8,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<KorzelContext>(options =>
     options.UseSqlite(connectionString));
 
-// Habilita os serviços de Controllers no container de dependências
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    // Ensina o conversor JSON a ignorar o loop infinito
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+});
 
 var app = builder.Build();
 
