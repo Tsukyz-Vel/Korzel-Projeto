@@ -13,42 +13,71 @@ export default function CharacterSheet({
   charName, setCharName, charOrigin, setCharOrigin, charRace, setCharRace, charClass, setCharClass, charAge, setCharAge, charLevel, setCharLevel,
   attrInt, setAttrInt, attrPre, setAttrPre, attrAgi, setAttrAgi, attrVig, setAttrVig, attrFor, setAttrFor, attrIns, setAttrIns,
   hp, setHp, maxHp, setMaxHp, pe, setPe, maxPe, setMaxPe, corruption, setCorruption, maxCorruption, setMaxCorruption,
-  lascas, setLascas, currentWeight, maxWeight, skillsList, executeRoll, getSkillTotal,
+  lascas, setLascas, currentWeight, maxWeight, skillsList, executeRoll,
   activeFichaTab, setActiveFichaTab,
-  showWeaponForm, setShowWeaponForm, editingWeaponIndex, weaponForm, setWeaponForm, attacksList, handleOpenNewWeapon, handleEditWeapon, handleDeleteWeapon, handleSaveWeapon,
+  showWeaponForm, setShowWeaponForm, editingWeaponIndex, weaponForm, setWeaponForm, attacksList, setAttacksList, handleOpenNewWeapon, handleEditWeapon, handleDeleteWeapon, handleSaveWeapon,
   showAbilityForm, setShowAbilityForm, editingAbilityIndex, abilityForm, setAbilityForm, abilitiesList, handleOpenNewAbility, handleEditAbility, handleDeleteAbility, handleSaveAbility,
   showItemForm, setShowItemForm, editingItemIndex, itemForm, setItemForm, inventoryList, handleOpenNewItem, handleEditItem, handleDeleteItem, handleSaveItem,
   charDeity, handleDeityChange, mut1, setMut1, mut2, setMut2, mut3, setMut3,
   notes, activeNoteId, setActiveNoteId, handleAddNote, handleDeleteNote, handleNoteChange, activeNote
 }) {
+
+ // ==========================================
+  // MOTOR DE CÁLCULO BLINDADO CONTRA ERROS DE API
+  // ==========================================
+  const calculateSkillTotal = (skillName) => {
+    const skill = skillsList.find(s => s.name === skillName);
+    if (!skill) return 0;
+
+    const attributesMap = {
+      'INT': attrInt,
+      'PRE': attrPre,
+      'AGI': attrAgi,
+      'VIG': attrVig,
+      'FOR': attrFor,
+      'INS': attrIns
+    };
+
+    // A MÁGICA: Limpa espaços em branco e força pra maiúsculo!
+    // 'Pre', ' pre  ', 'PRE' -> tudo vira 'PRE'
+    const siglaLimpa = skill.attrShort ? skill.attrShort.trim().toUpperCase() : '';
+    
+    // Pega o valor limpo
+    const attrValue = Number(attributesMap[siglaLimpa]) || 0;
+    const training = Number(skill.trainingLevel) || 0;
+
+    return attrValue + training;
+  };
+
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-8 w-full max-w-7xl mx-auto min-h-0">
       <div className="w-full lg:w-[50%] flex flex-col gap-8 relative z-10 shrink-0">
         <div className="w-full flex flex-wrap gap-4 bg-zinc-950/50 border border-zinc-800/50 rounded-xl p-4 shadow-lg backdrop-blur-sm">
           <div className="flex-1 min-w-[200px] flex flex-col mb-2">
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Personagem</span>
-            <input type="text" value={charName} onChange={(e) => setCharName(e.target.value)} className="w-full text-xl sm:text-2xl font-bold text-amber-500 bg-transparent border-b border-zinc-700 pb-1 focus:outline-none focus:border-amber-700 truncate transition-colors" />
+            <input type="text" value={charName} onChange={(e) => setCharName(e.target.value)} onFocus={(e) => e.target.select()} className="w-full text-xl sm:text-2xl font-bold text-amber-500 bg-transparent border-b border-zinc-700 pb-1 focus:outline-none focus:border-amber-700 truncate transition-colors" />
           </div>
           <div className="w-1/3 min-w-[150px] flex flex-col mb-2">
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Origem</span>
-            <input type="text" value={charOrigin} onChange={(e) => setCharOrigin(e.target.value)} placeholder="Ex: Caçador da Tundra" className="w-full text-lg font-bold text-amber-500 bg-transparent border-b border-zinc-700 pb-1 focus:outline-none focus:border-amber-700 truncate transition-colors" />
+            <input type="text" value={charOrigin} onChange={(e) => setCharOrigin(e.target.value)} onFocus={(e) => e.target.select()} placeholder="Ex: Caçador da Tundra" className="w-full text-lg font-bold text-amber-500 bg-transparent border-b border-zinc-700 pb-1 focus:outline-none focus:border-amber-700 truncate transition-colors" />
           </div>
           <div className="w-full h-[1px] bg-zinc-800/50 my-1"></div>
           <div className="flex-1 min-w-[100px] flex flex-col">
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Raça</span>
-            <input type="text" value={charRace} onChange={(e) => setCharRace(e.target.value)} className="w-full text-sm font-bold text-amber-500 bg-transparent border-b border-zinc-700 pb-1 focus:outline-none focus:border-amber-700 truncate transition-colors" />
+            <input type="text" value={charRace} onChange={(e) => setCharRace(e.target.value)} onFocus={(e) => e.target.select()} className="w-full text-sm font-bold text-amber-500 bg-transparent border-b border-zinc-700 pb-1 focus:outline-none focus:border-amber-700 truncate transition-colors" />
           </div>
           <div className="flex-1 min-w-[100px] flex flex-col">
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Classe</span>
-            <input type="text" value={charClass} onChange={(e) => setCharClass(e.target.value)} className="w-full text-sm font-bold text-amber-500 bg-transparent border-b border-zinc-700 pb-1 focus:outline-none focus:border-amber-700 truncate transition-colors" />
+            <input type="text" value={charClass} onChange={(e) => setCharClass(e.target.value)} onFocus={(e) => e.target.select()} className="w-full text-sm font-bold text-amber-500 bg-transparent border-b border-zinc-700 pb-1 focus:outline-none focus:border-amber-700 truncate transition-colors" />
           </div>
           <div className="w-16 flex flex-col">
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Idade</span>
-            <input type="number" value={charAge} onChange={(e) => setCharAge(e.target.value)} className="w-full text-sm text-center font-bold text-amber-500 bg-transparent border-b border-zinc-700 pb-1 focus:outline-none focus:border-amber-700 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+            {/* onFocus seleciona o texto todo, removendo o zero velho ao digitar */}
+            <input type="number" value={charAge} onChange={(e) => setCharAge(e.target.value)} onFocus={(e) => e.target.select()} className="w-full text-sm text-center font-bold text-amber-500 bg-transparent border-b border-zinc-700 pb-1 focus:outline-none focus:border-amber-700 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
           </div>
           <div className="w-16 flex flex-col">
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Nível</span>
-            <input type="number" value={charLevel} onChange={(e) => setCharLevel(e.target.value)} className="w-full text-sm text-center font-bold text-amber-500 bg-transparent border-b border-zinc-700 pb-1 focus:outline-none focus:border-amber-700 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+            <input type="number" value={charLevel} onChange={(e) => setCharLevel(e.target.value)} onFocus={(e) => e.target.select()} className="w-full text-sm text-center font-bold text-amber-500 bg-transparent border-b border-zinc-700 pb-1 focus:outline-none focus:border-amber-700 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
           </div>
         </div>
 
@@ -85,7 +114,12 @@ export default function CharacterSheet({
         {activeFichaTab === 'perícias' && (
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-4 min-h-0">
             <div className="flex justify-end items-end border-b border-zinc-800 pb-2 mb-2 px-2 pr-4"><div className="flex items-center text-[10px] text-zinc-400 uppercase tracking-wider font-bold gap-3 sm:gap-6"><div className="w-10 text-center text-amber-700/80" title="Bônus de Itens e Poderes">Outros</div><div className="w-12 text-center">Treino</div><div className="w-8 text-right">Total</div></div></div>
-            {skillsList.map((skill, index) => ( <SkillRow key={index} name={skill.name} attrShort={skill.attrShort} color={skill.color} trainingLevel={skill.trainingLevel} baseTotal={skill.total} onRoll={(nome, bonusTotal) => executeRoll('skill', `Teste de ${nome}`, bonusTotal)} /> ))}
+            {skillsList.map((skill, index) => ( 
+              <SkillRow 
+                key={index} name={skill.name} attrShort={skill.attrShort} color={skill.color} trainingLevel={skill.trainingLevel} baseTotal={calculateSkillTotal(skill.name)} 
+                onRoll={(nome, bonusTotal) => executeRoll('skill', `Teste de ${nome}`, bonusTotal)} 
+              /> 
+            ))}
           </div>
         )}
 
@@ -95,21 +129,70 @@ export default function CharacterSheet({
               <div className="relative flex-1 w-full"><input type="text" placeholder="Rolar dados avulsos (ex: 2d6+4)..." className="w-full bg-zinc-900 border border-zinc-700 rounded-md py-2 px-4 text-white placeholder-zinc-500 focus:outline-none focus:border-red-900 focus:ring-1 focus:ring-red-900 transition-all"/><img src={d20Icon} alt="Dado" className="absolute right-3 top-2 w-5 h-5 opacity-50 cursor-pointer hover:opacity-100" onClick={() => executeRoll('skill', "Rolagem Avulsa", 0)} title="Rolar 1d20 Puro" /></div>
               {!showWeaponForm && ( <button onClick={handleOpenNewWeapon} className="whitespace-nowrap bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2 px-4 rounded-md border border-zinc-600 transition-colors uppercase tracking-widest text-xs">+ Forjar Ataque</button> )}
             </div>
+            
             {showWeaponForm && (
               <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg p-4 mb-6 animate-fade-in shadow-lg shrink-0">
                 <h3 className="text-white font-bold uppercase tracking-widest text-sm border-b border-zinc-700 pb-2 mb-4">{editingWeaponIndex !== null ? "🔧 Reforjar Arma" : "⚒️ Registro de Arsenal"}</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="col-span-2 sm:col-span-4"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Nome da Arma</label><input type="text" value={weaponForm.name} onChange={(e) => setWeaponForm({...weaponForm, name: e.target.value})} placeholder="Ex: Machado de Ossos" className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
-                  <div className="col-span-1 sm:col-span-2"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Dano Base</label><input type="text" value={weaponForm.damage} onChange={(e) => setWeaponForm({...weaponForm, damage: e.target.value})} placeholder="1d12" className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
-                  <div className="col-span-1"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Margem</label><input type="text" value={weaponForm.critMargin} onChange={(e) => setWeaponForm({...weaponForm, critMargin: e.target.value})} placeholder="19" className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
-                  <div className="col-span-1"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Multip.</label><input type="text" value={weaponForm.critMultiplier} onChange={(e) => setWeaponForm({...weaponForm, critMultiplier: e.target.value})} placeholder="x3" className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
+                  <div className="col-span-2 sm:col-span-4"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Nome da Arma</label><input type="text" value={weaponForm.name} onFocus={(e) => e.target.select()} onChange={(e) => setWeaponForm({...weaponForm, name: e.target.value})} placeholder="Ex: Machado de Ossos" className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
+                  <div className="col-span-1 sm:col-span-2"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Dano Base</label><input type="text" value={weaponForm.damage} onFocus={(e) => e.target.select()} onChange={(e) => setWeaponForm({...weaponForm, damage: e.target.value})} placeholder="1d12" className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
+                  <div className="col-span-1"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Margem</label><input type="text" value={weaponForm.critMargin} onFocus={(e) => e.target.select()} onChange={(e) => setWeaponForm({...weaponForm, critMargin: e.target.value})} placeholder="19" className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
+                  <div className="col-span-1"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Multip.</label><input type="text" value={weaponForm.critMultiplier} onFocus={(e) => e.target.select()} onChange={(e) => setWeaponForm({...weaponForm, critMultiplier: e.target.value})} placeholder="x3" className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
                   <div className="col-span-2"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Tipo</label><select value={weaponForm.type} onChange={(e) => setWeaponForm({...weaponForm, type: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900"><option>Cortante</option><option>Perfurante</option><option>Impacto</option><option>Profano</option></select></div>
                   <div className="col-span-2"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Perícia Base</label><select value={weaponForm.skill} onChange={(e) => setWeaponForm({...weaponForm, skill: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900"><option>Luta</option><option>Pontaria</option><option>Arremesso</option></select></div>
+                  
+                  <div className="col-span-2 sm:col-span-2 flex items-center gap-2 pt-4">
+                    <input type="checkbox" checked={weaponForm.isRanged || false} onChange={(e) => setWeaponForm({...weaponForm, isRanged: e.target.checked})} className="w-4 h-4 accent-red-700 cursor-pointer" />
+                    <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest cursor-pointer" onClick={() => setWeaponForm({...weaponForm, isRanged: !weaponForm.isRanged})}>Longo Alcance?</span>
+                  </div>
+                  {weaponForm.isRanged && (
+                    <div className="col-span-2 sm:col-span-2">
+                      <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Munição Inicial</label>
+                      <input type="number" value={weaponForm.ammo || 0} onFocus={(e) => e.target.select()} onChange={(e) => setWeaponForm({...weaponForm, ammo: Number(e.target.value)})} placeholder="Qtd. Balas/Flechas" className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" />
+                    </div>
+                  )}
+
                 </div>
                 <div className="flex justify-end gap-3 mt-5 pt-4 border-t border-zinc-800"><button onClick={() => setShowWeaponForm(false)} className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white uppercase tracking-widest transition-colors">Cancelar</button><button onClick={handleSaveWeapon} className="px-4 py-2 text-xs font-bold bg-red-900/80 hover:bg-red-800 text-white rounded uppercase tracking-widest transition-colors shadow-lg">{editingWeaponIndex !== null ? "Atualizar Arma" : "Salvar Arma"}</button></div>
               </div>
             )}
-            <div className="flex flex-col">{attacksList.map((atk, index) => ( <WeaponCard key={index} weapon={atk} skillTotal={getSkillTotal(atk.skill)} onEdit={() => handleEditWeapon(index)} onDelete={() => handleDeleteWeapon(index)} onRollAttack={(weaponObj) => executeRoll('attack', `Ataque: ${weaponObj.name}`, getSkillTotal(weaponObj.skill), weaponObj)} /> ))}</div>
+            
+            <div className="flex flex-col">
+              {attacksList.map((atk, index) => ( 
+                <WeaponCard 
+                  key={index} 
+                  weapon={atk} 
+                  skillTotal={calculateSkillTotal(atk.skill)} 
+                  onEdit={() => handleEditWeapon(index)} 
+                  onDelete={() => handleDeleteWeapon(index)} 
+                  onUpdateAmmo={(amount) => {
+                    if (!setAttacksList) return;
+                    const newAttacks = [...attacksList];
+                    newAttacks[index].ammo = Math.max(0, (newAttacks[index].ammo || 0) + amount);
+                    setAttacksList(newAttacks);
+                  }}
+                  onRollAttack={(weaponObj) => {
+                    if (weaponObj.isRanged) {
+                      if (weaponObj.ammo > 0) {
+                        if (setAttacksList) {
+                          const updated = [...attacksList];
+                          updated[index].ammo -= 1;
+                          setAttacksList(updated);
+                        }
+                        executeRoll('attack', `Ataque: ${weaponObj.name} (-1 Munição)`, calculateSkillTotal(weaponObj.skill), weaponObj);
+                      } else {
+                        alert(`A arma falhou! Você não tem munição para ${weaponObj.name}. Recarregue!`);
+                      }
+                    } else {
+                      executeRoll('attack', `Ataque: ${weaponObj.name}`, calculateSkillTotal(weaponObj.skill), weaponObj);
+                    }
+                  }} 
+                  onRollDamage={(weaponObj) => {
+                    executeRoll('damage', `Dano: ${weaponObj.name}`, weaponObj.damage, weaponObj);
+                  }}
+                /> 
+              ))}
+            </div>
           </div>
         )}
 
@@ -123,9 +206,9 @@ export default function CharacterSheet({
               <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg p-4 mb-6 animate-fade-in shadow-lg shrink-0">
                 <h3 className="text-white font-bold uppercase tracking-widest text-sm border-b border-zinc-700 pb-2 mb-4">{editingAbilityIndex !== null ? "🔧 Modificar Habilidade" : "🧬 Nova Habilidade / Mutação"}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="col-span-1 sm:col-span-2"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Nome da Habilidade</label><input type="text" value={abilityForm.title} onChange={(e) => setAbilityForm({...abilityForm, title: e.target.value})} placeholder="Ex: Durão, Membrana Nictitante..." className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
+                  <div className="col-span-1 sm:col-span-2"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Nome da Habilidade</label><input type="text" value={abilityForm.title} onChange={(e) => setAbilityForm({...abilityForm, title: e.target.value})} onFocus={(e) => e.target.select()} placeholder="Ex: Durão, Membrana Nictitante..." className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
                   <div className="col-span-1"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Tipo</label><select value={abilityForm.type} onChange={(e) => setAbilityForm({...abilityForm, type: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900"><option>Poder de Classe</option><option>Poder de Guerreiro (Postura)</option><option>Habilidade de Raça</option><option>Dádiva Divina</option><option>Mutação da Corrupção</option></select></div>
-                  <div className="col-span-1"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Custo / Ativação</label><input type="text" value={abilityForm.cost} onChange={(e) => setAbilityForm({...abilityForm, cost: e.target.value})} placeholder="Ex: 2 PV, Passivo, Reação..." className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
+                  <div className="col-span-1"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Custo / Ativação</label><input type="text" value={abilityForm.cost} onChange={(e) => setAbilityForm({...abilityForm, cost: e.target.value})} onFocus={(e) => e.target.select()} placeholder="Ex: 2 PV, Passivo, Reação..." className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
                   <div className="col-span-1 sm:col-span-2"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Descrição e Efeitos</label><textarea rows="4" value={abilityForm.description} onChange={(e) => setAbilityForm({...abilityForm, description: e.target.value})} placeholder="Descreva o que a habilidade faz..." className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900 resize-none" /></div>
                 </div>
                 <div className="flex justify-end gap-3 mt-5 pt-4 border-t border-zinc-800"><button onClick={() => setShowAbilityForm(false)} className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white uppercase tracking-widest transition-colors">Cancelar</button><button onClick={handleSaveAbility} className="px-4 py-2 text-xs font-bold bg-red-900/80 hover:bg-red-800 text-white rounded uppercase tracking-widest transition-colors shadow-lg">{editingAbilityIndex !== null ? "Atualizar Registro" : "Aprender"}</button></div>
@@ -138,7 +221,7 @@ export default function CharacterSheet({
         {activeFichaTab === 'inventário' && (
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-4 flex flex-col min-h-0">
             <div className="flex justify-between items-center bg-[#140c08]/80 border-2 border-[#3e2723] rounded-lg p-4 mb-6 shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] shrink-0">
-              <div className="flex flex-col"><span className="text-[9px] text-amber-700/80 uppercase font-bold tracking-widest mb-1">Bolsa de Lascas</span><div className="flex items-center gap-2"><span className="text-2xl drop-shadow-md">🪙</span><input type="number" value={lascas} onChange={(e) => setLascas(Number(e.target.value))} className="bg-transparent text-2xl font-bold text-amber-500 outline-none w-24 border-b border-amber-900/50 focus:border-amber-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" /></div></div>
+              <div className="flex flex-col"><span className="text-[9px] text-amber-700/80 uppercase font-bold tracking-widest mb-1">Bolsa de Lascas</span><div className="flex items-center gap-2"><span className="text-2xl drop-shadow-md">🪙</span><input type="number" value={lascas} onChange={(e) => setLascas(Number(e.target.value))} onFocus={(e) => e.target.select()} className="bg-transparent text-2xl font-bold text-amber-500 outline-none w-24 border-b border-amber-900/50 focus:border-amber-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" /></div></div>
               {!showItemForm && ( <button onClick={handleOpenNewItem} className="h-10 px-4 bg-[#3e2723] hover:bg-amber-900 text-amber-500 hover:text-white font-bold rounded-md border border-amber-900/50 transition-colors uppercase tracking-widest text-[10px] shadow-lg">+ Guardar Item</button> )}
               <div className="flex flex-col items-end"><span className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Carga Máxima</span><div className="text-xl font-bold tracking-wider"><span className={currentWeight > maxWeight ? "text-red-500" : "text-white"}>{currentWeight.toFixed(1)}</span><span className="text-zinc-600 mx-1">/</span><span className="text-zinc-400">{maxWeight} kg</span></div></div>
             </div>
@@ -146,10 +229,10 @@ export default function CharacterSheet({
               <div className="bg-[#1a1412] border border-[#3e2723] rounded-lg p-4 mb-6 animate-fade-in shadow-lg shrink-0">
                 <h3 className="text-amber-600 font-bold uppercase tracking-widest text-sm border-b border-[#3e2723] pb-2 mb-4">{editingItemIndex !== null ? "🔧 Alterar Item" : "🎒 Guardar Novo Item"}</h3>
                 <div className="grid grid-cols-4 gap-4">
-                  <div className="col-span-4 sm:col-span-2"><label className="block text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Nome do Item</label><input type="text" value={itemForm.name} onChange={(e) => setItemForm({...itemForm, name: e.target.value})} placeholder="Ex: Poção de Cura" className="w-full bg-black/50 border border-[#3e2723] rounded p-2 text-zinc-200 text-sm focus:outline-none focus:border-amber-700" /></div>
-                  <div className="col-span-2 sm:col-span-1"><label className="block text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Qtd.</label><input type="number" min="1" value={itemForm.quantity} onChange={(e) => setItemForm({...itemForm, quantity: e.target.value})} className="w-full bg-black/50 border border-[#3e2723] rounded p-2 text-zinc-200 text-sm focus:outline-none focus:border-amber-700" /></div>
-                  <div className="col-span-2 sm:col-span-1"><label className="block text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Peso Un. (kg)</label><input type="number" step="0.1" min="0" value={itemForm.weight} onChange={(e) => setItemForm({...itemForm, weight: e.target.value})} className="w-full bg-black/50 border border-[#3e2723] rounded p-2 text-zinc-200 text-sm focus:outline-none focus:border-amber-700" /></div>
-                  <div className="col-span-4"><label className="block text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Descrição</label><input type="text" value={itemForm.description} onChange={(e) => setItemForm({...itemForm, description: e.target.value})} placeholder="Para que serve?" className="w-full bg-black/50 border border-[#3e2723] rounded p-2 text-zinc-200 text-sm focus:outline-none focus:border-amber-700" /></div>
+                  <div className="col-span-4 sm:col-span-2"><label className="block text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Nome do Item</label><input type="text" value={itemForm.name} onChange={(e) => setItemForm({...itemForm, name: e.target.value})} onFocus={(e) => e.target.select()} placeholder="Ex: Poção de Cura" className="w-full bg-black/50 border border-[#3e2723] rounded p-2 text-zinc-200 text-sm focus:outline-none focus:border-amber-700" /></div>
+                  <div className="col-span-2 sm:col-span-1"><label className="block text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Qtd.</label><input type="number" min="1" value={itemForm.quantity} onChange={(e) => setItemForm({...itemForm, quantity: e.target.value})} onFocus={(e) => e.target.select()} className="w-full bg-black/50 border border-[#3e2723] rounded p-2 text-zinc-200 text-sm focus:outline-none focus:border-amber-700" /></div>
+                  <div className="col-span-2 sm:col-span-1"><label className="block text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Peso Un. (kg)</label><input type="number" step="0.1" min="0" value={itemForm.weight} onChange={(e) => setItemForm({...itemForm, weight: e.target.value})} onFocus={(e) => e.target.select()} className="w-full bg-black/50 border border-[#3e2723] rounded p-2 text-zinc-200 text-sm focus:outline-none focus:border-amber-700" /></div>
+                  <div className="col-span-4"><label className="block text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Descrição</label><input type="text" value={itemForm.description} onChange={(e) => setItemForm({...itemForm, description: e.target.value})} onFocus={(e) => e.target.select()} placeholder="Para que serve?" className="w-full bg-black/50 border border-[#3e2723] rounded p-2 text-zinc-200 text-sm focus:outline-none focus:border-amber-700" /></div>
                 </div>
                 <div className="flex justify-end gap-3 mt-5 pt-4 border-t border-[#3e2723]"><button onClick={() => setShowItemForm(false)} className="px-4 py-2 text-xs font-bold text-zinc-500 hover:text-zinc-300 uppercase tracking-widest transition-colors">Fechar Bolsa</button><button onClick={handleSaveItem} className="px-4 py-2 text-xs font-bold bg-amber-900/80 hover:bg-amber-700 text-amber-100 rounded uppercase tracking-widest transition-colors shadow-lg">{editingItemIndex !== null ? "Atualizar" : "Guardar"}</button></div>
               </div>
@@ -213,7 +296,7 @@ export default function CharacterSheet({
               </div>
               {activeNote ? (
                 <div className="flex-1 flex flex-col animate-fade-in h-full min-h-0">
-                  <div className="flex justify-between items-center mb-4 shrink-0"><input type="text" value={activeNote.title} onChange={(e) => handleNoteChange('title', e.target.value)} placeholder="Título da Anotação..." className="text-xl sm:text-2xl font-bold text-amber-500 bg-transparent border-none focus:outline-none focus:ring-0 placeholder-amber-900/50 w-full" /><button onClick={() => handleDeleteNote(activeNote.id)} className="text-zinc-600 hover:text-red-500 transition-colors" title="Arrancar Página">🗑️</button></div>
+                  <div className="flex justify-between items-center mb-4 shrink-0"><input type="text" value={activeNote.title} onChange={(e) => handleNoteChange('title', e.target.value)} onFocus={(e) => e.target.select()} placeholder="Título da Anotação..." className="text-xl sm:text-2xl font-bold text-amber-500 bg-transparent border-none focus:outline-none focus:ring-0 placeholder-amber-900/50 w-full" /><button onClick={() => handleDeleteNote(activeNote.id)} className="text-zinc-600 hover:text-red-500 transition-colors" title="Arrancar Página">🗑️</button></div>
                   <textarea value={activeNote.content} onChange={(e) => handleNoteChange('content', e.target.value)} placeholder="Comece a escrever suas descobertas aqui..." className="flex-1 w-full h-full bg-transparent resize-none focus:outline-none text-amber-100/90 text-sm sm:text-base leading-[2rem] bg-[linear-gradient(transparent_31px,#3e2723_32px)] bg-[length:100%_32px] custom-scrollbar" />
                 </div>
               ) : (
