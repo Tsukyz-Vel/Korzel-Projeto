@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import mosasaurusSkull from '../assets/mosasaurus-skull.png';
 
-// === LORE E MANUSCRITO ===
-const loreText = `Em eras que se perdem no véu do tempo, quando as estrelas no céu ainda aprendiam seus nomes, Korzel já pulsava com vida primitiva e feroz. Aqui, os senhores da terra não possuíam mãos hábeis ou palavras faladas, mas garras que dilaceravam montanhas, mandíbulas como muralhas vivas e olhos antigos o bastante para testemunhar o nascimento dos primeiros vulcões.
+// === LORE E MANUSCRITO (VERSÃO ÉPICA) ===
+const loreText = `Em eras que se perdem no véu do tempo, quando as estrelas no céu ainda aprendiam seus nomes, Korzel já pulsava com vida primitiva, visceral e feroz. Aqui, os senhores da terra não possuíam mãos hábeis ou palavras faladas, mas garras que dilaceravam montanhas, mandíbulas como muralhas vivas e olhos antigos o bastante para testemunhar o nascimento — e a morte — dos primeiros vulcões.
 
-É um mundo de répteis colossais e feras titânicas, de vastos pântanos que sussurram segredos esquecidos e florestas tão antigas que até o vento caminha com cuidado entre seus galhos. As criaturas que dominam este orbe não são ecos de um passado extinto - são os senhores do presente. Linhagens que, em outros mundos, teriam desaparecido... aqui evoluíram. Adaptaram-se. Tornaram-se predadores perfeitos, conscientes de seu lugar no ciclo natural que ocupam sobre ele.
+Korzel nunca foi um mundo de quietude. É um orbe de répteis colossais e feras titânicas, de vastos pântanos que sussurram segredos esquecidos e florestas tão fechadas que até o vento caminha com cuidado entre seus galhos. As criaturas que dominam estas terras não são ecos de um passado extinto — são os soberanos absolutos do agora. Linhagens que, em outros mundos, teriam desaparecido sob a poeira da história... aqui evoluíram. Adaptaram-se. Tornaram-se predadores perfeitos, conscientes de seu lugar no ciclo natural e do trono que ocupam sobre ele.
 
-Neste palco hostil e magnífico, a humanidade não surgiu como herdeira. Surgiu como intrusa.
+Neste palco hostil e magnífico, a humanidade não surgiu como herdeira legítima. Surgiu como uma intrusa indesejada.
 
-Isolados por milênios, aprenderam a sobreviver à sombra dos titãs reptilianos. Cercados por mares profundos e bestas marinhas de fôlego eterno, aprenderam primeiro a temer... e depois, a respeitar os Antigos.
+Diz-se que os primeiros homens despertaram em ilhas dispersas do Grande Arquipélago de Sahl’Narra, os chamados 'Corações Dispersos'. Isolados por milênios, aprenderam a sobreviver à sombra dos titãs reptilianos. Cercados por mares insondáveis e bestas marinhas de fôlego eterno, aprenderam primeiro a temer... e depois, a respeitar a majestade sangrenta dos Antigos.
 
-Korzel não pertence aos homens. Pertence aos seres Primordiais. Às feras que nunca caíram. Às bestas que não esqueceram seu direito de governar. E cada dia em que o sol nasce é apenas um empréstimo - um breve instante em que os frágeis respiram, antes que os verdadeiros herdeiros da Terra os lembrem de quem sempre reinou.`;
-
+Korzel não pertence aos homens. Pertence aos seres Primordiais. Às feras que nunca caíram. Às bestas que não esqueceram seu direito divino de governar. Cada dia em que o sol nasce sobre este mundo é apenas um empréstimo — um breve instante de fôlego concedido aos frágeis, antes que os verdadeiros donos da Terra os lembrem de quem sempre reinou, e quem sempre reinará.`;
 // === BASE DE DADOS DO COMPÊNDIO ===
 const classesData = [
   {
@@ -440,36 +439,360 @@ const classesData = [
 
 
 const origensData = [
-{
-  name: "Humanos",
-  desc: "\"Nós não temos as garras dos Vaelen, a pele de pedra dos Korgath ou a visão dos Thalorim. Nós temos apenas uns aos outros e uma vontade maldita de não ficar no chão quando nos batem. É por isso que construímos cidades onde os monstros apenas caçam.\"\n\n— Capitão Darius, da Guarda de Verantis.\n\nEnquanto as outras raças se especializaram biologicamente para ocupar nichos extremos, os Humanos mantiveram o caminho do meio. Eles são a 'cola' de Korzel. Foram eles que estabeleceram as rotas comerciais, padronizaram a moeda e criaram as leis que tentam (muitas vezes em vão) manter a ordem.\n\nHumanos não sobrevivem por serem fortes ou resistentes; eles sobrevivem porque são adaptáveis. Eles mudam suas táticas, suas ferramentas e suas lealdades com uma rapidez que assusta as raças mais antigas. Em Korzel, ser humano não é ser 'padrão'; é ser ambicioso o suficiente para achar que pode dominar um mundo que te odeia.\n\n**Características Físicas**\nHumanos em Korzel são extremamente diversos. A exposição a diferentes microclimas e a miscigenação constante criaram uma variedade infinita de tons de pele, tipos de cabelo e compleições. Eles vivem pouco em comparação aos Vaelen ou Khellaris, o que lhes dá um senso de urgência: eles precisam deixar sua marca no mundo agora.\n\n**Sociedade e Aventureiros**\nHumanos dominam as planícies férteis e as grandes cidades comerciais. Eles são a maioria em qualquer taverna ou mercado.\n\nAventureiros humanos são os mais imprevisíveis. Um humano pode ser um Veterano de armadura pesada, um Bardo manipulador de massas, ou um Atormentado que aceitou a corrupção em troca de poder. Sua versatilidade é sua maior arma.",
-  stats: {
-    attributes: "+2 em Três Atributos diferentes à sua escolha. (Humanos não têm pontos fracos ou fortes definidos biologicamente; sua força vem da especialização individual).",
-    size: "Médio. (Ocupa um espaço de 1,5m e não sofre penalidades de tamanho).",
-    speed: "9m (6 quadrados)."
-  },
-  fixedAbilities: [
-    { 
-      title: "Versatilidade Ambiciosa", 
-      type: "Habilidade de Raça", 
-      cost: "Passivo", 
-      description: "Inicia o jogo com treinamento em 2 Perícias à sua escolha (não precisam ter ligação com a classe escolhida). Além disso, recebe +1 Perícia treinada sempre que o bônus de Inteligência obtiver um aumento permanente." 
+  {
+    name: "Humanos",
+    quote: "\"Nós não temos as garras dos Vaelen, a pele de pedra dos Korgath ou a visão dos Thalorim. Nós temos apenas uns aos outros e uma vontade maldita de não ficar no chão quando nos batem. É por isso que construímos cidades onde os monstros apenas caçam.\"\n— Capitão Darius, da Guarda de Verantis.",
+    desc: "Enquanto as outras raças se especializaram biologicamente para ocupar nichos extremos, os Humanos mantiveram o caminho do meio. Eles são a 'cola' de Korzel. Foram eles que estabeleceram as rotas comerciais, padronizaram a moeda e criaram as leis que tentam (muitas vezes em vão) manter a ordem.\n\nHumanos não sobrevivem por serem fortes ou resistentes; eles sobrevivem porque são adaptáveis. Eles mudam suas táticas, suas ferramentas e suas lealdades com uma rapidez que assusta as raças mais antigas. Em Korzel, ser humano não é ser 'padrão'; é ser ambicioso o suficiente para achar que pode dominar um mundo que te odeia.",
+    details: [
+      {
+        title: "Características Físicas",
+        text: "Humanos em Korzel são extremamente diversos. A exposição a diferentes microclimas e a miscigenação constante criaram uma variedade infinita de tons de pele, tipos de cabelo e compleições. Eles vivem pouco em comparação aos Vaelen ou Khellaris, o que lhes dá um senso de urgência: eles precisam deixar sua marca no mundo agora."
+      },
+      {
+        title: "Sociedade e Aventureiros",
+        text: "Humanos dominam as planícies férteis e as grandes cidades comerciais. Eles são a maioria em qualquer taverna ou mercado.\n\nAventureiros humanos são os mais imprevisíveis. Um humano pode ser um Veterano de armadura pesada, um Bardo manipulador de massas, ou um Atormentado que aceitou a corrupção em troca de poder. Sua versatilidade é sua maior arma."
+      }
+    ],
+    stats: {
+      attributes: "+2 em Três Atributos diferentes à sua escolha. (Humanos não têm pontos fracos ou fortes definidos biologicamente; sua força vem da especialização individual).",
+      size: "Médio. (Ocupa um espaço de 1,5m e não sofre penalidades de tamanho).",
+      speed: "9m (6 quadrados)."
     },
-    { 
-      title: "Espírito de Comunidade", 
-      type: "Habilidade de Raça", 
-      cost: "Passivo", 
-      description: "Devido à natureza social e dependência do trabalho em equipe, ao realizar a ação 'Prestar Ajuda' (Help) a um aliado, o bônus concedido torna-se +3 em vez de +2." 
-    }
-  ]
-},
-  { name: "Khellaris", desc: "Em construção...", powers: [] },
-  { name: "Korgaths", desc: "Em construção...", powers: [] },
-  { name: "Thalorims", desc: "Em construção...", powers: [] },
-  { name: "Vaelen", desc: "Em construção...", powers: [] },
-  { name: "Morvani", desc: "Em construção...", powers: [] }
+    fixedAbilities: [
+      { 
+        title: "Versatilidade Ambiciosa", 
+        type: "Habilidade de Raça", 
+        cost: "Passivo", 
+        description: "Inicia o jogo com treinamento em 2 Perícias à sua escolha (não precisam ter ligação com a classe escolhida). Além disso, recebe +1 Perícia treinada sempre que o bônus de Inteligência obtiver um aumento permanente." 
+      },
+      { 
+        title: "Espírito de Comunidade", 
+        type: "Habilidade de Raça", 
+        cost: "Passivo", 
+        description: "Devido à natureza social e dependência do trabalho em equipe, ao realizar a ação 'Prestar Ajuda' (Help) a um aliado, o bônus concedido torna-se +3 em vez de +2." 
+      }
+    ]
+  },
+  {
+    name: "Khellaris",
+    quote: "\"Amados por sua sabedoria, temidos por sua astúcia, respeitados por sua disciplina. Eles são os guardiões do conhecimento e, alguns diriam, os verdadeiros donos do futuro.\"",
+    desc: "Os Khellaris são a raça mais antiga e influente de Korzel. Enquanto humanos construíam cabanas, os Khellaris erguiam Vel'Korrin, a \"Mãe do Conhecimento\", uma cidade onde torres negras se fundem aos desfiladeiros de mármore branco. Eles reverenciam o Noor'khella, um réptil marinho colossal de pele negra, símbolo de sua força e conexão com os mares profundos.",
+    details: [
+      {
+        title: "Características Físicas",
+        text: "A aparência Khellari é austera e misteriosa.\n\n• Pele: Varia do cinza \"como pedra polida\" até o escuro profundo \"como a noite sem lua\", refletindo sua adaptação às sombras e às ilhas rochosas.\n• Cabelos: Geralmente em tons metálicos ou pálidos. Podem ser cinza claro, prateados ou brancos como a lua cheia.\n• Olhos: Intensos e brilhantes. Variam do dourado penetrante ao púrpura profundo que arde como brasa.\n• Traços: Possuem orelhas pontiagudas e feições angulares que transmitem uma beleza fria."
+      },
+      {
+        title: "Sociedade e Geografia: A Luz e a Sombra",
+        text: "A nação Khellari é unida, mas estratificada. Todos servem ao trono, mas vivem realidades diferentes.\n\n1. Kalir (A Cidadela de Marfim e Obsidiana)\nA ilha principal é um monumento à ordem e à magia. O Bastião do Crepúsculo, no topo do monte mais alto, é o castelo real de muralhas negras com detalhes em púrpura e dourado. A ilha é regida pelo Rei Kalroth Veyrathen I e seu conselho absoluto, As Dez Sombras. Habitada por nobres, magos, arquitetos e estudiosos, a vida aqui é luxuosa e tecnológica.\n\n2. O Arquipélago da Penumbra (O Escudo do Rei)\nAo redor de Kalir, quatro ilhas menores formam um cinturão de proteção. Seus habitantes são pescadores exímios e fazendeiros de encostas. Vivem em casas de pedra branca e madeira polida, orgulhosos de serem a primeira linha de defesa naval. Dominam o mar e o uso prático do Shael'thaar."
+      },
+      {
+        title: "Arma Cultural: O Shael'thaar",
+        text: "Uma lâmina curva e elegante presa a uma corrente fina ou corda de seda de aranha.\n\n• Dano: 1d6 | Crítico: 19/x2 | Peso: 1kg\n• Propriedades: Ágil (usa Agilidade no ataque) e Arremesso (6m).\n• Especial: Concede +2 em testes de Manobra (Derrubar/Desarmar/Puxar) e pode ser usada como gancho para escalada, concedendo Vantagem em testes de subir superfícies."
+      }
+    ],
+    stats: {
+      attributes: "+2 Inteligência, +2 Agilidade, –2 Vigor. (Mentes brilhantes e reflexos rápidos, mas corpos esguios e menos resistentes a danos brutos).",
+      size: "Médio. (Ocupa um espaço de 1,5m e não sofre penalidades de tamanho).",
+      speed: "9m (6 quadrados)."
+    },
+    fixedAbilities: [
+      {
+        title: "Visão na Penumbra",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Seus olhos, adaptados às torres escuras e noites no mar, enxergam na escuridão total a até 18m."
+      },
+      {
+        title: "Mente de Vel'Korrin",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "A cultura Khellari gira em torno do saber. Você se torna treinado em uma perícia de Conhecimento (História, Religião, Arcanismo) ou Ofício."
+      },
+      {
+        title: "Tradição do Shael'thaar",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Você sabe usar a arma tradicional de seu povo. Para você, o Shael'thaar é considerado uma arma simples."
+      },
+      {
+        title: "Análise Estratégica",
+        type: "Habilidade de Raça",
+        cost: "Ação de Mov.",
+        description: "Você pode gastar uma ação de movimento para analisar um inimigo. Se passar num teste de Inteligência (CD 15), o Mestre revela uma fraqueza, resistência ou traço oculto da criatura."
+      },
+      {
+        title: "Vulnerabilidade Psíquica",
+        type: "Fraqueza de Raça",
+        cost: "Passivo",
+        description: "A mente Khellari é aberta ao desconhecido, o que cobra seu preço. Você sofre –2 em testes de Vontade contra efeitos mentais e Dano Psíquico."
+      }
+    ],
+    powers: [
+      {
+        title: "Herança: Nobre de Kalir",
+        type: "Escolha de Herança",
+        cost: "Passivo",
+        description: "Você cresceu entre bibliotecas e intrigas da Cidadela. Você ganha proficiência em Diplomacia ou Enganação (à sua escolha)."
+      },
+      {
+        title: "Herança: Filho da Penumbra",
+        type: "Escolha de Herança",
+        cost: "Passivo",
+        description: "Você cresceu no mar e nas rochas do Arquipélago. Você ganha proficiência em Atletismo ou Pilotagem (à sua escolha), e pode prender a respiração pelo dobro do tempo normal."
+      }
+    ]
+  },
+  {
+    name: "Korgaths",
+    quote: "\"Eles não desviam da tempestade, nem do golpe. Eles o recebem de peito aberto, absorvem a dor e devolvem em dobro. Enfrentar um Korgath é como socar uma montanha esperando que ela sangre.\"\n— Kael de Veyrath, após o Torneio.",
+    desc: "Os Korgaths são a prova viva da resiliência humana levada ao extremo biológico. Em eras passadas, quando a humanidade precisou escolher entre fugir ou endurecer, os ancestrais dos Korgath escolheram ficar.\n\nEles evoluíram para se tornar sua própria armadura e sua própria besta de carga. São conhecidos em todo o arquipélago como \"meio-gigantes\", servindo frequentemente como mercenários de elite, estivadores portuários ou guardas-costas inamovíveis.",
+    details: [
+      {
+        title: "Características Físicas",
+        text: "Eles são massivos, variando entre 2,10m e 2,40m de altura. Sua estrutura óssea é densa, com mandíbulas quadradas e testas proeminentes que protegem olhos fundos.\n\n• A Pele: É grossa como couro fervido, capaz de desviar lâminas mal afiadas e ignorar arranhões que fariam um humano sangrar.\n• A Pelagem: Diferente dos humanos das cidades, os Korgath mantiveram (e aprimoraram) a pelagem corporal. A quantidade e o estilo variam drasticamente conforme o clima de onde vêm, mas é sempre um traço de orgulho e virilidade."
+      },
+      {
+        title: "As Três Culturas (O Sangue da Terra)",
+        text: "O ambiente em Korzel não perdoa. Para sobreviver, os Korgath se dividiram em três culturas distintas, cada uma moldada pelo inferno geográfico que chama de lar.\n\n1. Norte: Os Presas de Gelo (O Povo da Tundra)\nNas terras geladas, tornaram-se os \"Vikings Primordiais\". Pele pálida, espessa camada de pelos claros, trançam ossos de caça. São caçadores de megafauna, valorizam a força explosiva e a resistência à dor.\n\n2. Savana: Os Caminhantes do Pó (O Povo do Sol)\nNas planícies áridas do Sul. Pele escura e rachada como o solo. Raspam os pelos deixando apenas jubas para proteger a nuca do sol. São nômades e os maiores Domadores de Feras de Korzel.\n\n3. Costa: Os Quebra-Marés (O Povo do Sal)\nHabitantes das costas tempestuosas. Pele brilhosa, pelos impermeáveis embaraçados em dreadlocks pesados adornados com dentes de tubarão. São pescadores de monstros e piratas."
+      }
+    ],
+    stats: {
+      attributes: "+2 Força, +2 Vigor, –2 Inteligência. (Sua biologia prioriza a potência muscular e a resistência a danos em detrimento do raciocínio acadêmico ou abstrato).",
+      size: "Grande.",
+      speed: "9m (6 quadrados)."
+    },
+    fixedAbilities: [
+      {
+        title: "Pele de Muralha",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Sua derme espessa é uma armadura natural. Você recebe +2 na Defesa. Este bônus acumula com armaduras usadas (sua pele endurece o couro ou preenche as falhas da cota de malha)."
+      },
+      {
+        title: "Constituição Primordial",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Você foi feito para durar. Você recebe +1 Ponto de Vida base extra por nível de personagem."
+      },
+      {
+        title: "Carga de Impacto",
+        type: "Habilidade de Raça",
+        cost: "Livre",
+        description: "Quando você usa sua massa para atacar, é devastador. Se você se mover pelo menos 6m em linha reta e acertar um ataque corpo a corpo, pode tentar a manobra 'Derrubar' como uma Ação Livre com bônus de +2."
+      },
+      {
+        title: "Mãos Pesadas",
+        type: "Fraqueza de Raça",
+        cost: "Passivo",
+        description: "A falta de delicadeza da sua estrutura bruta tem um preço. Você sofre –2 em testes de Ladinagem e testes de Ofícios delicados."
+      }
+    ],
+    powers: [
+      {
+        title: "Herança: Sangue do Inverno",
+        type: "Escolha de Herança (Norte)",
+        cost: "Passivo",
+        description: "Vindo dos Presas de Gelo da Tundra, seu corpo ignora a hipotermia. Você recebe Resistência a Frio 5 e Proficiência na perícia Intimidação."
+      },
+      {
+        title: "Herança: Domador de Titãs",
+        type: "Escolha de Herança (Savana)",
+        cost: "Passivo",
+        description: "Vindo dos Caminhantes do Pó, você forjou laços com as feras do deserto. Você recebe Resistência a Fogo 5 e Vantagem em testes para Lidar com Animais (Dinos/Bestas)."
+      },
+      {
+        title: "Herança: Pulmões de Leviatã",
+        type: "Escolha de Herança (Costa)",
+        cost: "Passivo",
+        description: "Vindo dos Quebra-Marés, você é uma força da natureza sob as águas. Você adquire Deslocamento de Natação 9m e pode prender a respiração debaixo d'água por até 20 minutos."
+      }
+    ]
+  },
+  {
+    name: "Thalorims",
+    quote: "\"A pedra não perdoa o erro, e a gravidade não aceita desculpas. No fundo da terra, você é preciso ou você é morto. Nós somos a raça que calculou como sobreviver.\"\n— Mestre-Engenheiro Vorn, da Casta do Mercúrio.",
+    desc: "Os Thalorim são o triunfo da adaptação humana através da escassez. Milênios atrás, quando os predadores colossais tornaram as planícies um matadouro, um grupo de humanos fugiu para as fendas, cavernas e picos das montanhas.\n\nA evolução ali foi cruel e matemática: os grandes, que precisavam de muita comida e entalavam nos túneis, pereceram. Os compactos, eficientes e engenhosos sobreviveram. Hoje, eles não vivem mais escondidos. A partir de sua Cidadela da Base, eles exportam a tecnologia mais avançada de Korzel. Eles não usam magia; eles dominam a Física. Seus elevadores usam contrapesos perfeitos, suas bestas usam tensão de molas mortais e seus alquimistas flertam com o perigo da Pólvora Negra.",
+    details: [
+      {
+        title: "Características Físicas",
+        text: "Eles são humanos, mas de uma linhagem distinta. Sua altura média varia entre 1,50m e 1,60m. Não são anões de contos de fadas; são humanos atarracados, densos e com metabolismo ultra-eficiente.\n\n• Olhos: Grandes e com pupilas dilatadas, adaptados para captar a mínima luz das cavernas. Geralmente são negros ou de um castanho muito escuro.\n• Pele: Pálida, variando do branco-mármore ao cinza-pálido, devido a gerações longe do sol forte."
+      },
+      {
+        title: "As Duas Castas (O Martelo e o Compasso)",
+        text: "A sociedade Thalorim é uma máquina meritocrática. Embora biologicamente iguais ao nascer, o ofício que escolhem na juventude molda drasticamente seu físico e personalidade.\n\n1. Os Rubros (A Casta da Fuligem)\nOs Operários, Ferreiros e Mineradores. Passam a vida no calor das forjas e pedreiras. São expansivos, barulhentos e resolvem problemas na marreta. Têm ombros largos, pele avermelhada e mãos calejadas de fuligem.\n\n2. Os Pálidos (A Casta do Mercúrio)\nOs Engenheiros, Arquitetos e Químicos. Vivem em escritórios e laboratórios instáveis. Falam baixo, são reservados, técnicos e detestam o caos. Têm postura curvada, dedos ágeis manchados de tinta e usam óculos com lentes de aumento."
+      },
+      {
+        title: "Nota sobre Tecnologia: A Pólvora Negra",
+        text: "Em Korzel, a pólvora não é mágica, é química (Carvão, Enxofre e Salitre). Ela é:\n\n• Rara: Apenas os Thalorim sabem a \"receita\" segura.\n• Perigosa: Se molhar, estraga. Se pegar fogo, mata o usuário.\n• Experimental: As armas de fogo Thalorim são poderosas, mas instáveis. Um \"1\" natural no dado de ataque pode fazer a arma explodir na mão do usuário."
+      }
+    ],
+    stats: {
+      attributes: "+2 Inteligência, +2 Vigor, –2 Agilidade. (Mentes brilhantes e resistência metabólica invejável, mas pernas curtas e corpos densos não foram feitos para corridas ou acrobacias).",
+      size: "Médio (Baixo).",
+      speed: "6m (4 quadrados). (São mais lentos que humanos, khellaris e vaelen em terreno aberto)."
+    },
+    fixedAbilities: [
+      {
+        title: "Visão Adaptada",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Seus olhos evoluíram para a escuridão. Você enxerga na Penumbra como se fosse dia claro, e na Escuridão Total enxerga até 12m (em preto e branco)."
+      },
+      {
+        title: "Metabolismo Eficiente",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Você precisa de metade da comida e água que um humano normal necessitaria para sobreviver. Além disso, você tem Vantagem em testes de Vigor para resistir a privações (fome, sede, sufocamento)."
+      },
+      {
+        title: "Engenharia Prática",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Você sabe intuitivamente como as coisas são montadas — e como quebrá-las. Você causa +2 de dano contra Objetos e Construtos (golpeando as juntas, dobradiças ou pontos de tensão)."
+      },
+      {
+        title: "Sensibilidade à Luz",
+        type: "Fraqueza de Raça",
+        cost: "Passivo",
+        description: "A superfície é brilhante demais. Você fica ofuscado (-2 em ataques) se exposto à luz solar direta sem proteção (como óculos escuros de couro ou capuz)."
+      }
+    ],
+    powers: [
+      {
+        title: "Casta: Os Rubros (A Casta da Fuligem)",
+        type: "Escolha de Casta",
+        cost: "Passivo",
+        description: "Você é forjado no calor das pedreiras. Ganha Resistência a Fogo 5 e Vantagem em testes de Intimidação (Voz de Comando). Sua Força é considerada 4 pontos maior para fins de capacidade de carga e testes de força bruta (empurrar, levantar)."
+      },
+      {
+        title: "Casta: Os Pálidos (A Casta do Mercúrio)",
+        type: "Escolha de Casta",
+        cost: "Passivo",
+        description: "Você é um mestre da matemática e precisão. Ganha proficiência em Ofício (Engenharia ou Alquimia), pode recarregar armas com a propriedade Recarga como uma Ação de Movimento (ou reduzir o tempo em um passo), e pode usar Inteligência em vez de Instinto para testes de Percepção."
+      }
+    ]
+  },
+  {
+    name: "Vaelen",
+    quote: "\"A floresta não precisa de proteção. Ela precisa de comida. E você, forasteiro, acaba de invadir a despensa.\"\n— Yvra, Caçadora da Matilha dos Espinhos.",
+    desc: "Os Vaelen não se consideram \"donos\" da natureza, mas sim uma extensão letal dela. Diferente dos elfos de lendas antigas que cantavam para as árvores, os Vaelen usam a seiva venenosa para banhar suas flechas e ossos de dinossauros para forjar armaduras. Eles vivem nas copas das Árvores-Titãs da região de Verdespinho, longe do solo onde os superpredadores caçam.\n\nPara um Vaelen, a sobrevivência é a única lei. Se um estranho entra em seu território, ele não é necessariamente um inimigo; ele é apenas calorias em potencial.",
+    details: [
+      {
+        title: "Características Físicas",
+        text: "Eles evoluíram para se fundir ao ambiente, mas mantiveram sua humanidade no olhar.\n\n• Aparência: Seus cabelos assemelham-se a cipós grossos ou folhas secas trançadas. Seus olhos possuem íris vibrantes em tons de âmbar ou verde, que contrastam intensamente com a parte branca, dando-lhes um olhar focado e penetrante de predador.\n• Pele Camuflada: Sua pele possui manchas sutis que mudam levemente de tom (verde, marrom, ocre) conforme a estação ou o ambiente, funcionando como uma camuflagem biológica natural.\n• Simbiose: É comum a prática de escarificação (cicatrizes rituais) onde permitem que fungos bioluminescentes ou musgos cresçam sobre a própria pele, aumentando sua conexão com a floresta."
+      },
+      {
+        title: "O Cisma da Floresta (Origem Filosófica)",
+        text: "A sociedade Vaelen não é um bloco único. Ao criar seu personagem, você deve escolher a qual filosofia ele pertence.\n\n1. Os Espinhos (O Caminho Antigo)\nXenófobos, Territoriais e Brutais. Eles acreditam que a civilização de pedra é uma praga que deve ser contida. Matam invasores à primeira vista, comem carne crua e desconfiam do metal. São os melhores rastreadores e assassinos de Korzel.\n\n2. A Raiz Eterna (O Caminho da Simbiose)\nDiplomatas, Xamãs e Guias. Acreditam que o mundo é um organismo único e que a floresta deve se unir à cidade para sobreviver à Corrupção. São calmos, usam flores vivas nas roupas e agem como embaixadores e guias de caravanas."
+      },
+      {
+        title: "Arma Cultural: O Arco Syl'var",
+        text: "Um arco enorme, feito de madeira de ferro ou osso da cauda de Raptor. Exige força brutal para ser tensionado, projetado para perfurar o couro grosso de dinossauros.\n\n• Dano: 1d10 | Crítico: x3 | Alcance: 30m | Peso: 3kg\n• Propriedades: Duas Mãos.\n• Especial (Tração Pesada): Diferente de arcos comuns, você pode somar seu modificador de Força nas rolagens de dano com esta arma.\n• Especial (Adaptável): Devido à sua robustez, pode ser usado como um bastão em combate corpo a corpo (Dano 1d6 Impacto) sem sofrer penalidade de arma improvisada."
+      }
+    ],
+    stats: {
+      attributes: "+2 Instinto, +2 Vigor, –2 Presença. (São incrivelmente perceptivos e resistentes, sobrevivendo onde outros morreriam em horas, mas são socialmente isolados, selvagens e de poucas palavras).",
+      size: "Médio.",
+      speed: "9m (6 quadrados)."
+    },
+    fixedAbilities: [
+      {
+        title: "Mimetismo Natural",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Você pode tentar se esconder (Furtividade) mesmo sem cobertura total, desde que esteja em terreno natural (floresta, pântano, grama alta). Sua pele se mescla às sombras e folhagens."
+      },
+      {
+        title: "Sentidos da Presa",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Para caçar (e não ser caçado), você precisa ouvir o estalar de um galho a quilômetros. Você ganha proficiência em Percepção e Sobrevivência."
+      },
+      {
+        title: "Movimento Arbóreo",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Você possui Deslocamento de Escalada de 9m. Você sobe em árvores e superfícies naturais com a mesma velocidade que anda no chão, sem precisar de testes de Atletismo."
+      },
+      {
+        title: "Sangue de Seiva",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Séculos de exposição a esporos e venenos alteraram sua biologia. Você tem Resistência a Veneno 5."
+      }
+    ],
+    powers: [
+      {
+        title: "Filosofia: Os Espinhos (O Caminho Antigo)",
+        type: "Escolha de Filosofia",
+        cost: "Passivo",
+        description: "Você segue o caminho selvagem. Você recebe +2 em Iniciativa e não pode ser surpreendido enquanto estiver em ambientes naturais.\n\n⚠️ Defeito: Você sofre –2 em testes de Diplomacia com raças civilizadas."
+      },
+      {
+        title: "Filosofia: A Raiz Eterna (O Caminho da Simbiose)",
+        type: "Escolha de Filosofia",
+        cost: "Passivo",
+        description: "Você segue o caminho da conexão. Você ganha proficiência em Intuição e pode usar Instinto em vez de Presença para testes de Diplomacia (você convence pela sensatez e leitura corporal, não pelo charme).\n\n⚠️ Defeito: Seu sistema imunológico se abriu para o mundo. Você perde a vantagem em testes de resistência contra doenças (mas mantém a resistência a veneno)."
+      }
+    ]
+  },
+  {
+    name: "Morvani",
+    quote: "\"O mundo sangra, adoece e morre. Nós vendemos a cura, o veneno e o caixão. O ouro flui como o rio, e todos os rios levam a Verantis.\"\n— Lorde Valerius, da Casa Mercator.",
+    desc: "Descendentes de humanos que se estabeleceram no Grande Delta do Sul há milênios, os Morvani evoluíram para transformar o ambiente mais tóxico de Korzel em um império comercial. Enquanto outros viam o pântano como morte, eles viram proteção e recursos. Eles são os maiores farmacêuticos, alquimistas e banqueiros do mundo. Sua sociedade é uma \"Veneza Sombria\" onde não existem estradas de terra, apenas canais, pontes e plataformas flutuantes.",
+    details: [
+      {
+        title: "Características Físicas",
+        text: "Para viver sobre águas paradas e gases de pântano, a biologia Morvani se tornou um filtro vivo.\n\n• Aparência: Pele pálida, fria e lisa como porcelana, quase sem poros. Secretam um óleo natural imperceptível que repele água suja e parasitas.\n• Olhos de Mercúrio: Possuem uma película prateada (tapetum lucidum) que protege contra vapores químicos e permite enxergar através da neblina densa do delta.\n• Imunidade: Órgãos internos hiper eficientes que permitem ingerir água contaminada ou alimentos levemente estragados sem adoecer."
+      },
+      {
+        title: "Verantis: O Trono das Águas",
+        text: "A capital não é uma ilha, mas uma metrópole artificial flutuante no centro do Delta. A cidade é um gráfico vertical de poder:\n\n1. O Distrito Alto (A Cúpula de Vidro): No centro, palácios góticos de metal negro e vidro erguem-se sobre pilotis gigantescos. Aqui vive a elite, cercada de luxo.\n2. O Limo (A Periferia): Uma mancha caótica de balsas podres e barracos sem teto que flutuam na água oleosa. Aqui vivem os pobres, lutando para não afundar literalmente."
+      },
+      {
+        title: "A Cultura das Máscaras",
+        text: "Devido aos miasmas do pântano e à arrogância social, cobrir o rosto é lei em Verantis.\n\n• A Elite: Usa máscaras de porcelana, ouro ou prata, com filtros de ervas raras embutidos no \"bico\".\n• O Povo: Usa máscaras de madeira tosca, casca de árvore ou panos amarrados.\n• O Tabu: Um Morvani sem máscara em público é considerado \"nu\" ou impuro."
+      },
+      {
+        title: "Nota de Ambientação: Relações Diplomáticas",
+        text: "Os Morvani conectam Korzel através da influência:\n\n• Com os Thalorim: Revenda da Pólvora Negra pelo triplo do preço.\n• Com os Korgath: Contratam-nos como guarda-costas para seus nobres frágeis.\n• Com os Vaelen: Refinam seiva bruta da floresta em remédios caríssimos.\n• Com os Humanos: Seus maiores clientes, compram a ilusão de saúde e segurança.\n• Com os Khellaris: Trocam venenos indetectáveis por proteção naval contra piratas."
+      }
+    ],
+    stats: {
+      attributes: "+2 Inteligência, +2 Presença, –2 Força. (Brilhantes e manipuladores, mas com musculatura atrofiada pelo estilo de vida sedentário).",
+      size: "Médio.",
+      speed: "9m (6 quadrados)."
+    },
+    fixedAbilities: [
+      {
+        title: "Sangue Purificado",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Você é Imune a Doenças (mundanas e mágicas) e possui Resistência a Veneno 5. O que mata um humano comum causa apenas uma leve tontura em você."
+      },
+      {
+        title: "Nascido no Rio",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Você ignora penalidades de movimento em terreno difícil causado por lama ou água rasa. Além disso, possui proficiência na perícia Pilotagem (Barcos)."
+      },
+      {
+        title: "O Olhar da Névoa",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Seus olhos prateados perfuram o miasma. Você ignora camuflagem causada por neblina, fumaça ou gases (naturais ou alquímicos)."
+      },
+      {
+        title: "Educação Mercantil",
+        type: "Habilidade de Raça",
+        cost: "Passivo",
+        description: "Você entende o valor das coisas. Pode usar Inteligência em vez de Presença para testes de Diplomacia e Barganha (convence pela lógica técnica e burocracia)."
+      }
+    ],
+    powers: []
+  },
 ];
-
 export default function Compendio({ handleAddAbility, savedCharacters, activeCharacterName }) {
   const [activeSection, setActiveSection] = useState('lore');
   const [selectedTopic, setSelectedTopic] = useState(classesData[0]);
@@ -576,25 +899,73 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
 
             <div className="p-6 lg:p-8 overflow-y-auto custom-scrollbar h-full relative z-10">
               <h2 className="text-3xl font-black text-white uppercase tracking-widest mb-2">{selectedTopic.name}</h2>
-              <p className="text-zinc-400 mb-8 border-l-4 border-red-900 pl-4 italic text-sm">{selectedTopic.desc}</p>
+              {/* === RENDERIZAÇÃO CONDICIONAL DA DESCRIÇÃO === */}
+              {selectedTopic.quote ? (
+                // Layout NOVO (Usado pelas Raças/Origens)
+                <div className="mb-8">
+                  <div className="mb-6 border-l-4 border-red-900 pl-4 py-2 bg-red-950/10 rounded-r shadow-inner">
+                    <p className="text-zinc-400 italic text-sm whitespace-pre-wrap">{selectedTopic.quote}</p>
+                  </div>
+                  <div className="mb-6 space-y-4 text-zinc-300 text-sm leading-relaxed text-justify">
+                    {selectedTopic.desc && selectedTopic.desc.split('\n\n').map((paragraph, i) => (
+                      <p key={i}>{paragraph}</p>
+                    ))}
+                  </div>
+                  {selectedTopic.details && selectedTopic.details.length > 0 && (
+                    <div className="space-y-5 border-t border-[#3e2723] pt-6 mt-6">
+                      {selectedTopic.details.map((detail, idx) => (
+                        <div key={idx}>
+                          <h4 className="text-amber-500 font-bold uppercase tracking-widest text-xs mb-2">{detail.title}</h4>
+                          <p className="text-zinc-300 text-sm leading-relaxed text-justify whitespace-pre-wrap">{detail.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Layout ANTIGO (Mantém as Classes seguras e iguais a antes)
+                <p className="text-zinc-400 mb-8 border-l-4 border-red-900 pl-4 italic text-sm whitespace-pre-wrap">
+                  {selectedTopic.desc}
+                </p>
+              )}
               
-              {/* STATUS E PROFICIÊNCIAS */}
+              {/* === CARACTERÍSTICAS DINÂMICAS (CLASSE OU RAÇA) === */}
               {selectedTopic.stats && Object.keys(selectedTopic.stats).length > 0 && (
                 <div className="bg-black/50 border border-[#3e2723] rounded-lg p-5 mb-8 shadow-inner">
-                  <h3 className="text-amber-500 font-bold uppercase tracking-widest text-xs border-b border-[#3e2723] pb-2 mb-4">Características Básicas</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">❤️ Vida (PV)</span><span className="text-zinc-200">{selectedTopic.stats.hp}</span></div>
-                    <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">⚡ Esforço (PE)</span><span className="text-zinc-200">{selectedTopic.stats.pe}</span></div>
-                    <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">🛡️ Proficiências</span><span className="text-zinc-200">{selectedTopic.stats.proficiencies}</span></div>
-                    <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">🎲 Perícias Iniciais</span><span className="text-zinc-200">{selectedTopic.stats.skills}</span></div>
-                  </div>
+                  <h3 className="text-amber-500 font-bold uppercase tracking-widest text-xs border-b border-[#3e2723] pb-2 mb-4">
+                    {activeSection === 'classes' ? 'Características Básicas' : '📊 CARACTERÍSTICAS DE RAÇA'}
+                  </h3>
+                  
+                  {activeSection === 'classes' ? (
+                    /* Layout para Classes */
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">❤️ Vida (PV)</span><span className="text-zinc-200">{selectedTopic.stats.hp}</span></div>
+                      <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">⚡ Esforço (PE)</span><span className="text-zinc-200">{selectedTopic.stats.pe}</span></div>
+                      <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">🛡️ Proficiências</span><span className="text-zinc-200">{selectedTopic.stats.proficiencies}</span></div>
+                      <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">🎲 Perícias Iniciais</span><span className="text-zinc-200">{selectedTopic.stats.skills}</span></div>
+                    </div>
+                  ) : (
+                    /* Layout para Raças (Conforme solicitado) */
+                    <div className="grid grid-cols-1 gap-4 text-sm">
+                      <div>
+                        <span className="text-zinc-500 uppercase text-[10px] font-bold block">🧬 Atributos</span>
+                        <span className="text-zinc-200">{selectedTopic.stats.attributes}</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">📏 Tamanho</span><span className="text-zinc-200">{selectedTopic.stats.size}</span></div>
+                        <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">🏃 Deslocamento</span><span className="text-zinc-200">{selectedTopic.stats.speed}</span></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* HABILIDADES DE CLASSE (Automáticas) */}
+              {/* HABILIDADES FIXAS (CLASSE OU RAÇA) */}
               {selectedTopic.fixedAbilities && selectedTopic.fixedAbilities.length > 0 && (
                 <div className="mb-10">
-                  <h3 className="text-red-500 font-bold uppercase tracking-widest text-sm border-b-2 border-red-900/50 pb-2 mb-4">Habilidades da Classe (Fixas)</h3>
+                  <h3 className="text-red-500 font-bold uppercase tracking-widest text-sm border-b-2 border-red-900/50 pb-2 mb-4">
+                    {activeSection === 'classes' ? 'Habilidades da Classe (Fixas)' : '🧬 HABILIDADES DE RAÇA'}
+                  </h3>
                   <div className="grid grid-cols-1 gap-4">
                     {selectedTopic.fixedAbilities.map((power, idx) => (
                       <div key={idx} className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between shadow-sm">

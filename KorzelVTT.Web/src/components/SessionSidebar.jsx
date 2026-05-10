@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function SessionSidebar(props) {
   // Desestruturando o "pacotão" de props que vai chegar do App.jsx
@@ -14,6 +14,8 @@ export default function SessionSidebar(props) {
     editingCatalogIndex, catalogForm, setCatalogForm, handleEditCatalogItem, handleDeleteCatalogItem,
     handleSaveCatalogItem
   } = props;
+  
+  const [tokenSearch, setTokenSearch] = useState("");
 
   return (
     <div className="w-80 lg:w-96 bg-[#140c08] border-l border-[#3e2723] flex flex-col z-20 shadow-[-5px_0_15px_rgba(0,0,0,0.8)] shrink-0 h-full min-h-0">
@@ -50,7 +52,7 @@ export default function SessionSidebar(props) {
                 {(isMasterMode || !token.isNpc) && (
                   <div className="mt-3 flex items-center gap-3 border-t border-zinc-800/50 pt-2">
                     <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest shrink-0">Tamanho</span>
-                    <input type="range" min="20" max="1500" value={token.size || 80} onChange={(e) => updateTokenSize(token.id, e.target.value)} className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500" />
+                    <input type="range" min="20" max="3000" value={token.size || 80} onChange={(e) => updateTokenSize(token.id, e.target.value)} className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500" />
                   </div>
                 )}
               </div>
@@ -86,18 +88,42 @@ export default function SessionSidebar(props) {
               <h4 className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Biblioteca (Arraste)</h4>
               <span className="text-purple-500 text-xs">⭐</span>
             </div>
+
+            {/* BARRA DE PESQUISA DE TOKENS */}
+            <div className="relative mb-3">
+              <input 
+                type="text" 
+                placeholder="Buscar token por nome..." 
+                value={tokenSearch}
+                onChange={(e) => setTokenSearch(e.target.value)}
+                className="w-full bg-black/60 border border-zinc-800 rounded p-2 pl-8 text-xs text-white focus:outline-none focus:border-purple-600 transition-colors shadow-inner" 
+              />
+              <span className="absolute left-2.5 top-2 opacity-50 text-xs">🔍</span>
+            </div>
             
-            {tokenLibrary.map(libToken => (
-              <div key={libToken.id} draggable onDragStart={(e) => handleDragStartFromLibrary(e, libToken)} className="bg-black/40 border border-zinc-800/80 rounded p-2 flex items-center justify-between mb-2 hover:border-purple-600 transition-colors cursor-grab active:cursor-grabbing" title="Arraste para o Mapa">
-                <div className="flex items-center gap-3 pointer-events-none">
-                  <div className={`w-10 h-10 rounded border-2 flex items-center justify-center font-bold text-xs overflow-hidden ${libToken.isNpc ? 'border-red-900 bg-red-950/50 text-red-400' : 'border-blue-900 bg-blue-950/50 text-blue-400'}`}>
-                    {libToken.image ? <img src={libToken.image} alt={libToken.name} className="w-full h-full object-cover" /> : libToken.name.charAt(0)}
+            {/* LISTA DE TOKENS (AGORA COM FILTRO) */}
+            <div className="flex flex-col gap-2 max-h-64 overflow-y-auto custom-scrollbar pr-1">
+              {tokenLibrary
+                .filter(libToken => libToken.name.toLowerCase().includes(tokenSearch.toLowerCase()))
+                .map(libToken => (
+                <div key={libToken.id} draggable onDragStart={(e) => handleDragStartFromLibrary(e, libToken)} className="bg-black/40 border border-zinc-800/80 rounded p-2 flex items-center justify-between hover:border-purple-600 transition-colors cursor-grab active:cursor-grabbing" title="Arraste para o Mapa">
+                  <div className="flex items-center gap-3 pointer-events-none">
+                    <div className={`w-10 h-10 rounded border-2 flex items-center justify-center font-bold text-xs overflow-hidden shrink-0 ${libToken.isNpc ? 'border-red-900 bg-red-950/50 text-red-400' : 'border-blue-900 bg-blue-950/50 text-blue-400'}`}>
+                      {libToken.image ? <img src={libToken.image} alt={libToken.name} className="w-full h-full object-cover" /> : libToken.name.charAt(0)}
+                    </div>
+                    <span className="text-xs text-white font-bold truncate max-w-[120px]">{libToken.name}</span>
                   </div>
-                  <span className="text-xs text-white font-bold">{libToken.name}</span>
+                  <span className="text-zinc-600 text-lg hover:text-purple-500 transition-colors">✋</span>
                 </div>
-                <span className="text-zinc-600 text-lg">✋</span>
-              </div>
-            ))}
+              ))}
+              
+              {/* MENSAGEM CASO A BUSCA NÃO ENCONTRE NADA */}
+              {tokenLibrary.filter(libToken => libToken.name.toLowerCase().includes(tokenSearch.toLowerCase())).length === 0 && (
+                <div className="text-center py-4 text-zinc-600 text-[10px] uppercase font-bold tracking-widest border border-dashed border-zinc-800 rounded">
+                  Nenhum token encontrado.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

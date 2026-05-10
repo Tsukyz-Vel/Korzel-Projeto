@@ -4,9 +4,10 @@ import Lobby from './components/Lobby';
 import CharacterSheet from './components/CharacterSheet';
 import VttSession from './components/VttSession';
 import DiceRollerOverlay from './components/DiceRollerOverlay';
-import { initialLojaCatalog } from './data/korzelData';
+import { initialLojaCatalog, panteaoKorzel } from './data/korzelData';
 import { parseAndRollDamage } from './utils/diceUtils';
 import Compendio from './components/Compendio';
+
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('início'); 
@@ -70,6 +71,9 @@ export default function App() {
   const [editingCatalogIndex, setEditingCatalogIndex] = useState(null);
   const [catalogForm, setCatalogForm] = useState({ name: "", type: "Consumível", price: 10, weight: 0.1, desc: "" });
   const [buyQuantities, setBuyQuantities] = useState({});
+  const [campaigns, setCampaigns] = useState([
+    { id: 1, name: "Sombras de Korzel", lastPlayed: "Ontem" }
+  ]);
 
   const [sessionTab, setSessionTab] = useState('chat');
   const [secretRoll, setSecretRoll] = useState(false);
@@ -212,7 +216,29 @@ export default function App() {
   const handleDeleteCatalogItem = (index) => { if(window.confirm("Remover da Loja?")) setCatalog(catalog.filter((_, i) => i !== index)); };
   const handleSaveCatalogItem = () => { if(!catalogForm.name) return alert("Precisa de nome!"); if(editingCatalogIndex !== null) { const updated = [...catalog]; updated[editingCatalogIndex] = catalogForm; setCatalog(updated); } else { setCatalog([...catalog, catalogForm]); } setShowCatalogForm(false); };
 
-  const handleDeityChange = (newDeity) => { /* Omitido por brevidade visual, usa o original */ };
+ const handleDeityChange = (newDeity) => {
+    setCharDeity(newDeity); // Atualiza o select da ficha
+
+    // 1. Removemos as Dádivas Divinas antigas para não acumular se trocar de deus
+    const filteredAbilities = abilitiesList.filter(ability => ability.type !== "Dádiva Divina");
+
+    // 2. Se o jogador escolheu um deus válido, buscamos os poderes dele
+    if (newDeity !== "Nenhum" && panteaoKorzel[newDeity]) {
+      const deityPowers = panteaoKorzel[newDeity].poderes.map(poder => ({
+        title: poder.title,
+        type: "Dádiva Divina",
+        cost: poder.cost,
+        description: poder.desc
+      }));
+      
+      // 3. Atualizamos a lista mantendo os poderes de classe + as novas dádivas
+      setAbilitiesList([...filteredAbilities, ...deityPowers]);
+      showToast(`As Dádivas de ${newDeity} foram forjadas na sua ficha!`, "success");
+    } else {
+      // Se escolheu "Nenhum", apenas salva a lista limpa
+      setAbilitiesList(filteredAbilities);
+    }
+  };
   const handleOpenNewWeapon = () => { setWeaponForm({ name: "", damage: "", critMargin: "", critMultiplier: "", type: "Cortante", skill: "Luta" }); setEditingWeaponIndex(null); setShowWeaponForm(true); };
   const handleEditWeapon = (index) => { setWeaponForm(attacksList[index]); setEditingWeaponIndex(index); setShowWeaponForm(true); };
   const handleDeleteWeapon = (index) => { if(window.confirm("Deseja excluir?")) setAttacksList(attacksList.filter((_, i) => i !== index)); };
@@ -326,9 +352,17 @@ export default function App() {
 
       <main className="flex-1 w-full flex flex-col min-h-0">
         
-        {currentPage === 'início' && (
+       {currentPage === 'início' && (
           <div className="p-4 lg:p-8 animate-fade-in flex flex-col gap-10 overflow-y-auto w-full max-w-7xl mx-auto custom-scrollbar">
-            <Lobby handleEnterSession={handleEnterSession} setCurrentPage={setCurrentPage} charName={charName} charClass={charClass} charLevel={charLevel} />
+            <Lobby 
+              handleEnterSession={handleEnterSession} 
+              setCurrentPage={setCurrentPage} 
+              charName={charName} 
+              charClass={charClass} 
+              charLevel={charLevel}
+              campaigns={campaigns}         // <-- ADICIONADO AQUI
+              setCampaigns={setCampaigns}   // <-- ADICIONADO AQUI
+            />
           </div>
         )}
 
