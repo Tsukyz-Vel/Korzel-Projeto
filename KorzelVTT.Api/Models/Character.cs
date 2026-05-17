@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,43 +16,61 @@ public class Character
     [ForeignKey("UserId")]
     public User? User { get; set; }
 
-    // === IDENTIDADE ===
+    // === IDENTIDADE (ATUALIZADO) ===
     [Required]
     [MaxLength(100)]
     public string Name { get; set; } = string.Empty;
+    
+    [MaxLength(100)]
+    public string Origin { get; set; } = string.Empty; // 👈 Adicionado: Origem/Antecedente
+    
+    [MaxLength(100)]
     public string Race { get; set; } = string.Empty; 
+    
+    [MaxLength(100)]
     public string Class { get; set; } = string.Empty; 
+    
+    public int Age { get; set; } = 18; // 👈 Adicionado: Idade do Personagem
     public int Level { get; set; } = 1;
+    
+    [MaxLength(100)]
+    public string Deity { get; set; } = "Nenhum"; // 👈 Adicionado: Divindade Cultuada
+
+    // === A HERANÇA DO PREDADOR (NOVO) ===
+    // Guardam o nome das mutações escolhidas quando a corrupção sobe
+    public string Mut1 { get; set; } = "Carne Intacta"; 
+    public string Mut2 { get; set; } = "Carne Intacta";
+    public string Mut3 { get; set; } = "Carne Intacta";
 
     // === ATRIBUTOS PRINCIPAIS ===
-    // O sistema usa os atributos diretamente (ex: +3), então salvamos só o valor numérico
-    public int Vigor { get; set; } = 0;
-    public int Agility { get; set; } = 0;
-    public int Strength { get; set; } = 0;
     public int Intellect { get; set; } = 0;
-    public int Instinct { get; set; } = 0;
     public int Presence { get; set; } = 0;
+    public int Agility { get; set; } = 0;
+    public int Vigor { get; set; } = 0;
+    public int Strength { get; set; } = 0;
+    public int Instinct { get; set; } = 0;
 
     // === RECURSOS VITAIS ===
-    public int CurrentHP { get; set; } = 10; // Pontos de Vida (Sangue)
+    public int CurrentHP { get; set; } = 10; 
     public int MaxHP { get; set; } = 10;
     
-    public int CurrentPE { get; set; } = 0; // Pontos de Esforço (Para classes mundanas)
+    public int CurrentPE { get; set; } = 0; 
     public int MaxPE { get; set; } = 0;
 
-    public int Corruption { get; set; } = 0; // Escala de 0 a 40 para a Queda
+    public int Corruption { get; set; } = 0; 
+    public int MaxCorruption { get; set; } = 40; // 👈 Adicionado para bater com o React
 
     // === ECONOMIA E DEFESA ===
-    public int Lascas { get; set; } = 1000; // Moeda padrão (Lc) de Korzel
-    public int BaseDefense { get; set; } = 10; // Defesa Base (10 + Agilidade + Armadura)
+    public int Lascas { get; set; } = 1000; 
+    public int BaseDefense { get; set; } = 10; 
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
-    // NOVO: A lista de perícias que este personagem possui
+    // === RELACIONAMENTOS / LISTAS DA FICHA (COMPLETO) ===
+    // Todas as tabelas que guardam os dados dinâmicos das abas da ficha
     public ICollection<CharacterSkill> Skills { get; set; } = new List<CharacterSkill>();
-
-    // NOVO: O Inventário do Personagem
     public ICollection<CharacterItem> Inventory { get; set; } = new List<CharacterItem>();
-
-    
+    public ICollection<Weapon> Weapons { get; set; } = new List<Weapon>();       // 👈 Adicionado
+    public ICollection<Ability> Abilities { get; set; } = new List<Ability>();   // 👈 Adicionado
+    public ICollection<Note> Notes { get; set; } = new List<Note>();             // 👈 Adicionado
 }

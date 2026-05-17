@@ -2,35 +2,23 @@ using System.ComponentModel.DataAnnotations;
 
 namespace KorzelVTT.Api.Models;
 
-// Definimos os papéis possíveis. 
-// O Admin (você) tem poder total, Master pode gerenciar mesas, Player apenas joga.
-public enum UserRole
-{
-    Admin,
-    Master,
-    Player
-}
-
 public class User
 {
-    [Key] // Avisa ao EF que este é o identificador único (Primary Key)
+    [Key]
     public int Id { get; set; }
 
     [Required]
-    [MaxLength(50)]
+    [MaxLength(100)]
     public string Username { get; set; } = string.Empty;
 
     [Required]
     [EmailAddress]
+    [MaxLength(150)]
     public string Email { get; set; } = string.Empty;
 
+    // 👇 IMPORTANTE: Aqui guardaremos a senha criptografada de forma segura
     [Required]
-    public string PasswordHash { get; set; } = string.Empty; // Nunca salvamos a senha real, apenas o "hash" (digital) dela por segurança
-
-    public UserRole Role { get; set; } = UserRole.Player; // Por padrão, todo mundo nasce como Player
+    public string PasswordHash { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    // NOVO: Lista que guarda os personagens vinculados a esta conta
-    public ICollection<Character> Characters { get; set; } = new List<Character>();
 }

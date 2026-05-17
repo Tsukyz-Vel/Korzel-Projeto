@@ -3,6 +3,7 @@ using System;
 using KorzelVTT.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KorzelVTT.Api.Migrations
 {
     [DbContext(typeof(KorzelContext))]
-    partial class KorzelContextModelSnapshot : ModelSnapshot
+    [Migration("20260517034203_AtualizarEstruturaFicha")]
+    partial class AtualizarEstruturaFicha
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.7");
@@ -260,16 +263,18 @@ namespace KorzelVTT.Api.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Role")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasMaxLength(100)
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -337,7 +342,7 @@ namespace KorzelVTT.Api.Migrations
             modelBuilder.Entity("KorzelVTT.Api.Models.Character", b =>
                 {
                     b.HasOne("KorzelVTT.Api.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Characters")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -400,6 +405,11 @@ namespace KorzelVTT.Api.Migrations
                     b.Navigation("Skills");
 
                     b.Navigation("Weapons");
+                });
+
+            modelBuilder.Entity("KorzelVTT.Api.Models.User", b =>
+                {
+                    b.Navigation("Characters");
                 });
 #pragma warning restore 612, 618
         }

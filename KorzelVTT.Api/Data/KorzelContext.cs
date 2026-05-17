@@ -8,15 +8,55 @@ public class KorzelContext : DbContext
 {
     public KorzelContext(DbContextOptions<KorzelContext> options) : base(options) { }
 
-    // Aqui dizemos que queremos uma tabela chamada "Users" baseada na classe User
+    // Mapeamento das tabelas base
     public DbSet<User> Users { get; set; }
-
-    // NOVO: Representa a tabela de fichas no banco de dados
     public DbSet<Character> Characters { get; set; }
-
-    // NOVO: Tabela de Perícias
     public DbSet<CharacterSkill> CharacterSkills { get; set; }
-
-    // NOVO: Tabela do Inventário e Arsenal
     public DbSet<CharacterItem> CharacterItems { get; set; }
+
+    // 👇 NOVAS TABELAS ADICIONADAS AQUI 👇
+    public DbSet<Weapon> Weapons { get; set; }
+    public DbSet<Ability> Abilities { get; set; }
+    public DbSet<Note> Notes { get; set; }
+
+    // Configurações avançadas de relacionamentos e integridade
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Configuração de exclusão em cascata: Deletou o Character -> Limpa as Perícias
+        modelBuilder.Entity<Character>()
+            .HasMany(c => c.Skills)
+            .WithOne(s => s.Character)
+            .HasForeignKey(s => s.CharacterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deletou o Character -> Limpa o Inventário
+        modelBuilder.Entity<Character>()
+            .HasMany(c => c.Inventory)
+            .WithOne(i => i.Character)
+            .HasForeignKey(i => i.CharacterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deletou o Character -> Limpa as Armas (Arsenal)
+        modelBuilder.Entity<Character>()
+            .HasMany(c => c.Weapons)
+            .WithOne(w => w.Character)
+            .HasForeignKey(w => w.CharacterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deletou o Character -> Limpa as Habilidades/Poderes
+        modelBuilder.Entity<Character>()
+            .HasMany(c => c.Abilities)
+            .WithOne(a => a.Character)
+            .HasForeignKey(a => a.CharacterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deletou o Character -> Limpa as Páginas do Diário
+        modelBuilder.Entity<Character>()
+            .HasMany(c => c.Notes)
+            .WithOne(n => n.Character)
+            .HasForeignKey(n => n.CharacterId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
 }
