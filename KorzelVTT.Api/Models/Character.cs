@@ -16,13 +16,18 @@ public class Character
     [ForeignKey("UserId")]
     public User? User { get; set; }
 
-    // === IDENTIDADE (ATUALIZADO) ===
+    // 👇 NOVA PROPRIEDADE VITAL 👇
+    // Se for nulo, a ficha é solta (só o jogador dono dela pode ver).
+    // Se tiver ID, a ficha está dentro de uma campanha, e o Mestre daquela sala também tem acesso!
+    public int? CampaignId { get; set; }
+
+    // === IDENTIDADE ===
     [Required]
     [MaxLength(100)]
     public string Name { get; set; } = string.Empty;
     
     [MaxLength(100)]
-    public string Origin { get; set; } = string.Empty; // 👈 Adicionado: Origem/Antecedente
+    public string Origin { get; set; } = string.Empty; 
     
     [MaxLength(100)]
     public string Race { get; set; } = string.Empty; 
@@ -30,13 +35,13 @@ public class Character
     [MaxLength(100)]
     public string Class { get; set; } = string.Empty; 
     
-    public int Age { get; set; } = 18; // 👈 Adicionado: Idade do Personagem
+    public int Age { get; set; } = 18; 
     public int Level { get; set; } = 1;
     
     [MaxLength(100)]
-    public string Deity { get; set; } = "Nenhum"; // 👈 Adicionado: Divindade Cultuada
+    public string Deity { get; set; } = "Nenhum"; 
 
-    // === A HERANÇA DO PREDADOR (NOVO) ===
+    // === A HERANÇA DO PREDADOR ===
     // Guardam o nome das mutações escolhidas quando a corrupção sobe
     public string Mut1 { get; set; } = "Carne Intacta"; 
     public string Mut2 { get; set; } = "Carne Intacta";
@@ -58,7 +63,7 @@ public class Character
     public int MaxPE { get; set; } = 0;
 
     public int Corruption { get; set; } = 0; 
-    public int MaxCorruption { get; set; } = 40; // 👈 Adicionado para bater com o React
+    public int MaxCorruption { get; set; } = 40; 
 
     // === ECONOMIA E DEFESA ===
     public int Lascas { get; set; } = 1000; 
@@ -70,7 +75,7 @@ public class Character
     // Todas as tabelas que guardam os dados dinâmicos das abas da ficha
     public ICollection<CharacterSkill> Skills { get; set; } = new List<CharacterSkill>();
     public ICollection<CharacterItem> Inventory { get; set; } = new List<CharacterItem>();
-    public ICollection<Weapon> Weapons { get; set; } = new List<Weapon>();       // 👈 Adicionado
-    public ICollection<Ability> Abilities { get; set; } = new List<Ability>();   // 👈 Adicionado
-    public ICollection<Note> Notes { get; set; } = new List<Note>();             // 👈 Adicionado
+    public ICollection<Weapon> Weapons { get; set; } = new List<Weapon>();      
+    public ICollection<Ability> Abilities { get; set; } = new List<Ability>();   
+    public ICollection<Note> Notes { get; set; } = new List<Note>();             
 }

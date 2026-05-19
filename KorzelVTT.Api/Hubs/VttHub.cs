@@ -1,16 +1,26 @@
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Threading.Tasks;
+using KorzelVTT.Api.Data; // 👈 Importa o Banco
+using KorzelVTT.Api.Models;
 
 namespace KorzelVTT.Api.Hubs
 {
     public class VttHub : Hub
     {
+        // 👇 Preparando o terreno para o Banco de Dados
+        private readonly KorzelContext _context;
+
+        public VttHub(KorzelContext context)
+        {
+            _context = context;
+        }
+
         // 1. Método para colocar os jogadores na mesma sala
         public async Task JoinSession(string sessionId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
-            Console.WriteLine($"[SIGNALR] Jogador entrou na sala: {sessionId}");
+            Console.WriteLine($"[SIGNALR] Explorador entrou na sala: {sessionId}");
         }
 
         // 2. Método para repassar um NOVO token criado pelo mestre
@@ -23,6 +33,7 @@ namespace KorzelVTT.Api.Hubs
         // 3. Método para repassar o MOVIMENTO de um token
         public async Task MoveToken(string sessionId, string tokenId, float x, float y)
         {
+            // No futuro, podemos colocar o _context.SceneTokens.Update() aqui!
             await Clients.OthersInGroup(sessionId).SendAsync("TokenMoved", tokenId, x, y);
         }
 
@@ -78,7 +89,6 @@ namespace KorzelVTT.Api.Hubs
             await Clients.OthersInGroup(sessionId).SendAsync("WeatherChanged", weatherType);
         }
 
-        // Método para avisar se a Névoa foi Ligada ou Desligada
         public async Task ToggleFog(string sessionId, bool isEnabled)
         {
             await Clients.OthersInGroup(sessionId).SendAsync("FogToggled", isEnabled);

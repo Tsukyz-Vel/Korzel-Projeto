@@ -13,18 +13,24 @@ public class KorzelContext : DbContext
     public DbSet<Character> Characters { get; set; }
     public DbSet<CharacterSkill> CharacterSkills { get; set; }
     public DbSet<CharacterItem> CharacterItems { get; set; }
-
-    // 👇 NOVAS TABELAS ADICIONADAS AQUI 👇
     public DbSet<Weapon> Weapons { get; set; }
     public DbSet<Ability> Abilities { get; set; }
     public DbSet<Note> Notes { get; set; }
+
+    // 👇 NOVAS TABELAS DE PERSISTÊNCIA SESSÃO 👇
+    public DbSet<Campaign> Campaigns { get; set; }
+    public DbSet<Scene> Scenes { get; set; }
+    public DbSet<SceneToken> SceneTokens { get; set; }
 
     // Configurações avançadas de relacionamentos e integridade
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configuração de exclusão em cascata: Deletou o Character -> Limpa as Perícias
+        // =======================================================
+        // CASCATAS DA FICHA DE PERSONAGEM
+        // =======================================================
+        // Deletou o Character -> Limpa as Perícias
         modelBuilder.Entity<Character>()
             .HasMany(c => c.Skills)
             .WithOne(s => s.Character)
@@ -57,6 +63,23 @@ public class KorzelContext : DbContext
             .HasMany(c => c.Notes)
             .WithOne(n => n.Character)
             .HasForeignKey(n => n.CharacterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // =======================================================
+        // CASCATAS DO VTT (SESSÃO)
+        // =======================================================
+        // Configuração de Cascade Delete: Se a campanha sumir, as cenas somem junto
+        modelBuilder.Entity<Campaign>()
+            .HasMany(c => c.Scenes)
+            .WithOne(s => s.Campaign)
+            .HasForeignKey(s => s.CampaignId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Se a cena (mapa) sumir, os tokens jogados nela somem junto
+        modelBuilder.Entity<Scene>()
+            .HasMany(s => s.Tokens)
+            .WithOne(t => t.Scene)
+            .HasForeignKey(t => t.SceneId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
