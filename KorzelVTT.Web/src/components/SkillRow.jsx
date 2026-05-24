@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { themeColors } from '../data/korzelData';
 import d20Icon from '../assets/d20-red.png';
 
-export default function SkillRow({ name, attrShort, color, trainingLevel, baseTotal, onRoll }) {
+export default function SkillRow({ name, attrShort, color, trainingLevel, baseTotal, onRoll, onToggleTraining }) {
   // Garantia caso a API mande uma cor que não existe
   const theme = themeColors[color] || themeColors.red;
   
@@ -10,8 +10,22 @@ export default function SkillRow({ name, attrShort, color, trainingLevel, baseTo
   const total = baseTotal + Number(outros);
   
   const renderDiamonds = () => { 
+    // Mapeando os nomes oficiais do seu sistema para a dica visual (Tooltip)
+    const tooltipTitles = {
+      1: "Treinado (+2)",
+      2: "Veterano (+4)",
+      3: "Mestre (+6)"
+    };
+
     return [1, 2, 3].map((level) => (
-      <span key={level} className={`text-xs mx-[1px] ${trainingLevel >= level ? theme.text : "text-zinc-800"}`}>♦</span>
+      <span 
+        key={level} 
+        onClick={() => onToggleTraining && onToggleTraining(level)}
+        className={`text-xs mx-[1px] cursor-pointer hover:scale-125 transition-transform ${trainingLevel >= level ? theme.text : "text-zinc-800 hover:text-zinc-600"}`}
+        title={tooltipTitles[level]} // <-- Adicionamos o Tooltip aqui!
+      >
+        ♦
+      </span>
     )); 
   };
   
@@ -33,10 +47,11 @@ export default function SkillRow({ name, attrShort, color, trainingLevel, baseTo
             type="number" 
             value={outros} 
             onChange={(e) => setOutros(e.target.value)} 
-            onFocus={(e) => e.target.select()} /* <-- O zero não vai mais te incomodar! */
+            onFocus={(e) => e.target.select()} 
             className="w-8 bg-black/40 border-b border-zinc-700 text-center text-amber-500 font-bold text-sm focus:outline-none focus:border-amber-500 rounded-t-sm" 
           />
         </div>
+        {/* 👇 AQUI: Chama a função que renderiza os losangos interativos */}
         <div className="w-12 flex justify-center">{renderDiamonds()}</div>
         <div className="w-8 text-right text-lg font-bold text-white">{total >= 0 ? `+${total}` : total}</div>
       </div>

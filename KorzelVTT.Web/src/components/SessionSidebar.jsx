@@ -9,11 +9,16 @@ export default function SessionSidebar(props) {
     handleCreateToken, handleTokenImageUpload, tokenFileInputRef, handleDragStartFromLibrary,
     audioCategories, activeAudioId, isPlaying, isLooping, setIsLooping, volume, setVolume,
     targetAudioCat, setTargetAudioCat, audioFileInputRef, handleAudioUpload, togglePlayAudio,
-    fichaSearch, setFichaSearch, savedCharacters, setSheetModalOpen, setCurrentPage,
+    fichaSearch, setFichaSearch, setSheetModalOpen, setCurrentPage,
     lascas, catalog, buyQuantities, updateBuyQty, handleBuyItem, showCatalogForm, setShowCatalogForm,
     editingCatalogIndex, catalogForm, setCatalogForm, handleEditCatalogItem, handleDeleteCatalogItem,
-    handleSaveCatalogItem
+    handleSaveCatalogItem, handleDeleteTokenFromScene, handleDeleteTokenFromLibrary,
+    
+    // 👇 AS PROPS DO BANCO DE DADOS 👇
+    campaignCharacters, handleCreateNewCharacter, loadCharacterFromDb, handleDeleteCharacter
   } = props;
+ 
+  const [targetBuyerId, setTargetBuyerId] = useState('active');
   
   const [tokenSearch, setTokenSearch] = useState("");
 
@@ -34,7 +39,7 @@ export default function SessionSidebar(props) {
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 relative min-h-0">
           <div>
             <h4 className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-2 mt-2">Em Cena Atual</h4>
-            {sceneTokens.filter(t => (isMasterMode || !t.isNpc) && t.sceneId === currentSceneObj?.id && t.inScene).map(token => (
+            {sceneTokens.filter(t => (isMasterMode || !t.isNpc) && t.sceneId == currentSceneObj?.id).map(token => (
               <div key={token.id} className="bg-black/40 border border-zinc-800/80 rounded p-3 flex flex-col mb-3 hover:border-zinc-600 transition-colors shadow-sm">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -44,7 +49,7 @@ export default function SessionSidebar(props) {
                     <span className="text-xs text-white font-bold">{token.name}</span>
                   </div>
                   {isMasterMode && (
-                    <button onClick={() => setSceneTokens(prev => prev.filter(p => p.id !== token.id))} className="text-[9px] uppercase border border-zinc-700 bg-zinc-900 text-zinc-400 px-2 py-1 rounded hover:bg-red-900/50 hover:text-red-300 hover:border-red-800 transition-colors flex items-center gap-1">
+                    <button onClick={() => handleDeleteTokenFromScene(token.id)} className="text-[9px] uppercase border border-zinc-700 bg-zinc-900 text-zinc-400 px-2 py-1 rounded hover:bg-red-900/50 hover:text-red-300 hover:border-red-800 transition-colors flex items-center gap-1">
                       <span>X</span>
                     </button>
                   )}
@@ -89,7 +94,6 @@ export default function SessionSidebar(props) {
               <span className="text-purple-500 text-xs">⭐</span>
             </div>
 
-            {/* BARRA DE PESQUISA DE TOKENS */}
             <div className="relative mb-3">
               <input 
                 type="text" 
@@ -101,23 +105,30 @@ export default function SessionSidebar(props) {
               <span className="absolute left-2.5 top-2 opacity-50 text-xs">🔍</span>
             </div>
             
-            {/* LISTA DE TOKENS (AGORA COM FILTRO) */}
             <div className="flex flex-col gap-2 max-h-64 overflow-y-auto custom-scrollbar pr-1">
               {tokenLibrary
                 .filter(libToken => libToken.name.toLowerCase().includes(tokenSearch.toLowerCase()))
                 .map(libToken => (
                 <div key={libToken.id} draggable onDragStart={(e) => handleDragStartFromLibrary(e, libToken)} className="bg-black/40 border border-zinc-800/80 rounded p-2 flex items-center justify-between hover:border-purple-600 transition-colors cursor-grab active:cursor-grabbing" title="Arraste para o Mapa">
+                  
+                  {/* Lado Esquerdo: Imagem e Nome */}
                   <div className="flex items-center gap-3 pointer-events-none">
                     <div className={`w-10 h-10 rounded border-2 flex items-center justify-center font-bold text-xs overflow-hidden shrink-0 ${libToken.isNpc ? 'border-red-900 bg-red-950/50 text-red-400' : 'border-blue-900 bg-blue-950/50 text-blue-400'}`}>
                       {libToken.image ? <img src={libToken.image} alt={libToken.name} className="w-full h-full object-cover" /> : libToken.name.charAt(0)}
                     </div>
                     <span className="text-xs text-white font-bold truncate max-w-[120px]">{libToken.name}</span>
                   </div>
-                  <span className="text-zinc-600 text-lg hover:text-purple-500 transition-colors">✋</span>
+                  
+                  {/* Lado Direito: Botão de Lixeira e Mãozinha */}
+                  <div className="flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); handleDeleteTokenFromLibrary(libToken.id); }} className="text-[10px] text-zinc-600 hover:text-red-500 transition-colors" title="Excluir da Biblioteca">🗑️</button>
+                    <span className="text-zinc-600 text-lg hover:text-purple-500 transition-colors">✋</span>
+                  </div>
+                  
                 </div>
               ))}
               
-              {/* MENSAGEM CASO A BUSCA NÃO ENCONTRE NADA */}
+              {/* Mensagem caso a busca não encontre nada */}
               {tokenLibrary.filter(libToken => libToken.name.toLowerCase().includes(tokenSearch.toLowerCase())).length === 0 && (
                 <div className="text-center py-4 text-zinc-600 text-[10px] uppercase font-bold tracking-widest border border-dashed border-zinc-800 rounded">
                   Nenhum token encontrado.
@@ -173,37 +184,52 @@ export default function SessionSidebar(props) {
         </div>
       )}
       
-      {/* 3. ABA FICHAS */}
+      {/* 3. ABA FICHAS (COM A LIXEIRA) */}
       {sessionTab === 'fichas' && (
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 relative min-h-0">
+          
           <div className="relative shrink-0">
             <input type="text" placeholder="Buscar personagem..." value={fichaSearch} onChange={(e) => setFichaSearch(e.target.value)} className="w-full bg-black border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-amber-700" />
             <span className="absolute right-3 top-2.5 opacity-50">🔍</span>
           </div>
-          <button onClick={() => setCurrentPage('ficha')} className="w-full shrink-0 bg-red-900/50 hover:bg-red-800 text-red-200 text-[10px] font-bold uppercase tracking-widest py-3 rounded transition-colors border border-red-700 shadow-md">
+          
+          <button onClick={handleCreateNewCharacter} className="w-full shrink-0 bg-red-900/50 hover:bg-red-800 text-red-200 text-[10px] font-bold uppercase tracking-widest py-3 rounded transition-colors border border-red-700 shadow-md">
             + Forjar Novo Personagem
           </button>
+          
           <div className="flex flex-col gap-3 mt-2">
             <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest border-b border-zinc-800 pb-1 shrink-0">Vinculados a esta campanha</span>
-            {savedCharacters.filter(c => c.name.toLowerCase().includes(fichaSearch.toLowerCase())).map(char => (
-              <div key={char.id} className="bg-black/40 border border-zinc-800/80 rounded p-3 flex flex-col gap-3 shadow-md hover:border-red-900/50 transition-colors shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded bg-red-950 border border-red-900 flex items-center justify-center text-red-500 font-bold text-xs">{char.name.charAt(0)}</div>
-                  <div className="flex flex-col">
-                    <span className="text-xs text-white font-bold">{char.name}</span>
-                    <span className="text-[9px] text-zinc-500 uppercase mt-0.5">{char.race} • {char.class} Nvl {char.level}</span>
+            
+            {campaignCharacters && campaignCharacters.length > 0 ? (
+              campaignCharacters
+                .filter(c => (c.name || "").toLowerCase().includes((fichaSearch || "").toLowerCase()))
+                .map(char => (
+                <div key={char.id} className="bg-black/40 border border-zinc-800/80 rounded p-3 flex flex-col gap-3 shadow-md hover:border-red-900/50 transition-colors shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded bg-red-950 border border-red-900 flex items-center justify-center text-red-500 font-bold text-xs">
+                      {char.name ? char.name.charAt(0).toUpperCase() : "?"}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-white font-bold">{char.name || "Sem Nome"}</span>
+                      <span className="text-[9px] text-zinc-500 uppercase mt-0.5">Nvl {char.level || 1} • {char.class || "Desconhecido"}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => loadCharacterFromDb(char.id)} className="flex-1 bg-red-950/40 hover:bg-red-900 text-red-300 border border-red-900 text-[9px] uppercase font-bold tracking-widest py-2 rounded transition-colors">
+                      📖 Abrir
+                    </button>
+                    <button onClick={() => handleDeleteCharacter(char.id, char.name)} className="bg-zinc-900/80 hover:bg-red-900 text-zinc-500 hover:text-red-200 border border-zinc-800 hover:border-red-900 text-[10px] px-3 rounded transition-colors" title="Apagar Ficha">
+                      🗑️
+                    </button>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => setSheetModalOpen(true)} className="flex-1 bg-red-950/40 hover:bg-red-900 text-red-300 border border-red-900 text-[9px] uppercase font-bold tracking-widest py-2 rounded transition-colors">
-                    📖 Abrir
-                  </button>
-                  <button onClick={() => setCurrentPage('ficha')} className="px-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 border border-zinc-700 text-[10px] uppercase font-bold rounded transition-colors" title="Editar no modo tela cheia">
-                    ✏️
-                  </button>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-6 opacity-50">
+                <span className="text-2xl mb-2 block">📜</span>
+                <p className="text-xs text-zinc-500 italic">Nenhuma ficha salva no banco.</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       )}
@@ -223,34 +249,50 @@ export default function SessionSidebar(props) {
           <div className="flex flex-col gap-3 mt-2">
             <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest border-b border-zinc-800 pb-1 shrink-0">Mercado Local</span>
             {catalog.map((item, index) => {
-              const qty = buyQuantities[index] || 1;
-              return (
-                <div key={index} className="bg-black/40 border border-[#3e2723] rounded p-3 flex flex-col gap-2 relative group hover:border-amber-700/80 transition-colors shadow-sm shrink-0">
-                  {isMasterMode && (
-                    <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => handleEditCatalogItem(index)} className="text-[10px] text-zinc-500 hover:text-yellow-500">✏️</button>
-                      <button onClick={() => handleDeleteCatalogItem(index)} className="text-[10px] text-zinc-500 hover:text-red-500">🗑️</button>
-                    </div>
-                  )}
-                  <div>
-                    <span className="text-white text-sm font-bold block pr-10">{item.name}</span>
-                    <span className="text-[9px] text-zinc-500 uppercase">{item.type} • {item.weight} kg</span>
-                  </div>
-                  <p className="text-[10px] text-zinc-400 italic line-clamp-2">{item.desc}</p>
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#3e2723]">
-                    <span className="text-amber-500 font-bold text-sm">{item.price} Lc</span>
-                    <div className="flex gap-2 items-center">
-                      <div className="flex items-center bg-zinc-950 border border-amber-900/30 rounded">
-                        <button onClick={() => updateBuyQty(index, -1)} className="px-2 text-zinc-400 hover:text-white">-</button>
-                        <span className="text-xs text-white w-4 text-center">{qty}</span>
-                        <button onClick={() => updateBuyQty(index, 1)} className="px-2 text-zinc-400 hover:text-white">+</button>
-                      </div>
-                      <button onClick={() => handleBuyItem(item, index)} className="bg-amber-900/80 hover:bg-amber-700 text-amber-100 text-[9px] font-bold uppercase px-2 py-1.5 rounded transition-colors">Comprar</button>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+  const qty = buyQuantities[index] || 1;
+  return (
+    <div key={index} className="bg-black/40 border border-[#3e2723] rounded p-3 flex flex-col gap-2 relative group hover:border-amber-700/80 transition-colors shadow-sm shrink-0">
+      {/* ... [MANTENHA O CÓDIGO DO BOTÃO EDITAR/DELETAR DO MESTRE AQUI] ... */}
+      
+      <div>
+        <span className="text-white text-sm font-bold block pr-10">{item.name}</span>
+        <span className="text-[9px] text-zinc-500 uppercase">{item.type} • {item.weight} kg</span>
+      </div>
+      <p className="text-[10px] text-zinc-400 italic line-clamp-2">{item.desc}</p>
+      
+      <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#3e2723]">
+        <span className="text-amber-500 font-bold text-sm">{item.price} Lc</span>
+        
+        <div className="flex flex-col gap-1 items-end">
+           {/* 👇 SELETOR DE QUEM ESTÁ A COMPRAR 👇 */}
+           <select 
+             value={targetBuyerId} 
+             onChange={(e) => setTargetBuyerId(e.target.value)}
+             className="bg-zinc-950 border border-zinc-800 text-[9px] text-zinc-300 rounded px-1 mb-1"
+           >
+             <option value="active">Comprar para: Ficha Aberta</option>
+             {props.savedCharacters?.map(char => (
+               <option key={char.id} value={char.id}>{char.name}</option>
+             ))}
+           </select>
+
+           <div className="flex gap-2 items-center">
+             <div className="flex items-center bg-zinc-950 border border-amber-900/30 rounded">
+               <button onClick={() => updateBuyQty(index, -1)} className="px-2 text-zinc-400 hover:text-white">-</button>
+               <span className="text-xs text-white w-4 text-center">{qty}</span>
+               <button onClick={() => updateBuyQty(index, 1)} className="px-2 text-zinc-400 hover:text-white">+</button>
+             </div>
+             
+             {/* 👇 AGORA PASSAMOS O targetBuyerId PARA A FUNÇÃO DE COMPRA 👇 */}
+             <button onClick={() => handleBuyItem(item, index, targetBuyerId)} className="bg-amber-900/80 hover:bg-amber-700 text-amber-100 text-[9px] font-bold uppercase px-2 py-1.5 rounded transition-colors">
+               Comprar
+             </button>
+           </div>
+        </div>
+      </div>
+    </div>
+  )
+})}
           </div>
         </div>
       )}

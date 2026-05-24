@@ -1,45 +1,93 @@
 import React, { useState, useEffect } from 'react';
 import SessionSidebar from './SessionSidebar';
-import { panteaoKorzel } from '../data/korzelData';
 
 const mapaBackground = "https://i.imgur.com/w8N4N3k.jpeg";
 
 export default function VttSession(props) {
   const {
-    isMasterMode, scenes, setScenes, gmActiveSceneId, setGmActiveSceneId, playerActiveSceneId, setPlayerActiveSceneId,
+    isMasterMode, scenes, loggedUserName, currentCampaignId, setScenes, gmActiveSceneId, setGmActiveSceneId, playerActiveSceneId, setPlayerActiveSceneId,
     showToast, addNewScene, fileInputRef, handleMapUpload, mapRef, isDraggingMap, handleMapMouseDown,
     handleMapWheel, handleDropOnMap, mapOffset, mapScale, currentSceneObj, sceneTokens, setSceneTokens, draggingToken,
     setDraggingToken, tokenContextMenu, setTokenContextMenu, setMapScale, setSheetModalOpen,
-    bringToFront, sendToBack, assignPermission, toggleTokenStatus
+    bringToFront, sendToBack, assignPermission, toggleTokenStatus, connection
   } = props;
 
-  // ==========================================
-  // ESTADOS DE FERRAMENTAS E ATALHOS
-  // ==========================================
   const [activeTool, setActiveTool] = useState('select');
   const [isSpacePressed, setIsSpacePressed] = useState(false);
-
   const [measureStart, setMeasureStart] = useState(null);
   const [measureEnd, setMeasureEnd] = useState(null);
   const [pings, setPings] = useState([]);
-  
   const [drawings, setDrawings] = useState([]); 
   const [currentDrawing, setCurrentDrawing] = useState(null); 
-
-  // ==========================================
-  // ESTADOS DA NÉVOA DE GUERRA
-  // ==========================================
   const [isFogEnabled, setIsFogEnabled] = useState(false);
   const [fogMode, setFogMode] = useState('reveal');
   const [fogBrushSize, setFogBrushSize] = useState(160); 
   const [fogPaths, setFogPaths] = useState([]);
   const [currentFogPath, setCurrentFogPath] = useState(null);
-
-  // ==========================================
-  // ESTADOS DE CLIMA E AMBIENTE
-  // ==========================================
   const [weather, setWeather] = useState('none'); 
   const [showWeatherMenu, setShowWeatherMenu] = useState(false);
+
+  // ==========================================
+  // OS "OUVIDOS" DAS FERRAMENTAS DO VTT
+  // ==========================================
+  useEffect(() => {
+    if (!connection) return;
+
+    connection.on("PingReceived", (x, y) => {
+      const newPing = { id: Date.now(), x, y };
+      setPings(prev => [...prev, newPing]);
+      setTimeout(() => setPings(prev => prev.filter(p => p.id !== newPing.id)), 2000);
+    });
+
+    connection.on("DrawingAdded", (drawingJson) => {
+      setDrawings(prev => [...prev, JSON.parse(drawingJson)]);
+    });
+
+    connection.on("DrawingsCleared", () => setDrawings([]));
+
+    connection.on("FogAdded", (fogJson) => {
+      setFogPaths(prev => [...prev, JSON.parse(fogJson)]);
+    });
+
+    connection.on("FogCleared", () => setFogPaths([]));
+
+    // Escutando o Mestre ligar/desligar a névoa
+    connection.on("FogToggled", (isEnabled) => {
+      setIsFogEnabled(isEnabled);
+    });
+
+    connection.on("WeatherChanged", (weatherType) => {
+      setWeather(weatherType);
+    });
+
+    return () => {
+      connection.off("PingReceived");
+      connection.off("DrawingAdded");
+      connection.off("DrawingsCleared");
+      connection.off("FogAdded");
+      connection.off("FogCleared");
+      connection.off("FogToggled");
+      connection.off("WeatherChanged");
+    };
+  }, [connection]);
+
+  // ==========================================
+  // AS "BOCAS" DAS AÇÕES RÁPIDAS
+  // ==========================================
+  const changeWeatherSync = (newWeather) => {
+    setWeather(newWeather);
+    if (connection) connection.invoke("ChangeWeather", "Sala_Principal", newWeather).catch(console.error);
+  };
+
+  const clearDrawingsSync = () => {
+    setDrawings([]);
+    if (connection) connection.invoke("ClearDrawings", "Sala_Principal").catch(console.error);
+  };
+
+  const clearFogSync = () => {
+    setFogPaths([]);
+    if (connection) connection.invoke("ClearFog", "Sala_Principal").catch(console.error);
+  };
 
   // ==========================================
   // ATALHO DA BARRA DE ESPAÇO ROBUSTO
@@ -47,19 +95,12 @@ export default function VttSession(props) {
   useEffect(() => {
     const handleKeyDownEvent = (e) => {
       if (e.repeat) return; 
-
       if ((e.code === 'Space' || e.key === ' ') && !['INPUT', 'TEXTAREA', 'BUTTON'].includes(e.target.tagName)) {
         e.preventDefault(); 
         setIsSpacePressed(true);
       }
     };
-    
-    const handleKeyUpEvent = (e) => {
-      if (e.code === 'Space' || e.key === ' ') {
-        setIsSpacePressed(false);
-      }
-    };
-    
+    const handleKeyUpEvent = (e) => { if (e.code === 'Space' || e.key === ' ') setIsSpacePressed(false); };
     const handleBlur = () => setIsSpacePressed(false);
 
     window.addEventListener('keydown', handleKeyDownEvent);
@@ -73,48 +114,25 @@ export default function VttSession(props) {
     };
   }, []);
 
-  // ==========================================
-  // ESTADOS DE CENA E TOKENS
-  // ==========================================
   const [editingSceneId, setEditingSceneId] = useState(null);
   const [editSceneName, setEditSceneName] = useState("");
 
-  const startEditingScene = (scene) => {
-    setEditingSceneId(scene.id);
-    setEditSceneName(scene.name);
-  };
-
+  const startEditingScene = (scene) => { setEditingSceneId(scene.id); setEditSceneName(scene.name); };
   const saveSceneName = (id) => {
-    if(editSceneName.trim() === "") {
-        setEditingSceneId(null);
-        return;
-    }
+    if(editSceneName.trim() === "") { setEditingSceneId(null); return; }
     setScenes(prev => prev.map(s => s.id === id ? { ...s, name: editSceneName } : s));
     setEditingSceneId(null);
   };
+  const handleKeyDown = (e, id) => { if (e.key === 'Enter') saveSceneName(id); if (e.key === 'Escape') setEditingSceneId(null); };
 
-  const handleKeyDown = (e, id) => {
-    if (e.key === 'Enter') saveSceneName(id);
-    if (e.key === 'Escape') setEditingSceneId(null);
-  };
-
-  // NOVO: Função para deletar cena
   const handleDeleteScene = (e, id) => {
-    e.stopPropagation(); // Evita ativar a cena ao clicar no X
-    
-    if (scenes.length <= 1) {
-      showToast("Você precisa ter pelo menos uma cena na campanha!", "error");
-      return;
-    }
-
+    e.stopPropagation(); 
+    if (scenes.length <= 1) { showToast("Você precisa ter pelo menos uma cena na campanha!", "error"); return; }
     if (window.confirm("Tem certeza que deseja apagar esta cena? Isso não pode ser desfeito.")) {
       const remainingScenes = scenes.filter(s => s.id !== id);
       setScenes(remainingScenes);
-      
-      // Se estava na cena que foi apagada, volta pra primeira
       if (gmActiveSceneId === id) setGmActiveSceneId(remainingScenes[0].id);
       if (playerActiveSceneId === id) setPlayerActiveSceneId(remainingScenes[0].id);
-      
       showToast("Cena apagada com sucesso.", "success");
     }
   };
@@ -126,9 +144,8 @@ export default function VttSession(props) {
   };
 
   // ==========================================
-  // LÓGICA DO MAPA E FERRAMENTAS
+  // LÓGICA DO MAPA E FERRAMENTAS MULTIPLAYER
   // ==========================================
-  
   const getMapCoords = (e) => {
     const rect = mapRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left - mapOffset.x) / mapScale;
@@ -137,63 +154,58 @@ export default function VttSession(props) {
   };
 
   const localMouseDown = (e) => {
-    if (isSpacePressed || e.button === 1 || activeTool === 'select') {
-      handleMapMouseDown(e);
-      return;
-    }
+    if (isSpacePressed || e.button === 1 || activeTool === 'select') { handleMapMouseDown(e); return; }
 
     if (activeTool === 'measure') {
       const coords = getMapCoords(e);
-      setMeasureStart(coords);
-      setMeasureEnd(coords);
+      setMeasureStart(coords); setMeasureEnd(coords);
     } else if (activeTool === 'ping') {
       const coords = getMapCoords(e);
       const newPing = { id: Date.now(), x: coords.x, y: coords.y };
       setPings(prev => [...prev, newPing]);
-      setTimeout(() => {
-        setPings(prev => prev.filter(p => p.id !== newPing.id));
-      }, 2000);
+      setTimeout(() => { setPings(prev => prev.filter(p => p.id !== newPing.id)); }, 2000);
+      
+      // BOCA: GRITA O PING NO RÁDIO
+      if (connection) connection.invoke("SendPing", "Sala_Principal", coords.x, coords.y).catch(console.error);
+
     } else if (activeTool === 'draw' && isMasterMode) {
-      const coords = getMapCoords(e);
-      setCurrentDrawing([coords]);
+      setCurrentDrawing([getMapCoords(e)]);
     } else if (activeTool === 'fog' && isMasterMode) {
-      const coords = getMapCoords(e);
-      setCurrentFogPath([coords]);
+      setCurrentFogPath([getMapCoords(e)]);
     }
   };
   
   const localMouseMove = (e) => {
     if (isSpacePressed) return; 
-
-    if (activeTool === 'measure' && measureStart) {
-      setMeasureEnd(getMapCoords(e));
-    } else if (activeTool === 'draw' && currentDrawing && isMasterMode) {
-      const coords = getMapCoords(e);
-      setCurrentDrawing(prev => [...prev, coords]);
-    } else if (activeTool === 'fog' && currentFogPath && isMasterMode) {
-      const coords = getMapCoords(e);
-      setCurrentFogPath(prev => [...prev, coords]);
-    }
+    if (activeTool === 'measure' && measureStart) setMeasureEnd(getMapCoords(e));
+    else if (activeTool === 'draw' && currentDrawing && isMasterMode) setCurrentDrawing(prev => [...prev, getMapCoords(e)]);
+    else if (activeTool === 'fog' && currentFogPath && isMasterMode) setCurrentFogPath(prev => [...prev, getMapCoords(e)]);
   };
 
   const localMouseUp = () => {
     if (isSpacePressed) return;
 
     if (activeTool === 'measure') {
-      setMeasureStart(null);
-      setMeasureEnd(null);
+      setMeasureStart(null); setMeasureEnd(null);
     } else if (activeTool === 'draw' && currentDrawing && isMasterMode) {
       if (currentDrawing.length > 1) {
-        setDrawings(prev => [...prev, { id: Date.now(), points: currentDrawing }]);
+        const newDraw = { id: Date.now(), points: currentDrawing };
+        setDrawings(prev => [...prev, newDraw]);
+        // BOCA: GRITA O DESENHO NO RÁDIO
+        if (connection) connection.invoke("AddDrawing", "Sala_Principal", JSON.stringify(newDraw)).catch(console.error);
       }
       setCurrentDrawing(null);
     } else if (activeTool === 'fog' && currentFogPath && isMasterMode) {
+      let newPath;
       if (currentFogPath.length > 1) {
-        setFogPaths(prev => [...prev, { id: Date.now(), points: currentFogPath, type: fogMode, size: fogBrushSize }]);
+        newPath = { id: Date.now(), points: currentFogPath, type: fogMode, size: fogBrushSize };
       } else {
         const dot = [currentFogPath[0], { x: currentFogPath[0].x + 1, y: currentFogPath[0].y + 1 }];
-        setFogPaths(prev => [...prev, { id: Date.now(), points: dot, type: fogMode, size: fogBrushSize }]);
+        newPath = { id: Date.now(), points: dot, type: fogMode, size: fogBrushSize };
       }
+      setFogPaths(prev => [...prev, newPath]);
+      // BOCA: GRITA A NÉVOA NO RÁDIO
+      if (connection) connection.invoke("AddFog", "Sala_Principal", JSON.stringify(newPath)).catch(console.error);
       setCurrentFogPath(null);
     }
   };
@@ -228,12 +240,7 @@ export default function VttSession(props) {
     @keyframes fall { from { background-position: 0px 0px; } to { background-position: 400px 1000px; } }
     @keyframes drift { from { background-position: 0px 0px; } to { background-position: 200px 1000px; } }
     @keyframes rise { from { background-position: 0px 1000px; } to { background-position: 200px 0px; } }
-    
-    .weather-rain { 
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cline x1='20' y1='0' x2='25' y2='15' stroke='rgba(255,255,255,0.4)' stroke-width='1' /%3E%3Cline x1='120' y1='60' x2='125' y2='75' stroke='rgba(255,255,255,0.3)' stroke-width='0.8' /%3E%3Cline x1='70' y1='140' x2='75' y2='155' stroke='rgba(255,255,255,0.2)' stroke-width='0.5' /%3E%3C/svg%3E"); 
-      animation: fall 0.35s linear infinite; 
-    }
-    
+    .weather-rain { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cline x1='20' y1='0' x2='25' y2='15' stroke='rgba(255,255,255,0.4)' stroke-width='1' /%3E%3Cline x1='120' y1='60' x2='125' y2='75' stroke='rgba(255,255,255,0.3)' stroke-width='0.8' /%3E%3Cline x1='70' y1='140' x2='75' y2='155' stroke='rgba(255,255,255,0.2)' stroke-width='0.5' /%3E%3C/svg%3E"); animation: fall 0.35s linear infinite; }
     .weather-snow { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='20' cy='20' r='2' fill='rgba(255,255,255,0.8)' /%3E%3Ccircle cx='80' cy='70' r='3.5' fill='rgba(255,255,255,0.5)' /%3E%3Ccircle cx='150' cy='130' r='1.5' fill='rgba(255,255,255,0.6)' /%3E%3C/svg%3E"); animation: drift 5s linear infinite; }
     .weather-ash { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='40' cy='40' r='2' fill='rgba(245,158,11,0.8)' /%3E%3Ccircle cx='130' cy='90' r='1.5' fill='rgba(239,68,68,0.6)' /%3E%3Ccircle cx='80' cy='160' r='3' fill='rgba(245,158,11,0.4)' /%3E%3C/svg%3E"); animation: rise 6s linear infinite; }
   `;
@@ -246,28 +253,37 @@ export default function VttSession(props) {
           <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar flex-1">
             <span className="text-[10px] text-purple-400 font-bold uppercase tracking-widest mr-2 shrink-0">Cenas:</span>
             {scenes.map(scene => (
-              // ADICIONADA A CLASSE 'group' PARA O BOTÃO DE EXCLUIR APARECER NO HOVER
               <div key={scene.id} onClick={() => setGmActiveSceneId(scene.id)} onDoubleClick={() => startEditingScene(scene)} className={`group relative flex items-center px-4 py-2 cursor-pointer transition-colors border-2 rounded shrink-0 ${gmActiveSceneId === scene.id ? 'bg-purple-950/40 border-purple-600' : 'bg-black/60 border-zinc-800 hover:border-zinc-500'}`}>
-                
-                {/* BOTÃO DE DELETAR CENA */}
-                <button
-                  onClick={(e) => handleDeleteScene(e, scene.id)}
-                  className="absolute -top-2 -left-2 w-5 h-5 flex items-center justify-center rounded-full bg-red-900 border border-red-500 text-white text-[10px] opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all z-20 shadow-md"
-                  title="Apagar Cena"
-                >
-                  ✖
-                </button>
-
+                <button onClick={(e) => handleDeleteScene(e, scene.id)} className="absolute -top-2 -left-2 w-5 h-5 flex items-center justify-center rounded-full bg-red-900 border border-red-500 text-white text-[10px] opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all z-20 shadow-md" title="Apagar Cena">✖</button>
                 {editingSceneId === scene.id ? (
                   <input autoFocus value={editSceneName} onChange={(e) => setEditSceneName(e.target.value)} onBlur={() => saveSceneName(scene.id)} onKeyDown={(e) => handleKeyDown(e, scene.id)} onClick={(e) => e.stopPropagation()} className="bg-black/80 border-b border-purple-500 text-white text-[10px] font-bold tracking-widest uppercase px-1 focus:outline-none w-24 outline-none" />
                 ) : (
                   <span className={`text-[10px] font-bold tracking-widest uppercase ${gmActiveSceneId === scene.id ? 'text-white' : 'text-zinc-500'}`}>{scene.name}</span>
                 )}
-                
-                <button onClick={(e) => { e.stopPropagation(); setPlayerActiveSceneId(scene.id); showToast(`Jogadores movidos para a cena: ${scene.name}`, "success"); }} className={`absolute -top-3 -right-2 w-6 h-6 flex items-center justify-center rounded-full border-2 transition-all ${playerActiveSceneId === scene.id ? 'bg-amber-600 border-white text-white z-10 scale-110 shadow-[0_0_10px_rgba(217,119,6,0.8)]' : 'bg-zinc-800 border-zinc-600 text-zinc-400 opacity-50 hover:opacity-100 z-0 hover:scale-105'}`} title="Puxar jogadores para cá">👁️</button>
+                {/* 👇 BOTÃO DO OLHO ATUALIZADO 👇 */}
+               <button onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setPlayerActiveSceneId(scene.id); 
+                  if (connection && currentCampaignId) {
+                    // 👇 O MESTRE EMPACOTA TUDO E ENVIA 👇
+                   const syncData = { 
+                        sceneId: scene.id, 
+                        bgImage: scene.bgImage, 
+                        tokens: sceneTokens.filter(t => String(t.sceneId) === String(scene.id)) 
+                    };
+                    connection.invoke("PullPlayersToScene", currentCampaignId.toString(), JSON.stringify(syncData)).catch(console.error);
+                  }
+                  showToast(`Jogadores movidos e sincronizados com a cena: ${scene.name}`, "success"); 
+                }} className={`absolute -top-3 -right-2 w-6 h-6 flex items-center justify-center rounded-full border-2 transition-all ${playerActiveSceneId === scene.id ? 'bg-amber-600 border-white text-white z-10 scale-110 shadow-[0_0_10px_rgba(217,119,6,0.8)]' : 'bg-zinc-800 border-zinc-600 text-zinc-400 opacity-50 hover:opacity-100 z-0 hover:scale-105'}`} title="Sincronizar e Puxar Jogadores">👁️</button>
               </div>
             ))}
             <button onClick={addNewScene} className="ml-2 w-8 h-8 flex items-center justify-center rounded border border-purple-800 text-purple-500 hover:bg-purple-900/50 transition-colors shrink-0">+</button>
+            {/* 👇 ADICIONE ISTO AQUI 👇 */}
+            <div className="ml-auto flex items-center gap-2 bg-black/60 px-3 py-1 rounded border border-zinc-800 shrink-0" title="Personagens registrados nesta campanha">
+                <span className="text-xs">👥</span>
+                <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{props.savedCharacters?.length || 0} Aventureiros</span>
+            </div>
+
           </div>
         </div>
       )}
@@ -282,22 +298,24 @@ export default function VttSession(props) {
           {isMasterMode && (
             <>
               <button onClick={() => setActiveTool('draw')} className={`w-8 h-8 rounded flex items-center justify-center transition-colors shrink-0 ${activeTool === 'draw' ? 'bg-red-900/50 text-red-500 border border-red-700' : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'}`} title="Desenho Livre">🖌️</button>
-              {drawings.length > 0 && <button onClick={() => setDrawings([])} className="w-8 h-8 rounded flex items-center justify-center bg-red-950/40 text-red-500 hover:bg-red-900 hover:text-white border border-red-900/50 mt-1 shrink-0">🗑️</button>}
+              {drawings.length > 0 && <button onClick={clearDrawingsSync} className="w-8 h-8 rounded flex items-center justify-center bg-red-950/40 text-red-500 hover:bg-red-900 hover:text-white border border-red-900/50 mt-1 shrink-0">🗑️</button>}
               <div className="w-6 h-[1px] bg-zinc-800 my-1 shrink-0"></div>
               
               <button onClick={() => setActiveTool('fog')} className={`w-8 h-8 rounded flex items-center justify-center transition-colors shrink-0 ${activeTool === 'fog' ? 'bg-purple-900/50 text-purple-400 border border-purple-700' : 'text-purple-500/50 hover:bg-purple-950/40 hover:text-purple-400 border border-transparent'}`} title="Névoa de Guerra">🌫️</button>
               {activeTool === 'fog' && (
                 <div className="flex flex-col gap-2 p-1 bg-purple-950/40 rounded border border-purple-900/50 shrink-0">
-                  <button onClick={() => setIsFogEnabled(!isFogEnabled)} className={`w-6 h-6 rounded flex items-center justify-center text-[9px] font-bold transition-colors ${isFogEnabled ? 'bg-purple-600 text-white' : 'bg-black text-zinc-500 border border-zinc-800'}`}>{isFogEnabled ? 'ON' : 'OFF'}</button>
+                  <button onClick={() => {
+                      const newState = !isFogEnabled;
+                      setIsFogEnabled(newState);
+                      if (connection) connection.invoke("ToggleFog", "Sala_Principal", newState).catch(console.error);
+                  }} className={`w-6 h-6 rounded flex items-center justify-center text-[9px] font-bold transition-colors ${isFogEnabled ? 'bg-purple-600 text-white' : 'bg-black text-zinc-500 border border-zinc-800'}`}>{isFogEnabled ? 'ON' : 'OFF'}</button>
                   <button onClick={() => setFogMode('reveal')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] transition-colors ${fogMode === 'reveal' ? 'bg-zinc-200 text-black' : 'bg-black text-zinc-400'}`} title="Revelar">👁️</button>
                   <button onClick={() => setFogMode('hide')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] transition-colors ${fogMode === 'hide' ? 'bg-zinc-800 text-white border border-zinc-400' : 'bg-black text-zinc-400'}`} title="Esconder">⬛</button>
-                  
                   <div className="mt-2 flex flex-col gap-1 border-t border-purple-900/50 pt-2 pb-1">
                     <span className="text-[7px] text-purple-400 uppercase font-bold text-center">Pincel</span>
                     <input type="range" min="40" max="400" value={fogBrushSize} onChange={(e) => setFogBrushSize(Number(e.target.value))} className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-purple-500" />
                   </div>
-
-                  {fogPaths.length > 0 && <button onClick={() => setFogPaths([])} className="w-6 h-6 rounded flex items-center justify-center bg-red-950/50 text-red-500 hover:bg-red-900 mt-1">🗑️</button>}
+                  {fogPaths.length > 0 && <button onClick={clearFogSync} className="w-6 h-6 rounded flex items-center justify-center bg-red-950/50 text-red-500 hover:bg-red-900 mt-1">🗑️</button>}
                 </div>
               )}
               <div className="w-6 h-[1px] bg-zinc-800 my-1 shrink-0"></div>
@@ -305,11 +323,11 @@ export default function VttSession(props) {
               <button onClick={() => setShowWeatherMenu(!showWeatherMenu)} className={`w-8 h-8 rounded flex items-center justify-center transition-colors shrink-0 ${showWeatherMenu ? 'bg-cyan-900/50 text-cyan-400 border border-cyan-700' : 'text-cyan-500/50 hover:bg-cyan-950/40 hover:text-cyan-400 border border-transparent'}`}>🌦️</button>
               {showWeatherMenu && (
                 <div className="flex flex-col gap-2 p-1 bg-cyan-950/40 rounded border border-cyan-900/50 shrink-0">
-                  <button onClick={() => setWeather('none')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] ${weather === 'none' ? 'bg-zinc-200 text-black' : 'bg-black text-zinc-400'}`} title="Céu Limpo">☀️</button>
-                  <button onClick={() => setWeather('night')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] transition-colors ${weather === 'night' ? 'bg-indigo-900 text-white shadow-[0_0_10px_rgba(49,46,129,0.8)]' : 'bg-black text-indigo-400 hover:text-white border border-indigo-900'}`} title="Noite Escura">🌙</button>
-                  <button onClick={() => setWeather('rain')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] ${weather === 'rain' ? 'bg-blue-600 text-white' : 'bg-black text-blue-400'}`} title="Chuva e Tempo Fechado">🌧️</button>
-                  <button onClick={() => setWeather('snow')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] ${weather === 'snow' ? 'bg-white text-black' : 'bg-black text-zinc-300'}`} title="Neve">❄️</button>
-                  <button onClick={() => setWeather('ash')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] ${weather === 'ash' ? 'bg-orange-600 text-white' : 'bg-black text-orange-400'}`} title="Cinzas / Fogo">🔥</button>
+                  <button onClick={() => changeWeatherSync('none')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] ${weather === 'none' ? 'bg-zinc-200 text-black' : 'bg-black text-zinc-400'}`} title="Céu Limpo">☀️</button>
+                  <button onClick={() => changeWeatherSync('night')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] transition-colors ${weather === 'night' ? 'bg-indigo-900 text-white shadow-[0_0_10px_rgba(49,46,129,0.8)]' : 'bg-black text-indigo-400 hover:text-white border border-indigo-900'}`} title="Noite Escura">🌙</button>
+                  <button onClick={() => changeWeatherSync('rain')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] ${weather === 'rain' ? 'bg-blue-600 text-white' : 'bg-black text-blue-400'}`} title="Chuva e Tempo Fechado">🌧️</button>
+                  <button onClick={() => changeWeatherSync('snow')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] ${weather === 'snow' ? 'bg-white text-black' : 'bg-black text-zinc-300'}`} title="Neve">❄️</button>
+                  <button onClick={() => changeWeatherSync('ash')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] ${weather === 'ash' ? 'bg-orange-600 text-white' : 'bg-black text-orange-400'}`} title="Cinzas / Fogo">🔥</button>
                 </div>
               )}
               <div className="w-6 h-[1px] bg-zinc-800 my-1 shrink-0"></div>
@@ -322,29 +340,20 @@ export default function VttSession(props) {
         <style>{weatherStyles}</style>
 
         <div 
-          ref={mapRef} 
-          className={`flex-1 relative bg-[#0f0f0f] overflow-hidden select-none touch-none ${getCursorClass()}`} 
-          style={{ cursor: getDynamicCursor() }}
-          onMouseDown={localMouseDown} 
-          onMouseMove={localMouseMove}
-          onMouseUp={localMouseUp}
-          onMouseLeave={localMouseUp}
-          onWheel={handleMapWheel} 
-          onDragOver={(e) => e.preventDefault()} 
-          onDrop={handleDropOnMap}
-        >
-          {/* EFEITOS DE AMBIENTE: NOITE E CHUVA (ACINZENTADA) */}
-          {weather === 'night' && (
-            <div className="absolute inset-0 pointer-events-none z-[9995] bg-[#020617]/70 mix-blend-multiply"></div>
-          )}
-          {weather === 'rain' && (
-            <div className="absolute inset-0 pointer-events-none z-[9995] bg-slate-600/50 mix-blend-multiply" style={{ backdropFilter: 'grayscale(50%)' }}></div>
-          )}
-
-          {/* EFEITOS CLIMÁTICOS ANIMADOS */}
-          {weather !== 'none' && weather !== 'night' && (
-            <div className={`absolute inset-0 pointer-events-none z-[9996] opacity-80 weather-${weather}`}></div>
-          )}
+  ref={mapRef} 
+  className={`flex-1 relative bg-[#0f0f0f] overflow-hidden select-none touch-none ${getCursorClass()}`} 
+  style={{ cursor: getDynamicCursor() }} 
+  onMouseDown={localMouseDown} 
+  onMouseMove={localMouseMove} 
+  onMouseUp={localMouseUp} 
+  onMouseLeave={localMouseUp} 
+  onWheel={handleMapWheel} 
+  onDrop={handleDropOnMap}
+  onDragOver={(e) => e.preventDefault()}
+>
+          {weather === 'night' && <div className="absolute inset-0 pointer-events-none z-[9995] bg-[#020617]/70 mix-blend-multiply"></div>}
+          {weather === 'rain' && <div className="absolute inset-0 pointer-events-none z-[9995] bg-slate-600/50 mix-blend-multiply" style={{ backdropFilter: 'grayscale(50%)' }}></div>}
+          {weather !== 'none' && weather !== 'night' && <div className={`absolute inset-0 pointer-events-none z-[9996] opacity-80 weather-${weather}`}></div>}
 
           <div id="map-background" className="absolute origin-top-left" style={{ transform: `translate(${mapOffset.x}px, ${mapOffset.y}px) scale(${mapScale})`, width: '3000px', height: '3000px', willChange: 'transform' }}>
             
@@ -379,7 +388,7 @@ export default function VttSession(props) {
               </div>
             ))}
 
-            {sceneTokens.filter(t => t.sceneId === currentSceneObj?.id && t.inScene).map(token => {
+           {sceneTokens.filter(t => t.sceneId == currentSceneObj?.id).map(token => {
               const statuses = token.statuses || [];
               const isBleeding = statuses.includes('bleeding');
               const isPoisoned = statuses.includes('poisoned');
@@ -401,20 +410,33 @@ export default function VttSession(props) {
 
               const baseColorClasses = token.isNpc ? "bg-red-950 border-red-500" : "bg-blue-950 border-blue-400";
 
-              return (
-                <div 
-                  key={token.id} 
-                  onMouseDown={(e) => { 
-                    if (activeTool === 'select' && !isSpacePressed) {
-                      e.stopPropagation(); 
-                      setDraggingToken(token.id); 
-                    }
-                  }} 
-                  onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setTokenContextMenu({ show: true, x: e.clientX, y: e.clientY, tokenId: token.id }); }} 
-                  style={{ top: `${token.y}px`, left: `${token.x}px`, width: `${token.size}px`, height: `${token.size}px`, zIndex: draggingToken === token.id ? 9999 : (token.zIndex || 10), willChange: 'top, left, transform', transform: 'translateZ(0)' }} 
-                  className={`absolute flex items-center justify-center transition-transform duration-100 ${(activeTool === 'select' && !isSpacePressed) ? 'cursor-grab active:cursor-grabbing hover:scale-105' : ''} ${draggingToken === token.id ? 'scale-110' : ''} ${isCamouflaged ? 'opacity-40' : 'opacity-100'} ${!token.image ? `rounded-full border-2 ${baseColorClasses} ${shadowClass}` : ''}`} 
-                  title={token.name}
-                >
+            return (
+        <div 
+          key={token.id} 
+          onMouseDown={(e) => { 
+            if (activeTool === 'select' && !isSpacePressed) { 
+              e.stopPropagation(); 
+              
+              // NORMALIZAÇÃO PARA COMPARAR (Tudo minúsculo e sem espaços)
+              const dono = token.controlledBy ? token.controlledBy.toString().trim().toLowerCase() : "";
+              const jogador = loggedUserName ? loggedUserName.toString().trim().toLowerCase() : "";
+              
+              const podeControlar = isMasterMode || (dono !== "" && dono === jogador);
+              
+              console.log(`Debug Token: Nome=${token.name} | DonoEsperado=${dono} | JogadorLogado=${jogador} | Pode=${podeControlar}`);
+              
+              if (podeControlar) {
+                setDraggingToken(token.id); 
+              } else {
+                showToast(`Bloqueado. Este token pertence a: ${token.controlledBy || "Ninguém"}`, "error");
+              }
+            } 
+          }} 
+          onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setTokenContextMenu({ show: true, x: e.clientX, y: e.clientY, tokenId: token.id }); }} 
+          style={{ top: `${token.y}px`, left: `${token.x}px`, width: `${token.size}px`, height: `${token.size}px`, zIndex: draggingToken === token.id ? 9999 : (token.zIndex || 10) }} 
+          className={`absolute flex items-center justify-center transition-transform duration-100 cursor-grab`} 
+          title={token.controlledBy ? `${token.name} (Controlado por: ${token.controlledBy})` : token.name}
+        >
                   {token.image ? (
                     <img src={token.image} alt={token.name} className={`w-full h-full object-contain pointer-events-none ${dropShadowImg} ${token.flipX ? '-scale-x-100' : ''}`} draggable="false" />
                   ) : (
@@ -429,7 +451,6 @@ export default function VttSession(props) {
                 </div>
               );
             })}
-
             {isFogEnabled && (
               <svg className="absolute inset-0 w-full h-full pointer-events-none z-[9999]" style={{ overflow: 'visible' }}>
                 <defs>
@@ -470,9 +491,7 @@ export default function VttSession(props) {
           <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest px-3 py-1 border-b border-[#3e2723] mb-1">Camadas & Posse</span>
           <button onClick={bringToFront} className="text-left px-3 py-2 text-xs font-bold text-zinc-300 hover:bg-zinc-800 hover:text-amber-500 rounded transition-colors">⬆️ Trazer p/ Frente</button>
           <button onClick={sendToBack} className="text-left px-3 py-2 text-xs font-bold text-zinc-300 hover:bg-zinc-800 hover:text-amber-500 rounded transition-colors">⬇️ Enviar p/ Trás</button>
-          
           <button onClick={flipToken} className="text-left px-3 py-2 text-xs font-bold text-zinc-300 hover:bg-zinc-800 hover:text-amber-500 rounded transition-colors">↔️ Espelhar Imagem</button>
-
           {isMasterMode && (
             <button onClick={assignPermission} className="text-left px-3 py-2 text-xs font-bold text-purple-300 hover:bg-purple-900/50 hover:text-purple-200 rounded transition-colors border-t border-purple-900/30 mt-1">👤 Atribuir Jogador</button>
           )}

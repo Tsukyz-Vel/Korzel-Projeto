@@ -793,6 +793,157 @@ const origensData = [
     powers: []
   },
 ];
+
+const origensKorzel = [
+  {
+    nome: "Adestrador de Feras",
+    descricao: "Você passou a juventude cuidando de herbívoros colossais ou treinando micro-raptores, garantindo que os animais das cidades não virassem banquete para predadores.",
+    itens: "Um chicote ou cajado, luva de couro reforçada, ração de viagem extra.",
+    pericias: "Adestramento, Montaria/Pilotar ou Percepção",
+    poder: "Calma Primal: Você recebe +2 em testes de Adestramento. Além disso, animais neutros ou em pânico não atacam você a menos que você os fira primeiro."
+  },
+  {
+    nome: "Arqueólogo de Carcaças",
+    descricao: "Enquanto outros buscam ouro, você busca o 'marfim de pedra'. Especialista em extrair fósseis e ossos antigos de depósitos de alcatrão ou rochas sedimentares.",
+    itens: "Picareta de minerador, pincéis, um fragmento de osso fossilizado.",
+    pericias: "Investigação, Erudição ou Sobrevivência",
+    poder: "Olho Clínico: Você sabe identificar a espécie e o ponto fraco de qualquer criatura reptiliana apenas pela observação de seus ossos ou rastros, recebendo +2 em testes de ataque contra ela pela cena."
+  },
+  {
+    nome: "Caçador de Ovos",
+    descricao: "Um trabalho perigoso e lucrativo. Você se infiltra em ninhos de grandes répteis para roubar ovos antes da eclosão.",
+    itens: "Mochila reforçada com palha, corda (15m), gancho de escalada.",
+    pericias: "Acrobacia, Atletismo ou Ladinagem",
+    poder: "Passo Leve: Você recebe +5 em Furtividade para não acordar criaturas adormecidas e ignora penalidades de movimento durante escaladas."
+  },
+  {
+    nome: "Coletor de Âmbar",
+    descricao: "Você explorou as florestas mais profundas em busca da resina dourada, muitas vezes deparando-se com insetos gigantes e plantas carnívoras.",
+    itens: "Frasco com solvente, faca de resina, 3 pedras de âmbar bruto.",
+    pericias: "Sobrevivência, Fortitude ou Percepção",
+    poder: "Resistência Botânica: Você recebe +2 em testes de Fortitude contra venenos naturais e doenças botânicas."
+  },
+  {
+    nome: "Sentinela de Fronteira",
+    descricao: "Você serviu nas defesas externas, vigiando o horizonte para avisar quando um Tiranossauro ou uma manada em debandada se aproximava.",
+    itens: "Luneta rudimentar, arco curto, capa de camuflagem.",
+    pericias: "Percepção, Sobrevivência ou Furtividade",
+    poder: "Alerta Máximo: Você pode rolar novamente testes de Percepção para evitar surpresas (mas deve aceitar o segundo resultado)."
+  },
+  {
+    nome: "Eremita das Cimeiras",
+    descricao: "Você viveu isolado nos picos mais altos, onde os pterossauros fazem seus ninhos, em busca de iluminação ou apenas paz.",
+    itens: "Cajado de madeira, ervas medicinais, cobertor de pele grossa.",
+    pericias: "Vontade, Intuição ou Medicina",
+    poder: "Pulmão das Alturas: Você é imune a efeitos de fadiga por altitude ou ar rarefeito e recebe +2 em testes de Vontade."
+  },
+  {
+    nome: "Navegador de Rios",
+    descricao: "Você navegou pelos canais e rios perigosos de Korzel, desviando de espinossauros e operando eclusas pesadas.",
+    itens: "Remo reforçado, rede de pesca, frasco de óleo repelente.",
+    pericias: "Montaria/Pilotar, Atletismo ou Percepção",
+    poder: "Leitura das Águas: Você recebe +5 em testes de Pilotagem para navegar em rios e nunca é pego de surpresa por criaturas submersas."
+  },
+  {
+    nome: "Degredado dos Pântanos",
+    descricao: "Você sobreviveu sozinho nos lamaçais de Korzel, consumindo o que a lama oferecia após o exílio ou a destruição de sua casa.",
+    itens: "Lança de madeira endurecida, colar de dentes, saco de dormir impermeável.",
+    pericias: "Sobrevivência, Constituição ou Furtividade",
+    poder: "Imunidade de Lama: Você ignora terreno difícil causado por lama ou pântanos e recupera 1 PV extra por hora durante o descanso em ambientes naturais úmidos."
+  },
+  {
+    nome: "Escravo de Galés",
+    descricao: "Você passou anos acorrentado aos remos de um navio mercante ou de guerra, resistindo a tempestades e leviatãs marinhos.",
+    itens: "Algemas quebradas (podem ser usadas como braçadeiras), faca enferrujada, símbolo de sorte.",
+    pericias: "Atletismo, Montaria/Pilotar ou Constituição",
+    poder: "Força de Vontade: Uma vez por dia, você pode ignorar a condição Fatigado ou Exausto por uma cena completa."
+  },
+  {
+    nome: "Órfão de Ataque",
+    descricao: "Sua aldeia foi pisoteada por um titã ou devorada em uma noite de caça. Você cresceu nas ruas das grandes cidades e aprendeu a se virar.",
+    itens: "Um brinquedo de madeira quebrado, roupas remendadas, uma pedra de funda.",
+    pericias: "Ladinagem, Enganação ou Acrobacia",
+    poder: "Sobrevivência Urbana: Você consegue encontrar comida e abrigo para até 4 pessoas em qualquer cidade sem a necessidade de gastar dinheiro."
+  },
+  {
+    nome: "Caçador de Pragas",
+    descricao: "As cidades de Korzel sofrem com infestações de micro-raptores e artrópodes nos esgotos. Você é quem limpa a sujeira que ninguém vê.",
+    itens: "Lanterna de óleo, rede de captura, máscara de proteção contra odores.",
+    pericias: "Iniciativa, Luta ou Furtividade",
+    poder: "Adaptado ao Lixo: Você recebe +5 em testes de Fortitude contra doenças e venenos de criaturas pequenas ou insetos."
+  },
+  {
+    nome: "Gladiador da Arena",
+    descricao: "Nem todos os combates em Korzel são contra monstros. Nas arenas das cidades, você lutou por moedas e glória, sobrevivendo a confrontos brutais.",
+    itens: "Uma arma marcial à sua escolha, cicatriz de batalha visível, ataduras.",
+    pericias: "Luta, Iniciativa ou Atletismo",
+    poder: "Showman de Batalha: Quando você derruba um inimigo ou acerta um crítico, todos os aliados visuais recebem +2 no próximo teste de ataque (não cumulativo)."
+  },
+  {
+    nome: "Vigilante dos Cortiços",
+    descricao: "Vivendo nas sombras da classe baixa, você era o protetor de uma vizinhança esquecida pelo governo através de um código de silêncio e facas rápidas.",
+    itens: "Manto escuro, punhal escondido, símbolo de uma irmandade secreta.",
+    pericias: "Furtividade, Ladinagem ou Intimidação",
+    poder: "Sombra da Vizinhança: Você recebe +2 em Defesa e Reflexos em ambientes urbanos sob cobertura ou penumbra."
+  },
+  {
+    nome: "Mercador de Relíquias",
+    descricao: "Você viaja entre as cidades para comercializar garras, venenos, dentes decorados e curiosidades encontradas nos ermos.",
+    itens: "Balança de precisão, bolsa de moedas, mercadorias diversas.",
+    pericias: "Diplomacia, Intuição ou Ofício (Mercador)",
+    poder: "Olho para o Valor: Você sempre consegue vender itens por 10% a mais do valor de mercado e sabe identificar itens mágicos ou raros com um teste de Investigação."
+  },
+  {
+    nome: "Engenheiro de Cerco",
+    descricao: "Seu foco não é a espada, mas a construção e reparo das defesas, balistas e fortificações que protegem as cidades contra incursões de grandes predadores.",
+    itens: "Ferramentas de medição, martelo pesado, óleo de engrenagem.",
+    pericias: "Ofício (Engenharia/Carpintaria), Erudição ou Pontaria",
+    poder: "Artilheiro Treinado: Você recebe +2 em testes de ataque com armas de arremesso, bestas ou armas de cerco."
+  },
+  {
+    nome: "Ervanário de Campo",
+    descricao: "Sua família instruiu você sobre quais plantas curam e quais matam. Você é essencial em qualquer expedição que pretenda voltar viva.",
+    itens: "Kit de medicina, bolsa de ervas, almofariz e pilão.",
+    pericias: "Medicina, Sobrevivência ou Erudição",
+    poder: "Triagem Rápida: Você pode usar a perícia Medicina como uma Ação de Movimento (em vez de Padrão) para estabilizar aliados sangrando."
+  },
+  {
+    nome: "Cozinheiro de Carne de Titã",
+    descricao: "A gastronomia de Korzel é perigosa. Você sabe como remover as glândulas de veneno de feras tóxicas e amaciar carnes duras para o consumo.",
+    itens: "Faca de açougueiro (arma leve), kit de temperos exóticos, avental manchado.",
+    pericias: "Ofício (Culinária), Constituição ou Sobrevivência",
+    poder: "Dieta de Caçador: Durante um descanso curto, as refeições preparadas por você garantem +1d6 PV extras para todos os aliados que se alimentarem."
+  },
+  {
+    nome: "Arquivista de Lendas",
+    descricao: "Você trabalhou em bibliotecas ou grandes observatórios, com foco no registro dos movimentos das feras e das leis que governam o mundo.",
+    itens: "Lente de aumento, livro antigo de registro, tinta e pena.",
+    pericias: "Erudição, Investigação ou Percepção",
+    poder: "Saber Ancestral: Uma vez por dia, você pode fazer um teste de Erudição para descobrir a vulnerabilidade elemental de um monstro ou o funcionamento de um item mágico desconhecido."
+  },
+  {
+    nome: "Diplomata de Fronteira",
+    descricao: "Você atuou como tradutor e mediador de tensões entre as diferentes raças e culturas, compreendendo as regras sociais de Korzel.",
+    itens: "Traje de seda exótica, selo diplomático, pergaminho de leis inter-raciais.",
+    pericias: "Diplomacia, Erudição ou Intuição",
+    poder: "Etiqueta de Korzel: Você pode realizar testes de Diplomacia para acalmar conflitos como uma Ação de Movimento. Em caso de sucesso, os envolvidos ficam impedidos de realizar ações hostis por 1 rodada."
+  },
+  {
+    nome: "Portador de Tradições",
+    descricao: "Você foi o responsável por carregar os símbolos sagrados ou instrumentos musicais de sua comunidade, garantindo a proteção e a moral do grupo.",
+    itens: "Totem de madeira ou um instrumento musical, incensos, bolsa de recursos artesanais.",
+    pericias: "Atuação, Religião ou Vontade",
+    poder: "Proteção Espiritual: Você recebe RD 2 contra dano necrótico ou espiritual e +2 em testes contra Corrupção."
+  },
+  {
+    nome: "Caçador de Trilhas",
+    descricao: "Você passou o tempo mapeando caminhos brutais e seguindo pegadas profundas nos ecossistemas mais implacáveis de Korzel.",
+    itens: "Bússola rudimentar, cantil de couro reforçado, diário de mapeamento.",
+    pericias: "Sobrevivência, Percepção ou Investigação",
+    poder: "Rastreador Especialista: Você ignora penalidades por movimento ao rastrear e pode identificar há quanto tempo uma criatura passou por ali com precisão de minutos."
+  }
+];
+
 export default function Compendio({ handleAddAbility, savedCharacters, activeCharacterName }) {
   const [activeSection, setActiveSection] = useState('lore');
   const [selectedTopic, setSelectedTopic] = useState(classesData[0]);
@@ -802,10 +953,11 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
   const [powerToForge, setPowerToForge] = useState(null);
   const [targetCharId, setTargetCharId] = useState("active");
 
-  const handleTabChange = (section) => {
+ const handleTabChange = (section) => {
     setActiveSection(section);
     if (section === 'classes') setSelectedTopic(classesData[0]);
     if (section === 'origens') setSelectedTopic(origensData[0]);
+    if (section === 'origensKorzel') setSelectedTopic(origensKorzel[0]); // Define o primeiro antecedente/origem
   };
 
   const openForgeModal = (power) => {
@@ -830,7 +982,7 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
               Forjar Poder
             </h3>
             <p className="text-zinc-300 text-sm mb-4">
-              O poder <strong className="text-white">"{powerToForge.title}"</strong> será adicionado à aba de habilidades. Escolha o destinatário:
+              O poder <strong className="text-white">"{powerToForge.title || powerToForge.poder}"</strong> será adicionado à aba de habilidades. Escolha o destinatário:
             </p>
             
             <select 
@@ -860,7 +1012,10 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
         </h3>
         <button onClick={() => handleTabChange('lore')} className={`text-left px-4 py-2 text-xs font-bold uppercase tracking-widest rounded transition-colors ${activeSection === 'lore' ? 'bg-amber-900/50 text-amber-400 border border-amber-800/50' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>O Mundo de Korzel</button>
         <button onClick={() => handleTabChange('classes')} className={`text-left px-4 py-2 text-xs font-bold uppercase tracking-widest rounded transition-colors ${activeSection === 'classes' ? 'bg-amber-900/50 text-amber-400 border border-amber-800/50' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>Classes & Poderes</button>
-        <button onClick={() => handleTabChange('origens')} className={`text-left px-4 py-2 text-xs font-bold uppercase tracking-widest rounded transition-colors ${activeSection === 'origens' ? 'bg-amber-900/50 text-amber-400 border border-amber-800/50' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>Raças & Origens</button>
+        {/* BOTÃO ALTERADO AQUI */}
+        <button onClick={() => handleTabChange('origens')} className={`text-left px-4 py-2 text-xs font-bold uppercase tracking-widest rounded transition-colors ${activeSection === 'origens' ? 'bg-amber-900/50 text-amber-400 border border-amber-800/50' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>Raças</button>
+        {/* NOVO BOTÃO ADICIONADO AQUI */}
+        <button onClick={() => handleTabChange('origensKorzel')} className={`text-left px-4 py-2 text-xs font-bold uppercase tracking-widest rounded transition-colors ${activeSection === 'origensKorzel' ? 'bg-amber-900/50 text-amber-400 border border-amber-800/50' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>Origens do Passado</button>
       </div>
 
       {/* CONTEÚDO PRINCIPAL */}
@@ -882,139 +1037,188 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
           </div>
         )}
 
-        {(activeSection === 'classes' || activeSection === 'origens') && (
+        {(activeSection === 'classes' || activeSection === 'origens' || activeSection === 'origensKorzel') && (
           <div className="flex flex-col h-full animate-fade-in">
-            {/* SUB-MENU HORIZONTAL DE SELEÇÃO */}
+            {/* SUB-MENU HORIZONTAL DE SELEÇÃO ATUALIZADO */}
             <div className="bg-[#0a0502] border-b border-[#3e2723] p-4 flex gap-3 overflow-x-auto custom-scrollbar shrink-0 shadow-md z-10">
-              {(activeSection === 'classes' ? classesData : origensData).map((item, idx) => (
-                <button 
-                  key={idx} 
-                  onClick={() => setSelectedTopic(item)}
-                  className={`px-4 py-2 whitespace-nowrap text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-md border transition-all ${selectedTopic.name === item.name ? 'bg-red-950/60 border-red-800 text-red-400 shadow-[0_0_10px_rgba(153,27,27,0.5)]' : 'bg-black/40 border-zinc-800 text-zinc-500 hover:text-zinc-300'}`}
-                >
-                  {item.name}
-                </button>
-              ))}
+              {(activeSection === 'classes' 
+                ? classesData 
+                : activeSection === 'origens' 
+                ? origensData 
+                : origensKorzel
+              ).map((item, idx) => {
+                const name = item.name || item.nome; // Suporta as duas chaves de nome
+                return (
+                  <button 
+                    key={idx} 
+                    onClick={() => setSelectedTopic(item)}
+                    className={`px-4 py-2 whitespace-nowrap text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-md border transition-all ${
+                      (selectedTopic.name === name || selectedTopic.nome === name) 
+                        ? 'bg-red-950/60 border-red-800 text-red-400 shadow-[0_0_10px_rgba(153,27,27,0.5)]' 
+                        : 'bg-black/40 border-zinc-800 text-zinc-500 hover:text-zinc-300'
+                    }`}
+                  >
+                    {name}
+                  </button>
+                );
+              })}
             </div>
 
             <div className="p-6 lg:p-8 overflow-y-auto custom-scrollbar h-full relative z-10">
-              <h2 className="text-3xl font-black text-white uppercase tracking-widest mb-2">{selectedTopic.name}</h2>
-              {/* === RENDERIZAÇÃO CONDICIONAL DA DESCRIÇÃO === */}
-              {selectedTopic.quote ? (
-                // Layout NOVO (Usado pelas Raças/Origens)
-                <div className="mb-8">
-                  <div className="mb-6 border-l-4 border-red-900 pl-4 py-2 bg-red-950/10 rounded-r shadow-inner">
-                    <p className="text-zinc-400 italic text-sm whitespace-pre-wrap">{selectedTopic.quote}</p>
-                  </div>
-                  <div className="mb-6 space-y-4 text-zinc-300 text-sm leading-relaxed text-justify">
-                    {selectedTopic.desc && selectedTopic.desc.split('\n\n').map((paragraph, i) => (
-                      <p key={i}>{paragraph}</p>
-                    ))}
-                  </div>
-                  {selectedTopic.details && selectedTopic.details.length > 0 && (
-                    <div className="space-y-5 border-t border-[#3e2723] pt-6 mt-6">
-                      {selectedTopic.details.map((detail, idx) => (
-                        <div key={idx}>
-                          <h4 className="text-amber-500 font-bold uppercase tracking-widest text-xs mb-2">{detail.title}</h4>
-                          <p className="text-zinc-300 text-sm leading-relaxed text-justify whitespace-pre-wrap">{detail.text}</p>
-                        </div>
-                      ))}
+              
+              {/* RENDERIZAÇÃO DA NOVA ABA: ORIGENS KORZEL */}
+              {activeSection === 'origensKorzel' ? (
+                <div className="animate-fade-in">
+                  <h2 className="text-3xl font-black text-white uppercase tracking-widest mb-2">{selectedTopic.nome}</h2>
+                  <p className="text-zinc-400 mb-6 border-l-4 border-amber-700 pl-4 italic text-sm whitespace-pre-wrap bg-amber-950/5 py-2 rounded-r">
+                    {selectedTopic.descricao}
+                  </p>
+
+                  <div className="bg-black/50 border border-[#3e2723] rounded-lg p-5 mb-6 shadow-inner text-sm space-y-3">
+                    <h3 className="text-amber-500 font-bold uppercase tracking-widest text-xs border-b border-[#3e2723] pb-2">
+                      🎒 Equipamentos & Perícias de Origem
+                    </h3>
+                    <div>
+                      <span className="text-zinc-500 uppercase text-[10px] font-bold block">⚔️ Itens Iniciais</span>
+                      <span className="text-zinc-200">{selectedTopic.itens}</span>
                     </div>
-                  )}
+                    <div>
+                      <span className="text-zinc-500 uppercase text-[10px] font-bold block">🎲 Perícias Disponíveis</span>
+                      <span className="text-zinc-200">{selectedTopic.pericias}</span>
+                    </div>
+                  </div>
+
+                  <h3 className="text-red-500 font-bold uppercase tracking-widest text-sm border-b-2 border-red-900/50 pb-2 mb-4"> Poder Primal Obtido</h3>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between shadow-sm">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h4 className="text-amber-400 font-bold">{selectedTopic.nome}</h4>
+                        <span className="bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded text-[9px] font-bold text-zinc-500 uppercase">Habilidade de Origem</span>
+                      </div>
+                      <p className="text-xs text-zinc-400 whitespace-pre-wrap">{selectedTopic.poder}</p>
+                    </div>
+                    <button 
+                      onClick={() => openForgeModal({ title: selectedTopic.nome, description: selectedTopic.poder, cost: "Origem" })} 
+                      className="shrink-0 bg-amber-950/40 hover:bg-amber-900 border border-amber-900 text-amber-200 text-[10px] uppercase font-bold tracking-widest px-4 py-2 rounded transition-colors w-full md:w-auto"
+                    >
+                      ➕ Forjar na Ficha
+                    </button>
+                  </div>
                 </div>
               ) : (
-                // Layout ANTIGO (Mantém as Classes seguras e iguais a antes)
-                <p className="text-zinc-400 mb-8 border-l-4 border-red-900 pl-4 italic text-sm whitespace-pre-wrap">
-                  {selectedTopic.desc}
-                </p>
-              )}
-              
-              {/* === CARACTERÍSTICAS DINÂMICAS (CLASSE OU RAÇA) === */}
-              {selectedTopic.stats && Object.keys(selectedTopic.stats).length > 0 && (
-                <div className="bg-black/50 border border-[#3e2723] rounded-lg p-5 mb-8 shadow-inner">
-                  <h3 className="text-amber-500 font-bold uppercase tracking-widest text-xs border-b border-[#3e2723] pb-2 mb-4">
-                    {activeSection === 'classes' ? 'Características Básicas' : '📊 CARACTERÍSTICAS DE RAÇA'}
-                  </h3>
-                  
-                  {activeSection === 'classes' ? (
-                    /* Layout para Classes */
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">❤️ Vida (PV)</span><span className="text-zinc-200">{selectedTopic.stats.hp}</span></div>
-                      <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">⚡ Esforço (PE)</span><span className="text-zinc-200">{selectedTopic.stats.pe}</span></div>
-                      <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">🛡️ Proficiências</span><span className="text-zinc-200">{selectedTopic.stats.proficiencies}</span></div>
-                      <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">🎲 Perícias Iniciais</span><span className="text-zinc-200">{selectedTopic.stats.skills}</span></div>
+                /* RENDERIZAÇÃO ANTIGA (CLASSES E RAÇAS) SEGUURAS */
+                <>
+                  <h2 className="text-3xl font-black text-white uppercase tracking-widest mb-2">{selectedTopic.name}</h2>
+                  {selectedTopic.quote ? (
+                    <div className="mb-8">
+                      <div className="mb-6 border-l-4 border-red-900 pl-4 py-2 bg-red-950/10 rounded-r shadow-inner">
+                        <p className="text-zinc-400 italic text-sm whitespace-pre-wrap">{selectedTopic.quote}</p>
+                      </div>
+                      <div className="mb-6 space-y-4 text-zinc-300 text-sm leading-relaxed text-justify">
+                        {selectedTopic.desc && selectedTopic.desc.split('\n\n').map((paragraph, i) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                      </div>
+                      {selectedTopic.details && selectedTopic.details.length > 0 && (
+                        <div className="space-y-5 border-t border-[#3e2723] pt-6 mt-6">
+                          {selectedTopic.details.map((detail, idx) => (
+                            <div key={idx}>
+                              <h4 className="text-amber-500 font-bold uppercase tracking-widest text-xs mb-2">{detail.title}</h4>
+                              <p className="text-zinc-300 text-sm leading-relaxed text-justify whitespace-pre-wrap">{detail.text}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    /* Layout para Raças (Conforme solicitado) */
-                    <div className="grid grid-cols-1 gap-4 text-sm">
-                      <div>
-                        <span className="text-zinc-500 uppercase text-[10px] font-bold block">🧬 Atributos</span>
-                        <span className="text-zinc-200">{selectedTopic.stats.attributes}</span>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">📏 Tamanho</span><span className="text-zinc-200">{selectedTopic.stats.size}</span></div>
-                        <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">🏃 Deslocamento</span><span className="text-zinc-200">{selectedTopic.stats.speed}</span></div>
+                    <p className="text-zinc-400 mb-8 border-l-4 border-red-900 l-4 italic text-sm whitespace-pre-wrap">
+                      {selectedTopic.desc}
+                    </p>
+                  )}
+                  
+                  {selectedTopic.stats && Object.keys(selectedTopic.stats).length > 0 && (
+                    <div className="bg-black/50 border border-[#3e2723] rounded-lg p-5 mb-8 shadow-inner">
+                      <h3 className="text-amber-500 font-bold uppercase tracking-widest text-xs border-b border-[#3e2723] pb-2 mb-4">
+                        {activeSection === 'classes' ? 'Características Básicas' : '📊 CARACTERÍSTICAS DE RAÇA'}
+                      </h3>
+                      
+                      {activeSection === 'classes' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">❤️ Vida (PV)</span><span className="text-zinc-200">{selectedTopic.stats.hp}</span></div>
+                          <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">⚡ Esforço (PE)</span><span className="text-zinc-200">{selectedTopic.stats.pe}</span></div>
+                          <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">🛡️ Proficiências</span><span className="text-zinc-200">{selectedTopic.stats.proficiencies}</span></div>
+                          <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">🎲 Perícias Iniciais</span><span className="text-zinc-200">{selectedTopic.stats.skills}</span></div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 gap-4 text-sm">
+                          <div>
+                            <span className="text-zinc-500 uppercase text-[10px] font-bold block">🧬 Atributos</span>
+                            <span className="text-zinc-200">{selectedTopic.stats.attributes}</span>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">📏 Tamanho</span><span className="text-zinc-200">{selectedTopic.stats.size}</span></div>
+                            <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">🏃 Deslocamento</span><span className="text-zinc-200">{selectedTopic.stats.speed}</span></div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {selectedTopic.fixedAbilities && selectedTopic.fixedAbilities.length > 0 && (
+                    <div className="mb-10">
+                      <h3 className="text-red-500 font-bold uppercase tracking-widest text-sm border-b-2 border-red-900/50 pb-2 mb-4">
+                        {activeSection === 'classes' ? 'Habilidades da Classe (Fixas)' : '🧬 HABILIDADES DE RAÇA'}
+                      </h3>
+                      <div className="grid grid-cols-1 gap-4">
+                        {selectedTopic.fixedAbilities.map((power, idx) => (
+                          <div key={idx} className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between shadow-sm">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-1">
+                                <h4 className="text-red-300 font-bold">{power.title}</h4>
+                                <span className="bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded text-[9px] font-bold text-zinc-500 uppercase">{power.cost}</span>
+                              </div>
+                              <p className="text-xs text-zinc-400 whitespace-pre-wrap">{power.description}</p>
+                            </div>
+                            <button onClick={() => openForgeModal(power)} className="shrink-0 bg-red-950/40 hover:bg-red-900 border border-red-900 text-red-200 text-[10px] uppercase font-bold tracking-widest px-4 py-2 rounded transition-colors w-full md:w-auto">
+                              ➕ Forjar
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
-                </div>
-              )}
 
-              {/* HABILIDADES FIXAS (CLASSE OU RAÇA) */}
-              {selectedTopic.fixedAbilities && selectedTopic.fixedAbilities.length > 0 && (
-                <div className="mb-10">
-                  <h3 className="text-red-500 font-bold uppercase tracking-widest text-sm border-b-2 border-red-900/50 pb-2 mb-4">
-                    {activeSection === 'classes' ? 'Habilidades da Classe (Fixas)' : '🧬 HABILIDADES DE RAÇA'}
-                  </h3>
-                  <div className="grid grid-cols-1 gap-4">
-                    {selectedTopic.fixedAbilities.map((power, idx) => (
-                      <div key={idx} className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between shadow-sm">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-1">
-                            <h4 className="text-red-300 font-bold">{power.title}</h4>
-                            <span className="bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded text-[9px] font-bold text-zinc-500 uppercase">{power.cost}</span>
-                          </div>
-                          <p className="text-xs text-zinc-400 whitespace-pre-wrap">{power.description}</p>
-                        </div>
-                        <button onClick={() => openForgeModal(power)} className="shrink-0 bg-red-950/40 hover:bg-red-900 border border-red-900 text-red-200 text-[10px] uppercase font-bold tracking-widest px-4 py-2 rounded transition-colors w-full md:w-auto">
-                          ➕ Forjar
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* PODERES EXTRAS (Escolhas) */}
-              {selectedTopic.powers && selectedTopic.powers.length > 0 && (
-                <div>
-                  <h3 className="text-amber-500 font-bold uppercase tracking-widest text-sm border-b-2 border-amber-900/50 pb-2 mb-4">Poderes e Mecânicas (Escolhas)</h3>
-                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    {selectedTopic.powers.map((power, idx) => (
-                      <div key={idx} className="bg-black/60 border border-zinc-800/80 hover:border-amber-700/50 rounded-lg p-5 flex flex-col justify-between shadow-md transition-colors group">
-                        <div>
-                          <div className="flex justify-between items-start mb-3 gap-4">
-                            <div className="flex flex-col">
-                              <h4 className="text-amber-400 font-bold text-base">{power.title}</h4>
-                              <span className="text-[9px] text-zinc-500 uppercase tracking-widest mt-1">{power.type}</span>
+                  {selectedTopic.powers && selectedTopic.powers.length > 0 && (
+                    <div>
+                      <h3 className="text-amber-500 font-bold uppercase tracking-widest text-sm border-b-2 border-amber-900/50 pb-2 mb-4">Poderes e Mecânicas (Escolhas)</h3>
+                      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                        {selectedTopic.powers.map((power, idx) => (
+                          <div key={idx} className="bg-black/60 border border-zinc-800/80 hover:border-amber-700/50 rounded-lg p-5 flex flex-col justify-between shadow-md transition-colors group">
+                            <div>
+                              <div className="flex justify-between items-start mb-3 gap-4">
+                                <div className="flex flex-col">
+                                  <h4 className="text-amber-400 font-bold text-base">{power.title}</h4>
+                                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest mt-1">{power.type}</span>
+                                </div>
+                                <span className="bg-amber-950/40 border border-amber-900/50 px-2 py-1 rounded text-[9px] font-bold text-amber-300 tracking-widest whitespace-nowrap shadow-inner">
+                                  {power.cost}
+                                </span>
+                              </div>
+                              <p className="text-sm text-zinc-300 leading-relaxed mb-4 whitespace-pre-wrap">{power.description}</p>
                             </div>
-                            <span className="bg-amber-950/40 border border-amber-900/50 px-2 py-1 rounded text-[9px] font-bold text-amber-300 tracking-widest whitespace-nowrap shadow-inner">
-                              {power.cost}
-                            </span>
+                            
+                            <button 
+                              onClick={() => openForgeModal(power)}
+                              className="w-full mt-auto bg-zinc-900 hover:bg-amber-900/80 text-zinc-400 hover:text-white border border-zinc-700 hover:border-amber-600 text-[10px] uppercase font-bold tracking-widest py-2.5 rounded transition-all shadow-md group-hover:shadow-[0_0_15px_rgba(217,119,6,0.3)]"
+                            >
+                              ➕ Forjar na Ficha
+                            </button>
                           </div>
-                          <p className="text-sm text-zinc-300 leading-relaxed mb-4 whitespace-pre-wrap">{power.description}</p>
-                        </div>
-                        
-                        <button 
-                          onClick={() => openForgeModal(power)}
-                          className="w-full mt-auto bg-zinc-900 hover:bg-amber-900/80 text-zinc-400 hover:text-white border border-zinc-700 hover:border-amber-600 text-[10px] uppercase font-bold tracking-widest py-2.5 rounded transition-all shadow-md group-hover:shadow-[0_0_15px_rgba(217,119,6,0.3)]"
-                        >
-                          ➕ Forjar na Ficha
-                        </button>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
