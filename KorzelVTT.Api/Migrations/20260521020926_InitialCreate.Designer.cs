@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KorzelVTT.Api.Migrations
 {
     [DbContext(typeof(KorzelContext))]
-    [Migration("20260518011323_SistemaDeCampanhasEMapas")]
-    partial class SistemaDeCampanhasEMapas
+    [Migration("20260521020926_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -315,6 +315,9 @@ namespace KorzelVTT.Api.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ControlledBy")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Image")
                         .HasColumnType("TEXT");

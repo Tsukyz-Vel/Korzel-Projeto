@@ -156,4 +156,23 @@ public class CampaignsController : ControllerBase
         return new string(Enumerable.Repeat(chars, 6)
             .Select(s => s[random.Next(s.Length)]).ToArray());
     }
+
+    [HttpDelete("{id}")]
+public async Task<IActionResult> DeleteCampaign(int id)
+{
+    // Busca a campanha pelo ID no banco de dados
+    var campaign = await _context.Campaigns.FindAsync(id);
+    
+    if (campaign == null)
+    {
+        return NotFound(new { message = "Campanha não encontrada nas névoas." });
+    }
+
+    // Remove a campanha (se o seu banco tiver Delete Cascade, ele vai apagar as cenas e tokens dela também)
+    _context.Campaigns.Remove(campaign);
+    await _context.SaveChangesAsync();
+
+    return Ok(new { message = "Campanha apagada com sucesso!" });
+}
+
 }

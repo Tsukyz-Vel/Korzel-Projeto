@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization; // 👈 Necessário para a segurança
-using System.Security.Claims; // 👈 Necessário para ler o Token
+using Microsoft.AspNetCore.Authorization; 
+using System.Security.Claims; 
 using KorzelVTT.Api.Data;
 using KorzelVTT.Api.Models;
 
 namespace KorzelVTT.Api.Controllers;
 
-[Authorize] // 🛑 O SEGURANÇA: Ninguém entra aqui sem um Token válido!
+[Authorize] 
 [Route("api/[controller]")]
 [ApiController]
 public class CharactersController : ControllerBase
@@ -24,7 +24,6 @@ public class CharactersController : ControllerBase
     // ==========================================
     private int GetCurrentUserId()
     {
-        // Puxa o ID do usuário que nós embutimos lá no AuthController
         return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     }
 
@@ -32,9 +31,28 @@ public class CharactersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Character>>> GetCharacters()
     {
-        int userId = GetCurrentUserId(); // Descobre quem é
+        int userId = GetCurrentUserId(); 
 
-        // Retorna APENAS as fichas onde o dono é o usuário logado
+        return await _context.Characters
+            .Where(c => c.UserId == userId)
+            .Select(c => new Character { 
+                Id = c.Id, 
+                Name = c.Name, 
+                Class = c.Class, 
+                Level = c.Level 
+            })
+            .ToListAsync();
+    }
+
+    // 👇 ROTA NOVA CORRIGIDA: Não usa tabelas que não existem! 👇
+    // GET: api/Characters/campaign/5
+    [HttpGet("campaign/{campaignId}")]
+    public async Task<ActionResult<IEnumerable<Character>>> GetCampaignCharacters(int campaignId)
+    {
+        int userId = GetCurrentUserId();
+
+        // Para a API compilar agora e o VTT funcionar, vamos retornar as fichas do usuário logado.
+        // Mais tarde ensinamos o banco a mostrar tudo para o mestre!
         return await _context.Characters
             .Where(c => c.UserId == userId)
             .Select(c => new Character { 
@@ -58,7 +76,6 @@ public class CharactersController : ControllerBase
             .Include(c => c.Weapons)
             .Include(c => c.Abilities)
             .Include(c => c.Notes)
-            // Filtro duplo: Tem que ser o ID da ficha E pertencer ao usuário logado
             .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId); 
 
         if (character == null) return NotFound();
@@ -80,11 +97,10 @@ public class CharactersController : ControllerBase
             .Include(c => c.Weapons)
             .Include(c => c.Abilities)
             .Include(c => c.Notes)
-            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId); // 👈 Proteção aqui também
+            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId); 
 
         if (existingCharacter == null) return NotFound();
 
-        // Trava de segurança: Garante que o hacker não mude o dono da ficha no JSON
         characterUpdate.UserId = userId; 
 
         _context.Entry(existingCharacter).CurrentValues.SetValues(characterUpdate);
@@ -111,24 +127,44 @@ public class CharactersController : ControllerBase
     }
 
     // POST: api/Characters
+   // POST: api/Characters
     [HttpPost]
-    public async Task<ActionResult<Character>> PostCharacter(Character character)
+    public async Task<ActionResult> PostCharacter(Character character)
     {
-        // Quando forjar uma ficha nova, ignora o React e amarra ela ao usuário do Token
-        character.UserId = GetCurrentUserId(); 
+        try 
+        {
+            int userId = GetCurrentUserId(); 
 
-        _context.Characters.Add(character);
-        await _context.SaveChangesAsync();
-        return CreatedAtAction("GetCharacter", new { id = character.Id }, character);
+            // 👇 ANTI-FANTASMA: Verifica se o usuário do token realmente existe no banco novo
+            var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+            if (!userExists) 
+            {
+                return StatusCode(401, new { error = "Sessão expirada ou banco recriado! Faça logout e crie a sua conta de novo." });
+            }
+
+            character.UserId = userId; 
+
+            _context.Characters.Add(character);
+            await _context.SaveChangesAsync();
+            
+            // 👇 Devolve apenas o necessário para evitar loops no React
+            return Ok(new { id = character.Id, message = "Ficha forjada com sucesso!" });
+        }
+        catch (Exception ex) 
+        {
+            Console.WriteLine($"\n🚨 [ERRO CRÍTICO AO SALVAR FICHA]: {ex.Message}");
+            if (ex.InnerException != null) {
+                Console.WriteLine($"➡️ [DETALHE INTERNO]: {ex.InnerException.Message}\n");
+            }
+            return StatusCode(500, new { error = ex.Message, inner = ex.InnerException?.Message });
+        }
     }
-
     // DELETE: api/Characters/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCharacter(int id)
     {
         int userId = GetCurrentUserId();
 
-        // Só deixa deletar se a ficha for da pessoa
         var character = await _context.Characters.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
         
         if (character == null) return NotFound();

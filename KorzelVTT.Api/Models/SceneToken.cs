@@ -16,7 +16,7 @@ public class SceneToken
     public string Name { get; set; } = string.Empty;
 
     public string? Image { get; set; }
-    
+    public string? ControlledBy { get; set; }
     public bool IsNpc { get; set; }
 
     // Posições geométricas no grid do VTT

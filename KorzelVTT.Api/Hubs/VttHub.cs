@@ -93,5 +93,29 @@ namespace KorzelVTT.Api.Hubs
         {
             await Clients.OthersInGroup(sessionId).SendAsync("FogToggled", isEnabled);
         }
+
+        public async Task UpdateTokenPermission(string campaignId, string tokenId, string? playerName)
+        {
+            // Este comando pega no aviso do Mestre e grita para todos os jogadores da sala!
+            await Clients.Group(campaignId).SendAsync("TokenPermissionChanged", tokenId, playerName);
+        }
+
+        public async Task PullPlayersToScene(string campaignId, string syncJson)
+        {
+             // Agora o mestre grita todas as informações da cena de uma vez!
+             await Clients.OthersInGroup(campaignId).SendAsync("PlayersPulled", syncJson);
+        }
+
+        // Método para avisar que uma Cena Nova foi forjada
+        public async Task AddScene(string campaignId, string sceneJson)
+        {
+            await Clients.OthersInGroup(campaignId).SendAsync("SceneAdded", sceneJson);
+        }
+
+        // Método para avisar que um Token foi apagado da mesa
+        public async Task RemoveToken(string campaignId, string tokenId)
+        {
+            await Clients.OthersInGroup(campaignId).SendAsync("TokenRemoved", tokenId);
+        }
     }
 }

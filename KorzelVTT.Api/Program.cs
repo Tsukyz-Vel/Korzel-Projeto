@@ -88,6 +88,12 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestBodySize = null;
 });
 
+// 👇 ADICIONE ESTE BLOCO PARA DESBLOQUEAR O IIS EXPRESS 👇
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = null; 
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
