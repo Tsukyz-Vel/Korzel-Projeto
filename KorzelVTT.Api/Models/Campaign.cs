@@ -23,4 +23,15 @@ public class Campaign
     // Relacionamentos do Entity Framework
     public List<Scene> Scenes { get; set; } = new();
     public List<Character> Characters { get; set; } = new();
+
+    public class AudioTrack
+{
+    public int Id { get; set; }
+    public int CampaignId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty; // 'combat', 'ambient', 'tavern', etc.
+    
+    // É aqui que o arquivo de som vai morar em formato de texto!
+    public string Base64Data { get; set; } = string.Empty; 
+}
 }

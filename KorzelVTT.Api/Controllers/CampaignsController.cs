@@ -66,13 +66,14 @@ public class CampaignsController : ControllerBase
     // 2. LISTAR CAMPANHAS DO UTILIZADOR
     // ==========================================
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Campaign>>> GetMyCampaigns()
+    public async Task<ActionResult<IEnumerable<object>>> GetMyCampaigns()
     {
         int userId = GetCurrentUserId();
 
-        // Procura campanhas onde o utilizador é o MESTRE
-        // OU campanhas onde ele participa com alguma Ficha (Jogador)
+        // 👇 SOLUÇÃO: O .Include() diz ao banco para carregar a lista de fichas junto com a campanha
+        // para que o .Any() lá debaixo consiga saber que o jogador faz parte da mesa!
         var campaigns = await _context.Campaigns
+            .Include(c => c.Characters) 
             .Where(c => c.MasterUserId == userId || c.Characters.Any(ch => ch.UserId == userId))
             .Select(c => new {
                 c.Id,
@@ -157,22 +158,28 @@ public class CampaignsController : ControllerBase
             .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 
-    [HttpDelete("{id}")]
-public async Task<IActionResult> DeleteCampaign(int id)
-{
-    // Busca a campanha pelo ID no banco de dados
-    var campaign = await _context.Campaigns.FindAsync(id);
-    
-    if (campaign == null)
+[HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteCampaign(int id)
     {
-        return NotFound(new { message = "Campanha não encontrada nas névoas." });
+        int userId = GetCurrentUserId(); // Descobre quem mandou apagar
+
+        var campaign = await _context.Campaigns.FindAsync(id);
+        
+        if (campaign == null)
+        {
+            return NotFound(new { message = "Campanha não encontrada nas névoas." });
+        }
+
+        // 👇 SEGURANÇA: Só o Mestre da campanha pode apagá-la
+        if (campaign.MasterUserId != userId)
+        {
+            return Forbid("Só o Mestre pode apagar esta sessão.");
+        }
+
+        _context.Campaigns.Remove(campaign);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Campanha apagada com sucesso!" });
     }
-
-    // Remove a campanha (se o seu banco tiver Delete Cascade, ele vai apagar as cenas e tokens dela também)
-    _context.Campaigns.Remove(campaign);
-    await _context.SaveChangesAsync();
-
-    return Ok(new { message = "Campanha apagada com sucesso!" });
-}
 
 }

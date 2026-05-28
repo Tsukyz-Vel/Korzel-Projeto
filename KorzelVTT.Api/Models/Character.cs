@@ -68,7 +68,8 @@ public class Character
     // === ECONOMIA E DEFESA ===
     public int Lascas { get; set; } = 1000; 
     public int BaseDefense { get; set; } = 10; 
-
+    public string? Resistances { get; set; } = string.Empty;
+    public string? OficioText { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     // === RELACIONAMENTOS / LISTAS DA FICHA (COMPLETO) ===

@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using KorzelVTT.Api.Data;
 using KorzelVTT.Api.Models;
 
@@ -23,34 +24,16 @@ public class AuthController : ControllerBase
     }
 
     // ==========================================
-    // DTOs: Moldes de dados que vêm do React
-    // ==========================================
-    public class UserRegisterDto
-    {
-        public string Username { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-
-    public class UserLoginDto
-    {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-
-    // ==========================================
     // ROTA 1: CADASTRAR NOVO USUÁRIO
     // ==========================================
     [HttpPost("register")]
     public async Task<IActionResult> Register(UserRegisterDto request)
     {
-        // 1. Verifica se o email já foi usado por outro jogador
         if (await _context.Users.AnyAsync(u => u.Email == request.Email))
         {
             return BadRequest("As sombras já conhecem este email. Tente outro.");
         }
 
-        // 2. Cria o usuário e transforma a senha em um código embaralhado (Hash)
         var user = new User
         {
             Username = request.Username,
@@ -70,23 +53,24 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login(UserLoginDto request)
     {
-        // 1. Procura o usuário pelo Email
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
         if (user == null)
         {
             return BadRequest("Email ou senha incorretos.");
         }
 
-        // 2. Confere se a senha digitada bate com a senha criptografada do banco
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             return BadRequest("Email ou senha incorretos.");
         }
 
-        // 3. Tudo certo! Gera o crachá de acesso (Token)
+        if (user.IsBlocked)
+        {
+            return StatusCode(403, "A sua conta foi banida pelas sombras.");
+        }
+
         var token = GenerateJwtToken(user);
 
-        // Devolve o crachá e os dados básicos para o React saber quem logou
         return Ok(new 
         { 
             token = token, 
@@ -100,10 +84,8 @@ public class AuthController : ControllerBase
     // ==========================================
     private string GenerateJwtToken(User user)
     {
-        // Puxa a sua chave ultra secreta do appsettings.json
         var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
         
-        // Quais informações vão escondidas DENTRO do crachá? (O id e o nome)
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -114,7 +96,7 @@ public class AuthController : ControllerBase
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(7), // O login dura 7 dias
+            Expires = DateTime.UtcNow.AddDays(7),
             Issuer = _configuration["Jwt:Issuer"],
             Audience = _configuration["Jwt:Audience"],
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -123,6 +105,73 @@ public class AuthController : ControllerBase
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
 
-        return tokenHandler.WriteToken(token); // Converte o token para um texto longo
+        return tokenHandler.WriteToken(token);
     }
+
+    // ==========================================
+    // ROTA 3: LER DADOS DO USUÁRIO
+    // ==========================================
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMe()
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return NotFound("Aventureiro não encontrado.");
+        
+        return Ok(new { username = user.Username, email = user.Email });
+    }
+
+    // ==========================================
+    // ROTA 4: ATUALIZAR DADOS
+    // ==========================================
+    [Authorize]
+    [HttpPut("update")]
+    public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto dto)
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return NotFound("Aventureiro não encontrado.");
+
+        if (await _context.Users.AnyAsync(u => u.Email == dto.Email && u.Id != userId))
+            return BadRequest("Este pergaminho (email) já está em uso.");
+            
+        if (await _context.Users.AnyAsync(u => u.Username == dto.Username && u.Id != userId))
+            return BadRequest("Este nome de aventureiro já está em uso.");
+
+        user.Username = dto.Username;
+        user.Email = dto.Email;
+
+        if (!string.IsNullOrWhiteSpace(dto.NewPassword))
+        {
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        }
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Dados forjados com sucesso!", username = user.Username });
+    }
+} // FIM DA CLASSE DO CONTROLADOR
+
+// ==========================================
+// DTOs: Colocados FORA do Controlador
+// ==========================================
+public class UserRegisterDto
+{
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+public class UserLoginDto
+{
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+public class UpdateUserDto
+{
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string? NewPassword { get; set; }
 }

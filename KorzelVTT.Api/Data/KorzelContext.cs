@@ -16,6 +16,7 @@ public class KorzelContext : DbContext
     public DbSet<Weapon> Weapons { get; set; }
     public DbSet<Ability> Abilities { get; set; }
     public DbSet<Note> Notes { get; set; }
+    public DbSet<AudioTrack> AudioTracks { get; set; }
 
     // 👇 NOVAS TABELAS DE PERSISTÊNCIA SESSÃO 👇
     public DbSet<Campaign> Campaigns { get; set; }

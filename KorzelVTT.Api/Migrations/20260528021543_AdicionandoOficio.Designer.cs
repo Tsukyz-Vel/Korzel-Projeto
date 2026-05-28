@@ -3,6 +3,7 @@ using System;
 using KorzelVTT.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KorzelVTT.Api.Migrations
 {
     [DbContext(typeof(KorzelContext))]
-    partial class KorzelContextModelSnapshot : ModelSnapshot
+    [Migration("20260528021543_AdicionandoOficio")]
+    partial class AdicionandoOficio
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.7");
@@ -179,9 +182,6 @@ namespace KorzelVTT.Api.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("OficioText")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Origin")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -193,9 +193,6 @@ namespace KorzelVTT.Api.Migrations
                     b.Property<string>("Race")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Resistances")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Strength")
@@ -394,9 +391,6 @@ namespace KorzelVTT.Api.Migrations
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsBlocked")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
