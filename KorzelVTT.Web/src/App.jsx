@@ -8,13 +8,25 @@ import { initialLojaCatalog, panteaoKorzel } from './data/korzelData';
 import { parseAndRollDamage } from './utils/diceUtils';
 import Compendio from './components/Compendio';
 import * as signalR from '@microsoft/signalr';
+import Configuracoes from './components/Configuracoes';
+import AdminPanel from './components/AdminPanel';
 
 export default function App() {
+  const [onlinePlayers, setOnlinePlayers] = useState([]);
   const [currentPage, setCurrentPage] = useState('início'); 
   const [isMasterMode, setIsMasterMode] = useState(false); 
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
   const [authToken, setAuthToken] = useState(localStorage.getItem('korzel_token') || null);
+  let isAdmin = false;
+  if (authToken) {
+    try {
+      const payload = JSON.parse(atob(authToken.split('.')[1]));
+      // O .NET guarda o e-mail nesta chave longa ou apenas "email"
+      const userEmail = payload.email || payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] || "";
+      isAdmin = userEmail === "dinofalco123@gmail.com";
+    } catch (e) {}
+  }
   const [loggedUserName, setLoggedUserName] = useState(localStorage.getItem('korzel_username') || "");
   
   const [authMode, setAuthMode] = useState('login'); 
@@ -97,7 +109,18 @@ export default function App() {
   const [editingItemIndex, setEditingItemIndex] = useState(null);
   const [itemForm, setItemForm] = useState(initialItemState);
 
-  const [catalog, setCatalog] = useState(initialLojaCatalog);
+  // 👇 LOJA MÁGICA QUE SALVA E GRITA PARA TODOS 👇
+  const [catalog, setCatalog] = useState(() => {
+    try { 
+      const saved = localStorage.getItem('korzel_catalog'); 
+      return saved ? JSON.parse(saved) : initialLojaCatalog; 
+    } catch { 
+      return initialLojaCatalog;
+    }
+  });
+
+  useEffect(() => { localStorage.setItem('korzel_catalog', JSON.stringify(catalog)); }, [catalog]);
+  
   const [showCatalogForm, setShowCatalogForm] = useState(false);
   const [editingCatalogIndex, setEditingCatalogIndex] = useState(null);
   const [catalogForm, setCatalogForm] = useState({ name: "", type: "Consumível", price: 10, weight: 0.1, desc: "" });
@@ -107,6 +130,11 @@ export default function App() {
   const [currentCampaignId, setCurrentCampaignId] = useState(null);
   const [activeCharId, setActiveCharId] = useState(null); 
   const [campaignCharacters, setCampaignCharacters] = useState([]); 
+
+  const [resistances, setResistances] = useState("");
+  const [oficioText, setOficioText] = useState("");
+  
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [sessionTab, setSessionTab] = useState('chat');
   const [secretRoll, setSecretRoll] = useState(false);
@@ -189,7 +217,9 @@ export default function App() {
     setCurrentCampaignId(campaignId); 
     setSessionTab('chat'); 
     setCurrentPage('sessao');
-    if (connection && campaignId) { connection.invoke("JoinSession", campaignId.toString()).catch(console.error); }
+   if (connection && campaignId) { 
+      connection.invoke("JoinSession", campaignId.toString(), loggedUserName).catch(console.error); 
+    }
     
     try {
       const res = await fetch(`http://localhost:5104/api/scenes/campaign/${campaignId}`);
@@ -220,6 +250,16 @@ export default function App() {
              setSceneTokens([]);
           }
         }
+        try {
+          const audioRes = await fetch(`http://localhost:5104/api/audio/campaign/${campaignId}`, { headers: getAuthHeaders() });
+          if (audioRes.ok) {
+            const tracksData = await audioRes.json();
+            setAudioCategories(prev => prev.map(cat => {
+               const tracksForCat = tracksData.filter(t => t.category === cat.id).map(t => ({ id: t.id, name: t.name, url: t.base64Data }));
+               return { ...cat, tracks: tracksForCat };
+            }));
+          }
+        } catch(err) { console.error("Erro ao puxar áudio", err); }
       }
     } catch (e) { console.error("Erro mapa:", e); }
   };
@@ -244,7 +284,8 @@ export default function App() {
       if (response.ok) { const data = await response.json();
         setActiveCharId(data.id); setCharName(data.name || ""); setCharOrigin(data.origin || ""); setCharRace(data.race || ""); setCharClass(data.class || ""); setCharAge(data.age || 0); setCharLevel(data.level || 1); setCharDeity(data.deity || "Nenhum"); setMut1(data.mut1 || "Carne Intacta"); setMut2(data.mut2 || "Carne Intacta"); setMut3(data.mut3 || "Carne Intacta"); setAttrInt(data.intellect || 0); setAttrPre(data.presence || 0); setAttrAgi(data.agility || 0); setAttrVig(data.vigor || 0); setAttrFor(data.strength || 0); setAttrIns(data.instinct || 0); setHp(data.currentHP || 0); setMaxHp(data.maxHP || 0); setPe(data.currentPE || 0); setMaxPe(data.maxPE || 0); setCorruption(data.corruption || 0); setMaxCorruption(data.maxCorruption || 40); setLascas(data.lascas || 0);
         if (data.skills && data.skills.length > 0) { setSkillsList(prev => prev.map(base => { const dbSkill = data.skills.find(s => s.name === base.name); return dbSkill ? { ...base, trainingLevel: dbSkill.trainingLevel, others: dbSkill.others } : base; })); }
-        setInventoryList(data.inventory || []); setAttacksList(data.weapons || []); setAbilitiesList(data.abilities || []); setNotes(data.notes || []);
+        setInventoryList(data.inventory || []); setAttacksList(data.weapons || []); setAbilitiesList(data.abilities || []); setNotes(data.notes || []); setResistances(data.resistances || "");
+        setOficioText(data.oficioText || "");
         setCurrentPage('ficha'); showToast("Ficha carregada!", "success");
       }
     } catch (error) {}
@@ -253,7 +294,9 @@ export default function App() {
   const saveCharacterToDb = async () => {
     const characterData = { 
       id: activeCharId || 0, 
-      name: charName, origin: charOrigin, race: charRace, class: charClass, age: charAge, level: charLevel, deity: charDeity, mut1, mut2, mut3, intellect: attrInt, presence: attrPre, agility: attrAgi, vigor: attrVig, strength: attrFor, instinct: attrIns, currentHP: hp, maxHP: maxHp, currentPE: pe, maxPE: maxPe, corruption, maxCorruption, lascas, baseDefense: 10, 
+      campaignId: currentCampaignId || 0,
+      name: charName, origin: charOrigin, race: charRace, class: charClass, age: charAge, level: charLevel, deity: charDeity, mut1, mut2, mut3, intellect: attrInt, presence: attrPre, agility: attrAgi, vigor: attrVig, strength: attrFor, instinct: attrIns, currentHP: hp, maxHP: maxHp, currentPE: pe, maxPE: maxPe, corruption, maxCorruption, lascas, baseDefense: 10,resistances: resistances,
+      oficioText: oficioText, 
       skills: skillsList.map(s => ({ name: s.name, trainingLevel: s.trainingLevel, others: s.others || 0 })), 
       inventory: inventoryList.map(i => ({ name: i.name, description: i.description, quantity: i.quantity, weight: i.weight, isEquipped: i.isEquipped || false, itemType: i.itemType || "Consumível", armorBonus: i.armorBonus || 0, armorPenalty: i.armorPenalty || 0 })), 
       weapons: attacksList.map(w => ({ name: w.name, damage: w.damage, critMargin: w.critMargin, critMultiplier: w.critMultiplier, type: w.type, skill: w.skill, isRanged: w.isRanged || false, ammo: w.ammo || 0 })), 
@@ -263,18 +306,118 @@ export default function App() {
     try {
       if (activeCharId) {
         const res = await fetch(`http://localhost:5104/api/characters/${activeCharId}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(characterData) });
-        if(res.ok) showToast("Ficha atualizada!", "success"); else showToast(`Erro ${res.status}.`, "error");
+        if(res.ok) {
+           showToast("Ficha atualizada!", "success");
+           if (connection && currentCampaignId) connection.invoke("RefreshCharacters", currentCampaignId.toString()).catch(console.error);
+        } else showToast(`Erro ${res.status}.`, "error");
       } else {
         const res = await fetch(`http://localhost:5104/api/characters`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(characterData) });
-        if(res.ok) { const newData = await res.json(); setActiveCharId(newData.id); fetchAllCharacters(); showToast("Nova Ficha!", "success"); } else showToast(`Erro ${res.status}.`, "error");
+        if(res.ok) { 
+           const newData = await res.json(); 
+           setActiveCharId(newData.id); 
+           fetchAllCharacters(); 
+           showToast("Nova Ficha!", "success"); 
+           if (connection && currentCampaignId) connection.invoke("RefreshCharacters", currentCampaignId.toString()).catch(console.error);
+        } else showToast(`Erro ${res.status}.`, "error");
       }
     } catch (error) { showToast("Erro conexão.", "error"); }
   };
 
-  const handleDeleteCharacter = async (id, name) => { if (window.confirm(`Apagar ficha de ${name}?`)) { try { const res = await fetch(`http://localhost:5104/api/characters/${id}`, { method: 'DELETE', headers: getAuthHeaders() }); if (res.ok) { showToast("Excluída!", "success"); fetchAllCharacters(); if (activeCharId === id) handleCreateNewCharacter(); } } catch (error) {} } };
+  const handleDeleteCharacter = async (id, name) => { 
+    if (window.confirm(`Apagar ficha de ${name}?`)) { 
+      try { 
+        const res = await fetch(`http://localhost:5104/api/characters/${id}`, { method: 'DELETE', headers: getAuthHeaders() }); 
+        if (res.ok) { 
+          showToast("Excluída!", "success"); 
+          fetchAllCharacters(); 
+          if (activeCharId === id) handleCreateNewCharacter(); 
+          if (connection && currentCampaignId) connection.invoke("RefreshCharacters", currentCampaignId.toString()).catch(console.error);
+        } 
+      } catch (error) {} 
+    } 
+  };
+  
   const handleCreateNewCharacter = () => { setActiveCharId(null); setCharName(""); setCharOrigin(""); setCharRace(""); setCharClass(""); setCharAge(0); setCharLevel(1); setCharDeity("Nenhum"); setMut1("Carne Intacta"); setMut2("Carne Intacta"); setMut3("Carne Intacta"); setAttrInt(0); setAttrPre(0); setAttrAgi(0); setAttrVig(0); setAttrFor(0); setAttrIns(0); setHp(10); setMaxHp(10); setPe(0); setMaxPe(0); setCorruption(0); setLascas(0); setSkillsList(prev => prev.map(s => ({ ...s, trainingLevel: 0, others: 0 }))); setInventoryList([]); setAttacksList([]); setAbilitiesList([]); setNotes([]); setCurrentPage('ficha'); };
 
-  const executeRoll = (type, title, bonus, weapon = null) => { setRollModal({ show: true, title, type, bonus, d20: 0, total: 0, isRolling: true, isCrit: false, isFumble: false, weapon, detail: "" }); setTimeout(() => { let newChatMsg = { id: Date.now(), sender: isMasterMode && secretRoll ? "Mestre" : (charName || loggedUserName), type: isMasterMode && secretRoll ? "secret" : "roll", text: "" }; if (type === 'damage') { const isCrit = bonus?.isCrit || false; const res = parseAndRollDamage(weapon.damage, isCrit, weapon.critMultiplier); const detailText = `Dados rolados: [${res.log}]` + (isCrit ? "\n💥 DANO CRÍTICO!" : ""); setRollModal(prev => ({ ...prev, isRolling: false, total: res.total, detail: detailText, isCrit })); newChatMsg.text = `Rolou Dano (${weapon.name}): ${res.total}\nDetalhes: [${res.log}]`; if(isCrit) newChatMsg.text += "\n💥 DANO CRÍTICO!"; } else if (type === 'sincronia') { const d20 = Math.floor(Math.random() * 20) + 1; const total = d20 + Number(bonus); const dtSincronia = 20 + Number(corruption || 0); let detailText = `Dado de Sincronia: [ ${d20} ] + Bônus: ${bonus}\nTotal: ${total} vs DT ${dtSincronia} (20 base + ${corruption} Corrupção)\n\n`; if (total >= dtSincronia) { detailText += "✨ SUCESSO! A magia flui com segurança."; newChatMsg.text = `🔮 **Teste de Sincronia**\nResultado: **${total}** (DT ${dtSincronia})\n✨ SUCESSO! A magia flui com segurança.`; } else { const danoCorrupcao = Math.floor(Math.random() * 4) + 1; setCorruption(prev => Math.min(prev + danoCorrupcao, maxCorruption || 40)); detailText += `💀 VOCÊ FALHOU!\n(+${danoCorrupcao} de Corrupção)`; newChatMsg.text = `🔮 **Teste de Sincronia**\nResultado: **${total}** (DT ${dtSincronia})\n💀 **VOCÊ FALHOU!**\nSofreu +${danoCorrupcao} de Corrupção!`; } setRollModal(prev => ({ ...prev, isRolling: false, d20, total, detail: detailText, isCombined: false })); } else { const d20 = Math.floor(Math.random() * 20) + 1; const total = d20 + Number(bonus); let isCrit = d20 === 20; let isFumble = d20 === 1; let damageBreakdown = ""; let damageTotal = 0; newChatMsg.text = `${title}: ${total} (Dado: ${d20})`; let detailText = `Dado de Ataque: [ ${d20} ] + Bônus: ${bonus}`; if (type === 'attack' && weapon) { const critMargin = parseInt(weapon.critMargin) || 20; if (d20 >= critMargin) isCrit = true; const res = parseAndRollDamage(weapon.damage, isCrit, weapon.critMultiplier); damageBreakdown = res.log; damageTotal = res.total; if(isCrit) { newChatMsg.text += `\n🎉 Acerto Crítico!\n🩸 Dano: ${res.total} [${res.log}]`; detailText = `🎉 ACERTO CRÍTICO!\n` + detailText + `\n\n🩸 Dados de Dano: [${res.log}]`; } else if(isFumble) { newChatMsg.text += `\n💀 Falha Crítica!`; detailText = `💀 FALHA CRÍTICA!\n` + detailText; } else { newChatMsg.text += `\n🩸 Dano gerado: ${res.total} [${res.log}]`; detailText = detailText + `\n\n🩸 Dados de Dano: [${res.log}]`; } } else { if(isCrit) detailText = `🎉 Glória! (Acerto Crítico)\n` + detailText; if(isFumble) detailText = `💀 Desastre! (Falha Crítica)\n` + detailText; } setRollModal(prev => ({ ...prev, isRolling: false, d20, total, isCrit, isFumble, detail: detailText, isCombined: (type === 'attack' && weapon !== null), attackTotal: total, damageTotal: damageTotal })); } if (isMasterMode && secretRoll) newChatMsg.text = `[Rolagem Oculta]\n${newChatMsg.text}`; setChatMessages(prev => [...prev, newChatMsg]); if (connection && !(isMasterMode && secretRoll) && currentCampaignId) { connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newChatMsg)).catch(console.error); } }, 1000); };
+  const executeRoll = (type, title, bonus, weapon = null) => { 
+    if (type === 'attack' && weapon && weapon.isRanged) {
+      if ((weapon.ammo || 0) <= 0) {
+        showToast(`Arma descarregada! Sem munição para ${weapon.name}.`, "error");
+        return; 
+      }
+      setAttacksList(prev => prev.map(w => w.name === weapon.name ? { ...w, ammo: w.ammo - 1 } : w));
+    }
+
+    setRollModal({ show: true, title, type, bonus, d20: 0, total: 0, isRolling: true, isCrit: false, isFumble: false, weapon, detail: "" }); 
+    
+    setTimeout(() => { 
+      let newChatMsg = { id: Date.now(), sender: isMasterMode && secretRoll ? "Mestre" : (charName || loggedUserName), type: isMasterMode && secretRoll ? "secret" : "roll", text: "" }; 
+      
+      if (type === 'damage') { 
+        const isCrit = bonus?.isCrit || false; 
+        const res = parseAndRollDamage(weapon.damage, isCrit, weapon.critMultiplier); 
+        const detailText = `Dados rolados: [${res.log}]` + (isCrit ? "\n💥 DANO CRÍTICO!" : ""); 
+        setRollModal(prev => ({ ...prev, isRolling: false, total: res.total, detail: detailText, isCrit })); 
+        newChatMsg.text = `Rolou Dano (${weapon.name}): ${res.total}\nDetalhes: [${res.log}]`; 
+        if(isCrit) newChatMsg.text += "\n💥 DANO CRÍTICO!"; 
+      } 
+      else if (type === 'sincronia') { 
+        const d20 = Math.floor(Math.random() * 20) + 1; 
+        const total = d20 + Number(bonus); 
+        const dtSincronia = 20 + Number(corruption || 0); 
+        let detailText = `Dado de Sincronia: [ ${d20} ] + Bônus: ${bonus}\nTotal: ${total} vs DT ${dtSincronia} (20 base + ${corruption} Corrupção)\n\n`; 
+        if (total >= dtSincronia) { 
+          detailText += "✨ SUCESSO! A magia flui com segurança."; 
+          newChatMsg.text = `🔮 **Teste de Sincronia**\nResultado: **${total}** (DT ${dtSincronia})\n✨ SUCESSO! A magia flui com segurança.`; 
+        } else { 
+          const danoCorrupcao = Math.floor(Math.random() * 4) + 1; 
+          setCorruption(prev => Math.min(prev + danoCorrupcao, maxCorruption || 40)); 
+          detailText += `💀 VOCÊ FALHOU!\n(+${danoCorrupcao} de Corrupção)`; 
+          newChatMsg.text = `🔮 **Teste de Sincronia**\nResultado: **${total}** (DT ${dtSincronia})\n💀 **VOCÊ FALHOU!**\nSofreu +${danoCorrupcao} de Corrupção!`; 
+        } 
+        setRollModal(prev => ({ ...prev, isRolling: false, d20, total, detail: detailText, isCombined: false })); 
+      } 
+      else { 
+        const d20 = Math.floor(Math.random() * 20) + 1; 
+        const total = d20 + Number(bonus); 
+        let isCrit = d20 === 20; 
+        let isFumble = d20 === 1; 
+        let damageBreakdown = ""; 
+        let damageTotal = 0; 
+        newChatMsg.text = `${title}: ${total} (Dado: ${d20})`; 
+        let detailText = `Dado de Ataque: [ ${d20} ] + Bônus: ${bonus}`; 
+        
+        if (type === 'attack' && weapon) { 
+          const critMargin = parseInt(weapon.critMargin) || 20; 
+          if (d20 >= critMargin) isCrit = true; 
+          const res = parseAndRollDamage(weapon.damage, isCrit, weapon.critMultiplier); 
+          damageBreakdown = res.log; 
+          damageTotal = res.total; 
+          if(isCrit) { 
+            newChatMsg.text += `\n🎉 Acerto Crítico!\n🩸 Dano: ${res.total} [${res.log}]`; 
+            detailText = `🎉 ACERTO CRÍTICO!\n` + detailText + `\n\n🩸 Dados de Dano: [${res.log}]`; 
+          } else if(isFumble) { 
+            newChatMsg.text += `\n💀 Falha Crítica!`; 
+            detailText = `💀 FALHA CRÍTICA!\n` + detailText; 
+          } else { 
+            newChatMsg.text += `\n🩸 Dano gerado: ${res.total} [${res.log}]`; 
+            detailText = detailText + `\n\n🩸 Dados de Dano: [${res.log}]`; 
+          } 
+        } else { 
+          if(isCrit) detailText = `🎉 Glória! (Acerto Crítico)\n` + detailText; 
+          if(isFumble) detailText = `💀 Desastre! (Falha Crítica)\n` + detailText; 
+        } 
+        setRollModal(prev => ({ ...prev, isRolling: false, d20, total, isCrit, isFumble, detail: detailText, isCombined: (type === 'attack' && weapon !== null), attackTotal: total, damageTotal: damageTotal })); 
+      } 
+      
+      if (isMasterMode && secretRoll) newChatMsg.text = `[Rolagem Oculta]\n${newChatMsg.text}`; 
+      setChatMessages(prev => [...prev, newChatMsg]); 
+      
+      if (connection && !(isMasterMode && secretRoll) && currentCampaignId) { 
+        connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newChatMsg)).catch(console.error); 
+      } 
+    }, 1000); 
+  };
   
  const handleBuyItem = async (item, index, targetCharId = "active") => { 
   const qty = buyQuantities[index] || 1; 
@@ -282,33 +425,28 @@ export default function App() {
   
   let charIdToUpdate = null;
 
-  // 1. Descobrir o ID da Ficha que vai receber o item
   if (targetCharId === "active" || (activeCharId && Number(targetCharId) === activeCharId)) {
-    charIdToUpdate = activeCharId; // Usa a ficha aberta na tela
+    charIdToUpdate = activeCharId; 
   } else {
-    charIdToUpdate = Number(targetCharId); // Usa a ficha selecionada na lista
+    charIdToUpdate = Number(targetCharId); 
   }
 
-  // Se não encontrou um ID válido, alerta e para a função
   if (!charIdToUpdate) {
      showToast("Selecione um personagem para comprar!", "error");
      return;
   }
 
   try {
-    // 2. Buscar a ficha MAIS RECENTE do banco de dados
     const res = await fetch(`http://localhost:5104/api/characters/${charIdToUpdate}`, { headers: getAuthHeaders() });
     
     if (res.ok) {
       const charData = await res.json();
       const currentLascas = charData.lascas || 0;
 
-      // 3. Verificar se tem Lascas suficientes
       if (currentLascas >= totalCost) {
-        charData.lascas = currentLascas - totalCost; // Desconta o dinheiro
+        charData.lascas = currentLascas - totalCost; 
         charData.inventory = charData.inventory || [];
 
-        // Adiciona ou atualiza o item no inventário
         const existingItem = charData.inventory.find(i => i.name === item.name);
         if (existingItem) {
           existingItem.quantity += qty;
@@ -325,7 +463,6 @@ export default function App() {
           });
         }
 
-        // 4. Salvar IMEDIATAMENTE no banco de dados
         const updateRes = await fetch(`http://localhost:5104/api/characters/${charIdToUpdate}`, { 
           method: 'PUT', 
           headers: getAuthHeaders(), 
@@ -336,11 +473,9 @@ export default function App() {
           showToast(`🪙 ${qty}x ${item.name} guardado na mochila de ${charData.name}!`, "success");
           setBuyQuantities(prev => ({...prev, [index]: 1}));
 
-          // 5. SE A FICHA COMPRADA ESTIVER ABERTA NA TELA, ATUALIZAR A TELA!
           if (activeCharId === charIdToUpdate) {
-            setLascas(charData.lascas); // Atualiza as moedas na tela
+            setLascas(charData.lascas); 
             
-            // Re-constroi a lista de inventário da tela com a nova compra
             setInventoryList(prev => {
                 const existingIndex = prev.findIndex(i => i.name === item.name);
                 if (existingIndex >= 0) {
@@ -351,6 +486,7 @@ export default function App() {
                 return [...prev, { name: item.name, description: item.desc || item.description || "", quantity: qty, weight: item.weight || 0.1, isEquipped: false, itemType: "Consumível" }];
             });
           }
+          if (connection && currentCampaignId) connection.invoke("RefreshCharacters", currentCampaignId.toString()).catch(console.error);
         } else {
           showToast(`Erro ao salvar a compra de ${charData.name}.`, "error");
         }
@@ -365,9 +501,47 @@ export default function App() {
 
   const updateBuyQty = (index, delta) => { setBuyQuantities(prev => { const current = prev[index] || 1; return { ...prev, [index]: Math.max(1, current + delta) }; }); };
   const handleOpenNewCatalogItem = () => { setCatalogForm({ name: "", type: "Consumível", price: 10, weight: 0.1, desc: "" }); setEditingCatalogIndex(null); setShowCatalogForm(true); };
-  const handleEditCatalogItem = (index) => { setCatalogForm(catalog[index]); setEditingCatalogIndex(index); setShowCatalogForm(true); };
-  const handleDeleteCatalogItem = (index) => { if(window.confirm("Remover da Loja?")) setCatalog(catalog.filter((_, i) => i !== index)); };
-  const handleSaveCatalogItem = () => { if(!catalogForm.name) return alert("Precisa de nome!"); if(editingCatalogIndex !== null) { const updated = [...catalog]; updated[editingCatalogIndex] = catalogForm; setCatalog(updated); } else { setCatalog([...catalog, catalogForm]); } setShowCatalogForm(false); };
+
+  const handleEditCatalogItem = (index) => { 
+    setCatalogForm(catalog[index]); 
+    setEditingCatalogIndex(index); 
+    setShowCatalogForm(true); 
+  };
+
+  const handleDeleteCatalogItem = (index) => { 
+    if (window.confirm("Remover da Loja?")) {
+      const updatedCatalog = catalog.filter((_, i) => i !== index);
+      setCatalog(updatedCatalog); 
+      
+      if (connection && currentCampaignId) {
+        connection.invoke("UpdateCatalog", currentCampaignId.toString(), JSON.stringify(updatedCatalog))
+          .catch(console.error);
+      }
+    }
+  };
+
+  const handleSaveCatalogItem = () => { 
+    if (!catalogForm.name) return alert("Precisa de nome!"); 
+    
+    let updatedCatalog;
+    if (editingCatalogIndex !== null) { 
+      updatedCatalog = [...catalog]; 
+      updatedCatalog[editingCatalogIndex] = catalogForm; 
+    } else { 
+      updatedCatalog = [...catalog, catalogForm]; 
+    }
+    
+    setCatalog(updatedCatalog);
+    setShowCatalogForm(false); 
+    setEditingCatalogIndex(null);
+    setCatalogForm({ name: "", type: "Consumível", price: 10, weight: 0.1, desc: "" });
+
+    if (connection && currentCampaignId) {
+      connection.invoke("UpdateCatalog", currentCampaignId.toString(), JSON.stringify(updatedCatalog))
+        .catch(console.error);
+    }
+  };
+
   const handleDeityChange = (newDeity) => { setCharDeity(newDeity); const filteredAbilities = abilitiesList.filter(ability => ability.type !== "Dádiva Divina"); if (newDeity !== "Nenhum" && panteaoKorzel[newDeity]) { const deityPowers = panteaoKorzel[newDeity].poderes.map(poder => ({ title: poder.title, type: "Dádiva Divina", cost: poder.cost, description: poder.desc })); setAbilitiesList([...filteredAbilities, ...deityPowers]); showToast(`As Dádivas de ${newDeity} forjadas!`, "success"); } else { setAbilitiesList(filteredAbilities); } };
   const handleOpenNewWeapon = () => { setWeaponForm({ name: "", damage: "", critMargin: "", critMultiplier: "", type: "Cortante", skill: "Luta" }); setEditingWeaponIndex(null); setShowWeaponForm(true); };
   const handleEditWeapon = (index) => { setWeaponForm(attacksList[index]); setEditingWeaponIndex(index); setShowWeaponForm(true); };
@@ -619,96 +793,218 @@ export default function App() {
     }
   };
   const toggleTokenStatus = (statusName) => { if (!tokenContextMenu.tokenId) return; setSceneTokens(prev => prev.map(t => { if (t.id === tokenContextMenu.tokenId) { const currentStatuses = t.statuses || []; const newStatuses = currentStatuses.includes(statusName) ? currentStatuses.filter(s => s !== statusName) : [...currentStatuses, statusName]; return { ...t, statuses: newStatuses }; } return t; })); setTokenContextMenu({ ...tokenContextMenu, show: false }); };
-  const handleAudioUpload = (e) => { const file = e.target.files[0]; if (file) { const audioUrl = URL.createObjectURL(file); const newTrack = { id: Date.now(), name: file.name, url: audioUrl }; setAudioCategories(prev => prev.map(cat => cat.id === targetAudioCat ? { ...cat, tracks: [...cat.tracks, newTrack] } : cat)); } e.target.value = null; };
-  const togglePlayAudio = (trackId) => { if (activeAudioId === trackId) { setIsPlaying(!isPlaying); } else { setActiveAudioId(trackId); setIsPlaying(true); } };
- const handleAddAbilityToSheet = async (power, targetCharId) => { 
-    const newAbility = { title: power.title, type: power.type, cost: power.cost, description: power.description }; 
-    
-    if (targetCharId === "active" || Number(targetCharId) === activeCharId) { 
-      setAbilitiesList(prev => [...prev, newAbility]); 
-      showToast(`Poder [${power.title}] adicionado! Lembre-se de clicar em SALVAR FICHA!`, "success"); 
-      return;
+  const handleAudioUpload = (e) => { 
+    const file = e.target.files[0]; 
+    if (file && currentCampaignId) { 
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64Audio = event.target.result;
+        
+        const newTrackData = {
+          campaignId: currentCampaignId,
+          name: file.name,
+          category: targetAudioCat,
+          base64Data: base64Audio
+        };
+
+        try {
+          const res = await fetch('http://localhost:5104/api/audio', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(newTrackData)
+          });
+
+          if (res.ok) {
+            const savedTrack = await res.json();
+            // Atualiza a tela com a música que veio do banco
+            setAudioCategories(prev => prev.map(cat => cat.id === targetAudioCat ? { ...cat, tracks: [...cat.tracks, { id: savedTrack.id, name: savedTrack.name, url: base64Audio }] } : cat));
+            showToast("Música adicionada à campanha!", "success");
+          }
+        } catch (err) { console.error("Erro ao subir áudio", err); }
+      };
+      reader.readAsDataURL(file); // Lê o MP3/OGG e converte para texto Base64
     } 
-    
+    e.target.value = null; 
+  };
+  const handleDeleteAudioTrack = async (trackId, catId) => {
+    if (!window.confirm("Deseja banir esta música da sua campanha para sempre?")) return;
+
     try {
-      const res = await fetch(`http://localhost:5104/api/characters/${targetCharId}`, { headers: getAuthHeaders() });
+      const res = await fetch(`http://localhost:5104/api/audio/${trackId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+
+      if (res.ok) {
+        showToast("Música removida com sucesso!", "success");
+        // Remove a música da tela instantaneamente
+        setAudioCategories(prev => prev.map(cat => 
+          cat.id === catId 
+            ? { ...cat, tracks: cat.tracks.filter(t => t.id !== trackId) } 
+            : cat
+        ));
+        
+        // Se a música apagada era a que estava tocando, para o som
+        if (activeAudioId === trackId) {
+          setIsPlaying(false);
+          setActiveAudioId(null);
+          if (connection && currentCampaignId) connection.invoke("StopMusic", currentCampaignId.toString()).catch(console.error);
+        }
+      } else {
+        showToast("Erro ao remover a música do banco.", "error");
+      }
+    } catch (err) {
+      console.error("Erro deletar áudio:", err);
+    }
+  };
+ const togglePlayAudio = (trackId) => { 
+    if (activeAudioId === trackId && isPlaying) { 
+      setIsPlaying(false); 
+      // Se parou, avisa os jogadores para pararem também
+      if (connection && currentCampaignId) connection.invoke("StopMusic", currentCampaignId.toString()).catch(console.error);
+    } else { 
+      setActiveAudioId(trackId); 
+      setIsPlaying(true); 
+      // Se deu play, avisa os jogadores para tocarem esta faixa específica
+      if (connection && currentCampaignId) connection.invoke("PlayMusic", currentCampaignId.toString(), trackId).catch(console.error);
+    } 
+  };
+ const handleAddAbilityToSheet = async (power, targetCharId) => { 
+    const newAbility = { title: power.title, type: power.type, cost: power.cost, description: power.description || power.poder || "" }; 
+    
+    let charIdToUpdate = null;
+
+    // 1. Descobre quem é o alvo exato
+    if (targetCharId === "active" || (activeCharId && Number(targetCharId) === activeCharId)) {
+      charIdToUpdate = activeCharId; // Pega o ID numérico da ficha que o usuário está jogando agora
+    } else {
+      charIdToUpdate = Number(targetCharId); // Pega o ID que o Mestre escolheu na lista
+    }
+
+    // Se não encontrou um ID válido (ex: o usuário não tem nenhuma ficha criada)
+    if (!charIdToUpdate) {
+       showToast("Crie ou selecione um personagem primeiro!", "error");
+       return;
+    }
+
+    try {
+      // 2. Busca a ficha limpa direto da fonte
+      const res = await fetch(`http://localhost:5104/api/characters/${charIdToUpdate}`, { headers: getAuthHeaders() });
       
       if (res.ok) {
         const charData = await res.json();
         charData.abilities = charData.abilities || [];
         charData.abilities.push(newAbility);
 
-        const updateRes = await fetch(`http://localhost:5104/api/characters/${targetCharId}`, {
+        // 3. Salva a ficha com o poder novo
+        const updateRes = await fetch(`http://localhost:5104/api/characters/${charIdToUpdate}`, {
           method: 'PUT',
           headers: getAuthHeaders(),
           body: JSON.stringify(charData)
         });
 
         if (updateRes.ok) {
-           showToast(`Poder forjado diretamente na ficha de ${charData.name}!`, "success");
+           showToast(`Poder [${newAbility.title}] forjado na ficha de ${charData.name}!`, "success");
+           
+           // 4. Se a ficha alvo for a mesma que o jogador/mestre estava usando, atualiza a tela na hora!
+           if (activeCharId === charIdToUpdate) {
+             setAbilitiesList(prev => [...prev, newAbility]);
+           }
+           
+           // 5. Grita no rádio para os outros jogadores verem o poder novo do colega (se aplicável)
+           if (connection && currentCampaignId) {
+             connection.invoke("RefreshCharacters", currentCampaignId.toString()).catch(console.error);
+           }
         } else {
-           showToast(`Erro ao salvar na ficha de ${charData.name}.`, "error");
+           showToast(`Erro ao forjar poder na ficha de ${charData.name}.`, "error");
         }
       }
     } catch(e) {
        showToast("Erro de conexão ao forjar poder.", "error");
     }
   };
-
   useEffect(() => { if (audioRef.current) audioRef.current.volume = volume; }, [volume]);
   useEffect(() => { if (audioRef.current) audioRef.current.loop = isLooping; }, [isLooping]);
   useEffect(() => { if (audioRef.current) { if (isPlaying && activeAudioId) audioRef.current.play().catch(e => console.log("Erro áudio", e)); else audioRef.current.pause(); } }, [isPlaying, activeAudioId]);
   
-  useEffect(() => { if (authToken) fetchAllCharacters(); }, [authToken]);
+  // 👇 GATILHO REFRESH ADICIONADO AQUI 👇
+  useEffect(() => { 
+    if (authToken) fetchAllCharacters(); 
+  }, [authToken, currentCampaignId, refreshTrigger]);
 
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder().withUrl("http://localhost:5104/vtthub").withAutomaticReconnect().build();
     setConnection(newConnection);
   }, []);
 
+ // 👇 SISTEMA DE ESCUTA ATUALIZADO E RE-LIGADO CORRETAMENTE 👇
   useEffect(() => {
     if (connection) {
       connection.start().then(() => {
         console.log("⚡ Conectado ao servidor de Korzel!");
-        connection.on("TokenAdded", (tokenJson) => { setSceneTokens(prev => [...prev, JSON.parse(tokenJson)]); });
-        connection.on("TokenMoved", (tokenId, x, y) => { setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, x, y } : t)); });
         
-        connection.on("TokenPermissionChanged", (tokenId, playerName) => { 
-          setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, controlledBy: playerName } : t)); 
+        // 1. Ouvir atualizações de fichas em tempo real (Sem precisar de F5!)
+        connection.on("OnCharactersRefreshed", () => {
+            console.log("📡 Sinal de fumaça recebido: Atualizando fichas dos jogadores...");
+            setRefreshTrigger(prev => prev + 1);
         });
 
-       connection.on("PlayersPulled", (syncJson) => { 
+        // 2. Ouvintes do Mapa e Peças
+        connection.on("TokenAdded", (tokenJson) => { setSceneTokens(prev => [...prev, JSON.parse(tokenJson)]); });
+        connection.on("TokenMoved", (tokenId, x, y) => { setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, x, y } : t)); });
+        connection.on("TokenPermissionChanged", (tokenId, playerName) => { setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, controlledBy: playerName } : t)); });
+        connection.on("TokenRemoved", (tokenId) => { setSceneTokens(prev => prev.filter(t => String(t.id) !== String(tokenId))); });
+        connection.on("TokenSizeChanged", (tokenId, newSize) => { setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, size: newSize } : t)); });
+        
+        // 3. Ouvintes de Sincronização Geral
+        connection.on("PlayersPulled", (syncJson) => { 
           try {
             const data = JSON.parse(syncJson);
             setPlayerActiveSceneId(data.sceneId);
             setScenes(prev => prev.map(s => String(s.id) === String(data.sceneId) ? { ...s, bgImage: data.bgImage } : s));
-            
             setSceneTokens(prev => {
                 const outrosTokens = prev.filter(t => String(t.sceneId) !== String(data.sceneId));
                 return [...outrosTokens, ...data.tokens];
             });
           } catch(e) { console.error("Erro ao sincronizar", e); }
         });
-        
-        connection.on("TokenRemoved", (tokenId) => {
-            setSceneTokens(prev => prev.filter(t => String(t.id) !== String(tokenId)));
-        });
 
-        connection.on("SceneAdded", (sceneJson) => {
-            setScenes(prev => [...prev, JSON.parse(sceneJson)]);
-        });
-
-        connection.on("TokenSizeChanged", (tokenId, newSize) => { setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, size: newSize } : t)); });
+        connection.on("SceneAdded", (sceneJson) => { setScenes(prev => [...prev, JSON.parse(sceneJson)]); });
         connection.on("MapChanged", (payload) => { 
           try {
             const data = JSON.parse(payload);
             setScenes(prev => prev.map(s => String(s.id) === String(data.sceneId) ? { ...s, bgImage: data.bgImage } : s));
           } catch(e) {}
         });
+
+        // 4. Ouvintes do Chat e Rádio
         connection.on("ChatMessageReceived", (messageJson) => { setChatMessages(prev => [...prev, JSON.parse(messageJson)]); });
+        connection.on("MusicStarted", (trackId) => { setActiveAudioId(trackId); setIsPlaying(true); });
+        connection.on("MusicStopped", () => { setIsPlaying(false); });
+
+        // 👇 5. NOVAS ANTENAS: RADAR DE JOGADORES ONLINE 👇
+        connection.on("UpdatePlayerList", (playerList) => {
+            setOnlinePlayers(playerList);
+        });
+
+        connection.on("PlayerDisconnected", () => {
+            // Se alguém caiu, aviso o servidor que EU continuo aqui
+            if (currentCampaignId) {
+                connection.invoke("JoinSession", currentCampaignId.toString(), loggedUserName).catch(console.error);
+            }
+        });
+
+        connection.on("CatalogUpdated", (catalogJson) => {
+            setCatalog(JSON.parse(catalogJson));
+        });
+
+        // 🚨 Conexão inicial enviando o NOME do jogador para aparecer na bolinha:
+        if (currentCampaignId) {
+          connection.invoke("JoinSession", currentCampaignId.toString(), loggedUserName).catch(console.error);
+        }
       }).catch(console.error);
     }
-  }, [connection]);
+  }, [connection, currentCampaignId, loggedUserName]); // <-- Adicionado loggedUserName aqui
 
   const vttProps = {
     isMasterMode, currentCampaignId, charName, lascas, setLascas, sessionTab, setSessionTab, setCurrentPage, setSheetModalOpen, showToast,
@@ -720,13 +1016,12 @@ export default function App() {
     fichaSearch, setFichaSearch, savedCharacters: campaignCharacters, audioCategories, setAudioCategories, activeAudioId, setActiveAudioId, isPlaying, setIsPlaying,
     isLooping, setIsLooping, volume, setVolume, targetAudioCat, setTargetAudioCat, audioFileInputRef,
     catalog, setCatalog, showCatalogForm, setShowCatalogForm, editingCatalogIndex, setEditingCatalogIndex, catalogForm, setCatalogForm, buyQuantities, setBuyQuantities,
-    currentSceneObj, handleMapUpload, addNewScene, handleTokenImageUpload, handleCreateToken,
+    currentSceneObj, handleMapUpload, addNewScene, handleTokenImageUpload, handleCreateToken,onlinePlayers, setOnlinePlayers,
     updateTokenSize, handleDragStartFromLibrary, handleDropOnMap, handleMapWheel, handleMapMouseDown,
     bringToFront, sendToBack, assignPermission, toggleTokenStatus, handleAudioUpload, togglePlayAudio, handleBuyItem, updateBuyQty, handleOpenNewCatalogItem,
     handleEditCatalogItem, handleDeleteCatalogItem, handleSaveCatalogItem, executeRoll, getSkillTotal,
-    hp, setHp, maxHp, setMaxHp, pe, setPe, maxPe, setMaxPe, corruption, setCorruption, maxCorruption, setMaxCorruption,
-    attrInt, attrPre, attrAgi, attrVig, attrFor, attrIns,
-    inventoryList, setInventoryList, attacksList, setAttacksList, abilitiesList, setAbilitiesList, notes, setNotes, activeNoteId, setActiveNoteId,
+    hp, setHp, maxHp, setMaxHp, pe, setPe, maxPe, setMaxPe, corruption, setCorruption, maxCorruption, setMaxCorruption,handleDeleteAudioTrack,
+    attrInt, attrPre, attrAgi, attrVig, attrFor, attrIns,resistances, setResistances,oficioText, setOficioText, inventoryList, setInventoryList, attacksList, setAttacksList, abilitiesList, setAbilitiesList, notes, setNotes, activeNoteId, setActiveNoteId,
     skillsList, setSkillsList, campaignCharacters, loggedUserName, handleCreateNewCharacter, loadCharacterFromDb, handleDeleteCharacter, handleDeleteTokenFromScene, handleDeleteTokenFromLibrary
   };
 
@@ -780,7 +1075,7 @@ export default function App() {
               <button onClick={saveCharacterToDb} className="bg-red-900/80 hover:bg-red-700 text-white font-bold py-1 px-4 rounded border border-red-500 transition-colors text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(153,27,27,0.5)]">💾 Salvar Ficha</button>
               <button onClick={() => setSheetModalOpen(false)} className="text-zinc-500 hover:text-red-500 text-2xl transition-colors">✖</button>
             </div>
-            <CharacterSheet charName={charName} setCharName={setCharName} charOrigin={charOrigin} setCharOrigin={setCharOrigin} charRace={charRace} setCharRace={setCharRace} charClass={charClass} setCharClass={setCharClass} charAge={charAge} setCharAge={setCharAge} charLevel={charLevel} setCharLevel={setCharLevel} attrInt={attrInt} setAttrInt={setAttrInt} attrPre={attrPre} setAttrPre={setAttrPre} attrAgi={attrAgi} setAttrAgi={setAttrAgi} attrVig={attrVig} setAttrVig={setAttrVig} attrFor={attrFor} setAttrFor={setAttrFor} attrIns={attrIns} setAttrIns={setAttrIns} hp={hp} setHp={setHp} maxHp={maxHp} setMaxHp={setMaxHp} pe={pe} setPe={setPe} maxPe={maxPe} setMaxPe={setMaxPe} corruption={corruption} setCorruption={setCorruption} maxCorruption={maxCorruption} setMaxCorruption={setMaxCorruption} lascas={lascas} setLascas={setLascas} currentWeight={currentWeight} maxWeight={maxWeight} skillsList={skillsList} setSkillsList={setSkillsList} executeRoll={executeRoll} getSkillTotal={getSkillTotal} activeFichaTab={activeFichaTab} setActiveFichaTab={setActiveFichaTab} showWeaponForm={showWeaponForm} setShowWeaponForm={setShowWeaponForm} editingWeaponIndex={editingWeaponIndex} weaponForm={weaponForm} setWeaponForm={setWeaponForm} attacksList={attacksList} handleOpenNewWeapon={handleOpenNewWeapon} handleEditWeapon={handleEditWeapon} handleDeleteWeapon={handleDeleteWeapon} handleSaveWeapon={handleSaveWeapon} showAbilityForm={showAbilityForm} setShowAbilityForm={setShowAbilityForm} editingAbilityIndex={editingAbilityIndex} abilityForm={abilityForm} setAbilityForm={setAbilityForm} abilitiesList={abilitiesList} handleOpenNewAbility={handleOpenNewAbility} handleEditAbility={handleEditAbility} handleDeleteAbility={handleDeleteAbility} handleSaveAbility={handleSaveAbility} showItemForm={showItemForm} setShowItemForm={setShowItemForm} editingItemIndex={editingItemIndex} itemForm={itemForm} setItemForm={setItemForm} inventoryList={inventoryList} handleOpenNewItem={handleOpenNewItem} handleEditItem={handleEditItem} handleDeleteItem={handleDeleteItem} handleSaveItem={handleSaveItem} charDeity={charDeity} handleDeityChange={handleDeityChange} mut1={mut1} setMut1={setMut1} mut2={mut2} setMut2={setMut2} mut3={mut3} setMut3={setMut3} notes={notes} activeNoteId={activeNoteId} setActiveNoteId={setActiveNoteId} handleAddNote={handleAddNote} handleDeleteNote={handleDeleteNote} handleNoteChange={handleNoteChange} activeNote={activeNote} connection={connection} setChatMessages={setChatMessages} showToast={showToast} />
+           <CharacterSheet charName={charName} setCharName={setCharName} charOrigin={charOrigin} setCharOrigin={setCharOrigin} charRace={charRace} setCharRace={setCharRace} charClass={charClass} setCharClass={setCharClass} charAge={charAge} setCharAge={setCharAge} charLevel={charLevel} setCharLevel={setCharLevel} attrInt={attrInt} setAttrInt={setAttrInt} attrPre={attrPre} setAttrPre={setAttrPre} attrAgi={attrAgi} setAttrAgi={setAttrAgi} attrVig={attrVig} setAttrVig={setAttrVig} attrFor={attrFor} setAttrFor={setAttrFor} attrIns={attrIns} setAttrIns={setAttrIns} hp={hp} setHp={setHp} maxHp={maxHp} setMaxHp={setMaxHp} pe={pe} setPe={setPe} maxPe={maxPe} setMaxPe={setMaxPe} corruption={corruption} setCorruption={setCorruption} maxCorruption={maxCorruption} setMaxCorruption={setMaxCorruption} lascas={lascas} setLascas={setLascas} currentWeight={currentWeight} maxWeight={maxWeight} skillsList={skillsList} setSkillsList={setSkillsList} executeRoll={executeRoll} getSkillTotal={getSkillTotal} resistances={resistances} setResistances={setResistances} oficioText={oficioText} setOficioText={setOficioText} activeFichaTab={activeFichaTab} setActiveFichaTab={setActiveFichaTab} showWeaponForm={showWeaponForm} setShowWeaponForm={setShowWeaponForm} editingWeaponIndex={editingWeaponIndex} weaponForm={weaponForm} setWeaponForm={setWeaponForm} attacksList={attacksList} handleOpenNewWeapon={handleOpenNewWeapon} handleEditWeapon={handleEditWeapon} handleDeleteWeapon={handleDeleteWeapon} handleSaveWeapon={handleSaveWeapon} showAbilityForm={showAbilityForm} setShowAbilityForm={setShowAbilityForm} editingAbilityIndex={editingAbilityIndex} abilityForm={abilityForm} setAbilityForm={setAbilityForm} abilitiesList={abilitiesList} handleOpenNewAbility={handleOpenNewAbility} handleEditAbility={handleEditAbility} handleDeleteAbility={handleDeleteAbility} handleSaveAbility={handleSaveAbility} showItemForm={showItemForm} setShowItemForm={setShowItemForm} editingItemIndex={editingItemIndex} itemForm={itemForm} setItemForm={setItemForm} inventoryList={inventoryList} handleOpenNewItem={handleOpenNewItem} handleEditItem={handleEditItem} handleDeleteItem={handleDeleteItem} handleSaveItem={handleSaveItem} charDeity={charDeity} handleDeityChange={handleDeityChange} mut1={mut1} setMut1={setMut1} mut2={mut2} setMut2={setMut2} mut3={mut3} setMut3={setMut3} notes={notes} activeNoteId={activeNoteId} setActiveNoteId={setActiveNoteId} handleAddNote={handleAddNote} handleDeleteNote={handleDeleteNote} handleNoteChange={handleNoteChange} activeNote={activeNote} connection={connection} setChatMessages={setChatMessages} showToast={showToast} />
           </div>
         </div>
       )}
@@ -792,12 +1087,27 @@ export default function App() {
         </div>
       )}
 
-      <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} loggedUserName={loggedUserName} handleLogout={handleLogout} />
+     <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} loggedUserName={loggedUserName} handleLogout={handleLogout} isAdmin={isAdmin} />
 
       <main className="flex-1 w-full flex flex-col min-h-0">
        {currentPage === 'início' && (
           <div className="p-4 lg:p-8 animate-fade-in flex flex-col gap-10 overflow-y-auto w-full max-w-7xl mx-auto custom-scrollbar">
             <Lobby handleEnterSession={handleEnterSession} setCurrentPage={setCurrentPage} charName={charName} charClass={charClass} charLevel={charLevel} campaigns={campaigns} setCampaigns={setCampaigns} />
+          </div>
+        )}
+        {currentPage === 'configuracoes' && (
+          <div className="flex-1 overflow-y-auto animate-fade-in min-h-0">
+             <Configuracoes 
+               authToken={authToken} 
+               setLoggedUserName={setLoggedUserName} 
+               showToast={showToast} 
+               setCurrentPage={setCurrentPage} 
+             />
+          </div>
+        )}
+        {currentPage === 'admin' && (
+          <div className="flex-1 overflow-y-auto animate-fade-in min-h-0">
+             <AdminPanel authToken={authToken} showToast={showToast} setCurrentPage={setCurrentPage} />
           </div>
         )}
         {currentPage === 'sessao' && <VttSession {...vttProps} connection={connection} />}
@@ -811,7 +1121,7 @@ export default function App() {
             <button onClick={saveCharacterToDb} className="bg-red-900/80 hover:bg-red-700 text-white font-bold py-2 px-6 rounded border border-red-500 transition-colors text-sm uppercase tracking-widest shadow-[0_0_15px_rgba(153,27,27,0.5)]">💾 Salvar Ficha Completa</button>
             <button onClick={() => setCurrentPage('sessao')} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white font-bold py-2 px-6 rounded border border-zinc-600 transition-colors text-sm uppercase tracking-widest">✖ Fechar e Voltar</button>
           </div>
-          <CharacterSheet charName={charName} setCharName={setCharName} charOrigin={charOrigin} setCharOrigin={setCharOrigin} charRace={charRace} setCharRace={setCharRace} charClass={charClass} setCharClass={setCharClass} charAge={charAge} setCharAge={setCharAge} charLevel={charLevel} setCharLevel={setCharLevel} attrInt={attrInt} setAttrInt={setAttrInt} attrPre={attrPre} setAttrPre={setAttrPre} attrAgi={attrAgi} setAttrAgi={setAttrAgi} attrVig={attrVig} setAttrVig={setAttrVig} attrFor={attrFor} setAttrFor={setAttrFor} attrIns={attrIns} setAttrIns={setAttrIns} hp={hp} setHp={setHp} maxHp={maxHp} setMaxHp={setMaxHp} pe={pe} setPe={setPe} maxPe={maxPe} setMaxPe={setMaxPe} corruption={corruption} setCorruption={setCorruption} maxCorruption={maxCorruption} setMaxCorruption={setMaxCorruption} lascas={lascas} setLascas={setLascas} currentWeight={currentWeight} maxWeight={maxWeight} skillsList={skillsList} setSkillsList={setSkillsList} executeRoll={executeRoll} getSkillTotal={getSkillTotal} activeFichaTab={activeFichaTab} setActiveFichaTab={setActiveFichaTab} showWeaponForm={showWeaponForm} setShowWeaponForm={setShowWeaponForm} editingWeaponIndex={editingWeaponIndex} weaponForm={weaponForm} setWeaponForm={setWeaponForm} attacksList={attacksList} handleOpenNewWeapon={handleOpenNewWeapon} handleEditWeapon={handleEditWeapon} handleDeleteWeapon={handleDeleteWeapon} handleSaveWeapon={handleSaveWeapon} showAbilityForm={showAbilityForm} setShowAbilityForm={setShowAbilityForm} editingAbilityIndex={editingAbilityIndex} abilityForm={abilityForm} setAbilityForm={setAbilityForm} abilitiesList={abilitiesList} handleOpenNewAbility={handleOpenNewAbility} handleEditAbility={handleEditAbility} handleDeleteAbility={handleDeleteAbility} handleSaveAbility={handleSaveAbility} showItemForm={showItemForm} setShowItemForm={setShowItemForm} editingItemIndex={editingItemIndex} itemForm={itemForm} setItemForm={setItemForm} inventoryList={inventoryList} handleOpenNewItem={handleOpenNewItem} handleEditItem={handleEditItem} handleDeleteItem={handleDeleteItem} handleSaveItem={handleSaveItem} charDeity={charDeity} handleDeityChange={handleDeityChange} mut1={mut1} setMut1={setMut1} mut2={mut2} setMut2={setMut2} mut3={mut3} setMut3={setMut3} notes={notes} activeNoteId={activeNoteId} setActiveNoteId={setActiveNoteId} handleAddNote={handleAddNote} handleDeleteNote={handleDeleteNote} handleNoteChange={handleNoteChange} activeNote={activeNote} connection={connection} setChatMessages={setChatMessages} showToast={showToast} />
+          <CharacterSheet charName={charName} setCharName={setCharName} charOrigin={charOrigin} setCharOrigin={setCharOrigin} charRace={charRace} setCharRace={setCharRace} charClass={charClass} setCharClass={setCharClass} charAge={charAge} setCharAge={setCharAge} charLevel={charLevel} setCharLevel={setCharLevel} attrInt={attrInt} setAttrInt={setAttrInt} attrPre={attrPre} setAttrPre={setAttrPre} attrAgi={attrAgi} setAttrAgi={setAttrAgi} attrVig={attrVig} setAttrVig={setAttrVig} attrFor={attrFor} setAttrFor={setAttrFor} attrIns={attrIns} setAttrIns={setAttrIns} hp={hp} setHp={setHp} maxHp={maxHp} setMaxHp={setMaxHp} pe={pe} setPe={setPe} maxPe={maxPe} setMaxPe={setMaxPe} corruption={corruption} setCorruption={setCorruption} maxCorruption={maxCorruption} setMaxCorruption={setMaxCorruption} lascas={lascas} setLascas={setLascas} currentWeight={currentWeight} maxWeight={maxWeight} skillsList={skillsList} setSkillsList={setSkillsList} executeRoll={executeRoll} getSkillTotal={getSkillTotal} activeFichaTab={activeFichaTab} setActiveFichaTab={setActiveFichaTab} showWeaponForm={showWeaponForm} setShowWeaponForm={setShowWeaponForm} editingWeaponIndex={editingWeaponIndex} weaponForm={weaponForm} setWeaponForm={setWeaponForm} attacksList={attacksList} handleOpenNewWeapon={handleOpenNewWeapon} handleEditWeapon={handleEditWeapon} handleDeleteWeapon={handleDeleteWeapon} handleSaveWeapon={handleSaveWeapon} showAbilityForm={showAbilityForm} setShowAbilityForm={setShowAbilityForm} editingAbilityIndex={editingAbilityIndex} abilityForm={abilityForm} setAbilityForm={setAbilityForm} abilitiesList={abilitiesList} handleOpenNewAbility={handleOpenNewAbility} handleEditAbility={handleEditAbility} handleDeleteAbility={handleDeleteAbility} handleSaveAbility={handleSaveAbility} showItemForm={showItemForm} setShowItemForm={setShowItemForm} editingItemIndex={editingItemIndex} itemForm={itemForm} setItemForm={setItemForm} inventoryList={inventoryList} handleOpenNewItem={handleOpenNewItem} handleEditItem={handleEditItem} handleDeleteItem={handleDeleteItem} handleSaveItem={handleSaveItem} charDeity={charDeity} handleDeityChange={handleDeityChange} mut1={mut1} setMut1={setMut1} mut2={mut2} setMut2={setMut2} mut3={mut3} setMut3={setMut3} notes={notes} activeNoteId={activeNoteId} setActiveNoteId={setActiveNoteId} handleAddNote={handleAddNote} handleDeleteNote={handleDeleteNote} handleNoteChange={handleNoteChange} activeNote={activeNote} connection={connection} setChatMessages={setChatMessages} showToast={showToast} resistances={resistances} setResistances={setResistances} oficioText={oficioText} setOficioText={setOficioText} />
         </div>
       </main>
     </div>

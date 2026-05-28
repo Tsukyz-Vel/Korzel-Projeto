@@ -139,7 +139,7 @@ export default function SessionSidebar(props) {
         </div>
       )}
 
-      {/* 2. ABA ÁUDIO (Apenas Mestre) */}
+   {/* 2. ABA ÁUDIO (Apenas Mestre) */}
       {isMasterMode && sessionTab === 'áudio' && (
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 min-h-0">
           <div className="flex justify-between items-center border-b border-zinc-800 pb-2 shrink-0">
@@ -162,12 +162,32 @@ export default function SessionSidebar(props) {
                 ) : (
                   category.tracks.map(track => (
                     <div key={track.id} className={`p-3 rounded-lg border flex flex-col gap-3 transition-colors ${activeAudioId === track.id ? 'bg-amber-950/20 border-amber-800/50' : 'bg-black/40 border-zinc-800 hover:border-zinc-600'}`}>
-                      <div className="flex justify-between items-center">
-                        <span className={`text-xs font-bold ${activeAudioId === track.id ? 'text-amber-500' : 'text-zinc-300'}`}>{track.name}</span>
-                        <button onClick={() => togglePlayAudio(track.id)} className={`w-8 h-8 rounded flex items-center justify-center text-lg ${activeAudioId === track.id && isPlaying ? 'bg-amber-600 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
-                          {activeAudioId === track.id && isPlaying ? '⏸' : '▶'}
-                        </button>
+                      
+                      <div className="flex justify-between items-center group/track relative">
+                        <span className={`text-xs font-bold truncate pr-2 ${activeAudioId === track.id ? 'text-amber-500' : 'text-zinc-300'}`}>
+                          {track.name}
+                        </span>
+                        
+                                        <div className="flex items-center gap-3">
+                          {/* 👇 TRAVA REMOVIDA! Agora a lixeira aparece em QUALQUER pasta para o Mestre 👇 */}
+                          {isMasterMode && (
+                            <button 
+                              onClick={() => props.handleDeleteAudioTrack(track.id, category.id)} 
+                              className="text-[11px] opacity-40 hover:opacity-100 hover:text-red-500 transition-all"
+                              title="Excluir faixa do banco"
+                            >
+                              🗑️
+                            </button>
+                          )}
+
+                          {/* BOTÃO DE PLAY/PAUSE */}
+                          <button onClick={() => togglePlayAudio(track.id)} className={`w-8 h-8 rounded flex items-center justify-center text-lg ${activeAudioId === track.id && isPlaying ? 'bg-amber-600 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
+                            {activeAudioId === track.id && isPlaying ? '⏸' : '▶'}
+                          </button>
+                        </div>
                       </div>
+                      
+                      {/* CONTROLE DE VOLUME */}
                       {activeAudioId === track.id && (
                         <div className="flex items-center gap-3 border-t border-amber-900/30 pt-2 animate-fade-in">
                           <span className="text-xs">🔈</span>
@@ -184,7 +204,7 @@ export default function SessionSidebar(props) {
         </div>
       )}
       
-      {/* 3. ABA FICHAS (COM A LIXEIRA) */}
+      {/* 3. ABA FICHAS (COM DIVISÓRIAS) */}
       {sessionTab === 'fichas' && (
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 relative min-h-0">
           
@@ -198,105 +218,190 @@ export default function SessionSidebar(props) {
           </button>
           
           <div className="flex flex-col gap-3 mt-2">
-            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest border-b border-zinc-800 pb-1 shrink-0">Vinculados a esta campanha</span>
             
-            {campaignCharacters && campaignCharacters.length > 0 ? (
-              campaignCharacters
-                .filter(c => (c.name || "").toLowerCase().includes((fichaSearch || "").toLowerCase()))
-                .map(char => (
-                <div key={char.id} className="bg-black/40 border border-zinc-800/80 rounded p-3 flex flex-col gap-3 shadow-md hover:border-red-900/50 transition-colors shrink-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded bg-red-950 border border-red-900 flex items-center justify-center text-red-500 font-bold text-xs">
-                      {char.name ? char.name.charAt(0).toUpperCase() : "?"}
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs text-white font-bold">{char.name || "Sem Nome"}</span>
-                      <span className="text-[9px] text-zinc-500 uppercase mt-0.5">Nvl {char.level || 1} • {char.class || "Desconhecido"}</span>
-                    </div>
+            {/* MÁGICA DA DIVISÃO E RENDERIZAÇÃO */}
+            {(() => {
+              const filteredChars = (campaignCharacters || []).filter(c => (c.name || "").toLowerCase().includes((fichaSearch || "").toLowerCase()));
+
+              // Preparamos a separação. (Em breve o C# enviará a flag 'isMine')
+              const playerSheets = filteredChars.filter(c => c.isMine === false);
+              const mySheets = filteredChars.filter(c => c.isMine !== false); 
+
+              if (filteredChars.length === 0) {
+                return (
+                  <div className="text-center py-6 opacity-50">
+                    <span className="text-2xl mb-2 block">📜</span>
+                    <p className="text-xs text-zinc-500 italic">Nenhuma ficha nas redondezas.</p>
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => loadCharacterFromDb(char.id)} className="flex-1 bg-red-950/40 hover:bg-red-900 text-red-300 border border-red-900 text-[9px] uppercase font-bold tracking-widest py-2 rounded transition-colors">
-                      📖 Abrir
-                    </button>
-                    <button onClick={() => handleDeleteCharacter(char.id, char.name)} className="bg-zinc-900/80 hover:bg-red-900 text-zinc-500 hover:text-red-200 border border-zinc-800 hover:border-red-900 text-[10px] px-3 rounded transition-colors" title="Apagar Ficha">
-                      🗑️
-                    </button>
+                );
+              }
+
+              return (
+                <>
+                  {/* === FICHAS DOS JOGADORES (APENAS MESTRE) === */}
+                  {isMasterMode && playerSheets.length > 0 && (
+                    <div className="mb-4 animate-fade-in">
+                      <span className="text-[9px] text-blue-400 font-bold uppercase tracking-widest border-b border-blue-900/50 pb-1 flex items-center gap-2 mb-3 shrink-0">
+                        <span>🛡️</span> Heróis da Campanha
+                      </span>
+                      {playerSheets.map(char => (
+                        <div key={char.id} className="bg-black/40 border border-blue-900/50 hover:border-blue-700 rounded p-3 flex flex-col gap-3 shadow-md transition-colors shrink-0 mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded bg-blue-950 border border-blue-900 flex items-center justify-center text-blue-500 font-bold text-xs">
+                              {char.name ? char.name.charAt(0).toUpperCase() : "?"}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-xs text-white font-bold">{char.name || "Sem Nome"}</span>
+                              <span className="text-[9px] text-zinc-500 uppercase mt-0.5">Nvl {char.level || 1} • {char.class || "Desconhecido"}</span>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button onClick={() => loadCharacterFromDb(char.id)} className="flex-1 bg-blue-950/40 hover:bg-blue-900 text-blue-300 border border-blue-900 text-[9px] uppercase font-bold tracking-widest py-2 rounded transition-colors">
+                              📖 Inspecionar
+                            </button>
+                            {/* O mestre inspeciona, mas não pode deletar a ficha do jogador aqui */}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* === MINHAS FICHAS (NPCs ou Fichas Próprias) === */}
+                  <div className="animate-fade-in">
+                    <span className={`text-[9px] font-bold uppercase tracking-widest border-b pb-1 flex items-center gap-2 mb-3 shrink-0 ${isMasterMode ? 'text-purple-400 border-purple-900/50' : 'text-zinc-500 border-zinc-800'}`}>
+                      <span>{isMasterMode ? '👾' : '👤'}</span> {isMasterMode ? 'Minhas Fichas (NPCs / Monstros)' : 'Minhas Fichas'}
+                    </span>
+                    {mySheets.map(char => (
+                      <div key={char.id} className="bg-black/40 border border-zinc-800/80 hover:border-red-900/50 rounded p-3 flex flex-col gap-3 shadow-md transition-colors shrink-0 mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded bg-red-950 border border-red-900 flex items-center justify-center text-red-500 font-bold text-xs">
+                            {char.name ? char.name.charAt(0).toUpperCase() : "?"}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-xs text-white font-bold">{char.name || "Sem Nome"}</span>
+                            <span className="text-[9px] text-zinc-500 uppercase mt-0.5">Nvl {char.level || 1} • {char.class || "Desconhecido"}</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => loadCharacterFromDb(char.id)} className="flex-1 bg-red-950/40 hover:bg-red-900 text-red-300 border border-red-900 text-[9px] uppercase font-bold tracking-widest py-2 rounded transition-colors">
+                            📖 Abrir
+                          </button>
+                          <button onClick={() => handleDeleteCharacter(char.id, char.name)} className="bg-zinc-900/80 hover:bg-red-900 text-zinc-500 hover:text-red-200 border border-zinc-800 hover:border-red-900 text-[10px] px-3 rounded transition-colors" title="Apagar Ficha">
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
+
+          </div>
+        </div>
+      )}
+     {/* 4. ABA LOJA */}
+      {props.sessionTab === 'loja' && (
+        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 min-h-0">
+          <div className="bg-amber-950/20 border border-amber-900/50 p-3 rounded-lg flex justify-between items-center shadow-inner shrink-0">
+            <span className="text-[10px] text-amber-600 uppercase tracking-widest font-bold">Sua Bolsa</span>
+            <span className="text-lg font-bold text-amber-500">🪙 {props.lascas || 0}</span>
+          </div>
+          
+          {/* 👇 BOTÃO E FORMULÁRIO DO MESTRE 👇 */}
+          {props.isMasterMode && !props.showCatalogForm && (
+            <button onClick={props.handleOpenNewCatalogItem} className="w-full shrink-0 bg-purple-900/50 hover:bg-purple-800 text-purple-200 text-[10px] font-bold uppercase tracking-widest py-2 rounded transition-colors border border-purple-700 shadow-md">
+              + Adicionar Produto
+            </button>
+          )}
+
+          {props.isMasterMode && props.showCatalogForm && (
+            <div className="bg-zinc-900/90 border border-purple-700/50 rounded-lg p-3 shrink-0 shadow-lg animate-fade-in">
+              <h4 className="text-[10px] text-purple-400 font-bold uppercase tracking-widest border-b border-purple-900/50 pb-1 mb-2">
+                {props.editingCatalogIndex !== null ? "🔧 Editar Produto" : "📦 Novo Produto"}
+              </h4>
+              <div className="flex flex-col gap-2">
+                <input type="text" value={props.catalogForm.name} onChange={e => props.setCatalogForm({...props.catalogForm, name: e.target.value})} placeholder="Nome do Item" className="w-full bg-black/50 border border-zinc-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" />
+                <div className="flex gap-2">
+                  <input type="number" value={props.catalogForm.price} onChange={e => props.setCatalogForm({...props.catalogForm, price: Number(e.target.value)})} placeholder="Preço" className="w-1/2 bg-black/50 border border-zinc-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" />
+                  <input type="number" step="0.1" value={props.catalogForm.weight} onChange={e => props.setCatalogForm({...props.catalogForm, weight: Number(e.target.value)})} placeholder="Peso" className="w-1/2 bg-black/50 border border-zinc-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" />
+                </div>
+                <input type="text" value={props.catalogForm.desc} onChange={e => props.setCatalogForm({...props.catalogForm, desc: e.target.value})} placeholder="Descrição breve" className="w-full bg-black/50 border border-zinc-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" />
+                <div className="flex justify-end gap-2 mt-1">
+                  <button onClick={() => props.setShowCatalogForm(false)} className="px-3 py-1 text-[9px] font-bold text-zinc-400 hover:text-white uppercase transition-colors">Cancelar</button>
+                  <button onClick={props.handleSaveCatalogItem} className="px-3 py-1 text-[9px] font-bold bg-purple-800 hover:bg-purple-600 text-white rounded uppercase transition-colors shadow">Salvar</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3 mt-2">
+            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest border-b border-zinc-800 pb-1 shrink-0">Mercado Local</span>
+            {props.catalog && props.catalog.map((item, index) => {
+              const qty = props.buyQuantities[index] || 1;
+              return (
+                <div key={index} className="bg-black/40 border border-[#3e2723] rounded p-3 flex flex-col gap-2 relative group hover:border-amber-700/80 transition-colors shadow-sm shrink-0">
+                  
+                  {/* 👇 BOTÕES DE EDITAR/DELETAR DO MESTRE 👇 */}
+                  {props.isMasterMode && (
+                    <div className="absolute top-2 right-2 flex gap-2">
+                      <button onClick={() => props.handleEditCatalogItem(index)} className="text-[10px] opacity-40 hover:opacity-100 hover:text-purple-400 transition-opacity" title="Editar Produto">✏️</button>
+                      <button onClick={() => props.handleDeleteCatalogItem(index)} className="text-[10px] opacity-40 hover:opacity-100 hover:text-red-500 transition-opacity" title="Excluir Produto">🗑️</button>
+                    </div>
+                  )}
+                  
+                  <div>
+                    <span className="text-white text-sm font-bold block pr-12">{item.name}</span>
+                    <span className="text-[9px] text-zinc-500 uppercase">{item.type} • {item.weight} kg</span>
+                  </div>
+                  <p className="text-[10px] text-zinc-400 italic line-clamp-2">{item.desc}</p>
+                  
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#3e2723]">
+                    <span className="text-amber-500 font-bold text-sm">{item.price} Lc</span>
+                    
+                    <div className="flex flex-col gap-1 items-end">
+                       {/* 👇 SELETOR DE QUEM ESTÁ A COMPRAR 👇 */}
+                       <select 
+                         id={`buy-target-${index}`}
+                         className="bg-zinc-950 border border-zinc-800 text-[9px] text-zinc-300 rounded px-1 py-1 mb-1 outline-none cursor-pointer max-w-[140px]"
+                       >
+                         <option value="active">Para: Ficha Aberta</option>
+                         {props.savedCharacters?.map(char => (
+                           <option key={char.id} value={char.id}>{char.name}</option>
+                         ))}
+                       </select>
+
+                       <div className="flex gap-2 items-center">
+                         <div className="flex items-center bg-zinc-950 border border-amber-900/30 rounded">
+                           <button onClick={() => props.updateBuyQty(index, -1)} className="px-2 py-0.5 text-zinc-400 hover:text-white">-</button>
+                           <span className="text-xs text-white w-4 text-center">{qty}</span>
+                           <button onClick={() => props.updateBuyQty(index, 1)} className="px-2 py-0.5 text-zinc-400 hover:text-white">+</button>
+                         </div>
+                         
+                         {/* 👇 CHAMA A FUNÇÃO PUXANDO O ID DO SELECT 👇 */}
+                         <button 
+                           onClick={() => {
+                              const targetSelect = document.getElementById(`buy-target-${index}`);
+                              const targetCharId = targetSelect ? targetSelect.value : "active";
+                              props.handleBuyItem(item, index, targetCharId);
+                           }} 
+                           className="bg-amber-900/80 hover:bg-amber-700 text-amber-100 text-[9px] font-bold uppercase px-3 py-1.5 rounded transition-colors shadow"
+                         >
+                           Comprar
+                         </button>
+                       </div>
+                    </div>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-6 opacity-50">
-                <span className="text-2xl mb-2 block">📜</span>
-                <p className="text-xs text-zinc-500 italic">Nenhuma ficha salva no banco.</p>
-              </div>
+              );
+            })}
+            
+            {(!props.catalog || props.catalog.length === 0) && (
+               <p className="text-[10px] text-zinc-500 italic text-center py-4">O mercado está vazio hoje.</p>
             )}
           </div>
         </div>
       )}
-
-      {/* 4. ABA LOJA */}
-      {sessionTab === 'loja' && (
-        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 min-h-0">
-          <div className="bg-amber-950/20 border border-amber-900/50 p-3 rounded-lg flex justify-between items-center shadow-inner shrink-0">
-            <span className="text-[10px] text-amber-600 uppercase tracking-widest font-bold">Sua Bolsa</span>
-            <span className="text-lg font-bold text-amber-500">🪙 {lascas}</span>
-          </div>
-          {isMasterMode && (
-            <button onClick={() => setShowCatalogForm(true)} className="w-full shrink-0 bg-purple-900/50 hover:bg-purple-800 text-purple-200 text-[10px] font-bold uppercase tracking-widest py-2 rounded transition-colors border border-purple-700 shadow-md">
-              + Adicionar Produto
-            </button>
-          )}
-          <div className="flex flex-col gap-3 mt-2">
-            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest border-b border-zinc-800 pb-1 shrink-0">Mercado Local</span>
-            {catalog.map((item, index) => {
-  const qty = buyQuantities[index] || 1;
-  return (
-    <div key={index} className="bg-black/40 border border-[#3e2723] rounded p-3 flex flex-col gap-2 relative group hover:border-amber-700/80 transition-colors shadow-sm shrink-0">
-      {/* ... [MANTENHA O CÓDIGO DO BOTÃO EDITAR/DELETAR DO MESTRE AQUI] ... */}
-      
-      <div>
-        <span className="text-white text-sm font-bold block pr-10">{item.name}</span>
-        <span className="text-[9px] text-zinc-500 uppercase">{item.type} • {item.weight} kg</span>
-      </div>
-      <p className="text-[10px] text-zinc-400 italic line-clamp-2">{item.desc}</p>
-      
-      <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#3e2723]">
-        <span className="text-amber-500 font-bold text-sm">{item.price} Lc</span>
-        
-        <div className="flex flex-col gap-1 items-end">
-           {/* 👇 SELETOR DE QUEM ESTÁ A COMPRAR 👇 */}
-           <select 
-             value={targetBuyerId} 
-             onChange={(e) => setTargetBuyerId(e.target.value)}
-             className="bg-zinc-950 border border-zinc-800 text-[9px] text-zinc-300 rounded px-1 mb-1"
-           >
-             <option value="active">Comprar para: Ficha Aberta</option>
-             {props.savedCharacters?.map(char => (
-               <option key={char.id} value={char.id}>{char.name}</option>
-             ))}
-           </select>
-
-           <div className="flex gap-2 items-center">
-             <div className="flex items-center bg-zinc-950 border border-amber-900/30 rounded">
-               <button onClick={() => updateBuyQty(index, -1)} className="px-2 text-zinc-400 hover:text-white">-</button>
-               <span className="text-xs text-white w-4 text-center">{qty}</span>
-               <button onClick={() => updateBuyQty(index, 1)} className="px-2 text-zinc-400 hover:text-white">+</button>
-             </div>
-             
-             {/* 👇 AGORA PASSAMOS O targetBuyerId PARA A FUNÇÃO DE COMPRA 👇 */}
-             <button onClick={() => handleBuyItem(item, index, targetBuyerId)} className="bg-amber-900/80 hover:bg-amber-700 text-amber-100 text-[9px] font-bold uppercase px-2 py-1.5 rounded transition-colors">
-               Comprar
-             </button>
-           </div>
-        </div>
-      </div>
-    </div>
-  )
-})}
-          </div>
-        </div>
-      )}
-
       {/* 5. ABA CHAT */}
       {sessionTab === 'chat' && (
         <div className="flex-1 flex flex-col p-4 overflow-hidden h-full min-h-0">

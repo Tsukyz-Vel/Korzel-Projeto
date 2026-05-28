@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export default function Navbar({ currentPage, setCurrentPage, loggedUserName, handleLogout }) {
+export default function Navbar({ currentPage, setCurrentPage, loggedUserName, handleLogout, isAdmin }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -18,9 +18,13 @@ export default function Navbar({ currentPage, setCurrentPage, loggedUserName, ha
   return (
     <nav className="bg-[#0a0502] border-b border-[#3e2723] px-4 lg:px-8 py-3 flex items-center justify-between z-[500] relative shadow-[0_5px_15px_rgba(0,0,0,0.5)] shrink-0">
       
-      {/* LOGO E TÍTULO */}
+     {/* LOGO E TÍTULO */}
       <div className="flex items-center gap-3">
-        <span className="text-xl sm:text-2xl font-bold text-amber-600 tracking-widest uppercase drop-shadow-[0_0_8px_rgba(217,119,6,0.6)]">
+        <span 
+          onClick={() => { if (isAdmin) setCurrentPage('admin'); }}
+          className={`text-xl sm:text-2xl font-bold text-amber-600 tracking-widest uppercase drop-shadow-[0_0_8px_rgba(217,119,6,0.6)] ${isAdmin ? 'cursor-pointer hover:text-red-500 transition-colors' : ''}`}
+          title={isAdmin ? "Painel Divino" : ""}
+        >
           Korzel VTT
         </span>
       </div>
@@ -71,14 +75,21 @@ export default function Navbar({ currentPage, setCurrentPage, loggedUserName, ha
               
               {/* BOTÕES DO MENU */}
               <button 
-                onClick={() => { setIsMenuOpen(false); /* Aqui você pode colocar uma função futura de abrir modal de config */ }} 
-                className="text-left px-4 py-2.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors flex items-center gap-2"
+                onClick={() => { 
+                  setIsMenuOpen(false); 
+                  setCurrentPage('configuracoes'); // 👇 AGORA ELE MUDA DE TELA 👇
+                }} 
+                className={`text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-2 ${currentPage === 'configuracoes' ? 'bg-zinc-800 text-amber-500' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'}`}
               >
                 <span>⚙️</span> Configurações
               </button>
               
               <button 
-                onClick={() => { setIsMenuOpen(false); handleLogout(); }} 
+                onClick={() => { 
+                  setIsMenuOpen(false); 
+                  handleLogout(); 
+                  setCurrentPage('início'); 
+                }} 
                 className="text-left px-4 py-2.5 text-xs font-bold text-red-400 hover:bg-red-950/50 hover:text-red-300 transition-colors flex items-center gap-2 border-t border-[#3e2723] mt-1"
               >
                 <span>🚪</span> Sair da Conta

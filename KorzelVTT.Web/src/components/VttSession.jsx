@@ -9,7 +9,8 @@ export default function VttSession(props) {
     showToast, addNewScene, fileInputRef, handleMapUpload, mapRef, isDraggingMap, handleMapMouseDown,
     handleMapWheel, handleDropOnMap, mapOffset, mapScale, currentSceneObj, sceneTokens, setSceneTokens, draggingToken,
     setDraggingToken, tokenContextMenu, setTokenContextMenu, setMapScale, setSheetModalOpen,
-    bringToFront, sendToBack, assignPermission, toggleTokenStatus, connection
+    bringToFront, sendToBack, assignPermission, toggleTokenStatus, connection,
+    onlinePlayers // 👈 Destruturado aqui para o VttSession poder ler as bolinhas
   } = props;
 
   const [activeTool, setActiveTool] = useState('select');
@@ -74,19 +75,20 @@ export default function VttSession(props) {
   // ==========================================
   // AS "BOCAS" DAS AÇÕES RÁPIDAS
   // ==========================================
-  const changeWeatherSync = (newWeather) => {
+ const changeWeatherSync = (newWeather) => {
     setWeather(newWeather);
-    if (connection) connection.invoke("ChangeWeather", "Sala_Principal", newWeather).catch(console.error);
+    // 👇 Troque "Sala_Principal" por currentCampaignId.toString()
+    if (connection && currentCampaignId) connection.invoke("ChangeWeather", currentCampaignId.toString(), newWeather).catch(console.error);
   };
 
-  const clearDrawingsSync = () => {
+ const clearDrawingsSync = () => {
     setDrawings([]);
-    if (connection) connection.invoke("ClearDrawings", "Sala_Principal").catch(console.error);
+    if (connection && currentCampaignId) connection.invoke("ClearDrawings", currentCampaignId.toString()).catch(console.error);
   };
 
-  const clearFogSync = () => {
+ const clearFogSync = () => {
     setFogPaths([]);
-    if (connection) connection.invoke("ClearFog", "Sala_Principal").catch(console.error);
+    if (connection && currentCampaignId) connection.invoke("ClearFog", currentCampaignId.toString()).catch(console.error);
   };
 
   // ==========================================
@@ -165,9 +167,8 @@ export default function VttSession(props) {
       setPings(prev => [...prev, newPing]);
       setTimeout(() => { setPings(prev => prev.filter(p => p.id !== newPing.id)); }, 2000);
       
-      // BOCA: GRITA O PING NO RÁDIO
-      if (connection) connection.invoke("SendPing", "Sala_Principal", coords.x, coords.y).catch(console.error);
-
+     if (connection && currentCampaignId) connection.invoke("SendPing", currentCampaignId.toString(), coords.x, coords.y).catch(console.error);
+    
     } else if (activeTool === 'draw' && isMasterMode) {
       setCurrentDrawing([getMapCoords(e)]);
     } else if (activeTool === 'fog' && isMasterMode) {
@@ -192,7 +193,7 @@ export default function VttSession(props) {
         const newDraw = { id: Date.now(), points: currentDrawing };
         setDrawings(prev => [...prev, newDraw]);
         // BOCA: GRITA O DESENHO NO RÁDIO
-        if (connection) connection.invoke("AddDrawing", "Sala_Principal", JSON.stringify(newDraw)).catch(console.error);
+        if (connection && currentCampaignId) connection.invoke("AddDrawing", currentCampaignId.toString(), JSON.stringify(newDraw)).catch(console.error);
       }
       setCurrentDrawing(null);
     } else if (activeTool === 'fog' && currentFogPath && isMasterMode) {
@@ -205,7 +206,7 @@ export default function VttSession(props) {
       }
       setFogPaths(prev => [...prev, newPath]);
       // BOCA: GRITA A NÉVOA NO RÁDIO
-      if (connection) connection.invoke("AddFog", "Sala_Principal", JSON.stringify(newPath)).catch(console.error);
+      if (connection && currentCampaignId) connection.invoke("AddFog", currentCampaignId.toString(), JSON.stringify(newPath)).catch(console.error);
       setCurrentFogPath(null);
     }
   };
@@ -307,7 +308,7 @@ export default function VttSession(props) {
                   <button onClick={() => {
                       const newState = !isFogEnabled;
                       setIsFogEnabled(newState);
-                      if (connection) connection.invoke("ToggleFog", "Sala_Principal", newState).catch(console.error);
+                      if (connection && currentCampaignId) connection.invoke("ToggleFog", currentCampaignId.toString(), newState).catch(console.error);
                   }} className={`w-6 h-6 rounded flex items-center justify-center text-[9px] font-bold transition-colors ${isFogEnabled ? 'bg-purple-600 text-white' : 'bg-black text-zinc-500 border border-zinc-800'}`}>{isFogEnabled ? 'ON' : 'OFF'}</button>
                   <button onClick={() => setFogMode('reveal')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] transition-colors ${fogMode === 'reveal' ? 'bg-zinc-200 text-black' : 'bg-black text-zinc-400'}`} title="Revelar">👁️</button>
                   <button onClick={() => setFogMode('hide')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] transition-colors ${fogMode === 'hide' ? 'bg-zinc-800 text-white border border-zinc-400' : 'bg-black text-zinc-400'}`} title="Esconder">⬛</button>
@@ -481,6 +482,24 @@ export default function VttSession(props) {
               <span className="text-xl">📖</span>
             </button>
           )}
+
+          {/* 🟢 JOGADORES ONLINE (ESTILO ROLL20) 🟢 */}
+          {onlinePlayers && onlinePlayers.length > 0 && (
+            <div className="absolute bottom-6 left-6 z-40 flex items-center gap-3 bg-black/60 backdrop-blur-md p-3 rounded-full border border-zinc-800 shadow-2xl">
+              {onlinePlayers.map((player, idx) => (
+                <div key={idx} className="relative group flex flex-col items-center">
+                  <div className="w-10 h-10 rounded-full bg-zinc-900 border-2 border-green-600 flex items-center justify-center text-white font-bold tracking-widest shadow-[0_0_10px_rgba(22,163,74,0.5)] cursor-help">
+                    {player ? player.substring(0, 2).toUpperCase() : '?'}
+                  </div>
+                  <div className="absolute -top-8 bg-black border border-zinc-700 text-xs text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                    {player}
+                  </div>
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-black"></div>
+                </div>
+              ))}
+            </div>
+          )}
+
         </div>
 
         <SessionSidebar {...props} />

@@ -8,14 +8,13 @@ import StatusBar from './StatusBar';
 import WeaponCard from './WeaponCard';
 import AbilityCard from './AbilityCard';
 import ItemCard from './ItemCard';
-import DefenseBlock from './DefenseBlock';
 
 export default function CharacterSheet({
   charName, setCharName, charOrigin, setCharOrigin, charRace, setCharRace, charClass, setCharClass, charAge, setCharAge, charLevel, setCharLevel,
   attrInt, setAttrInt, attrPre, setAttrPre, attrAgi, setAttrAgi, attrVig, setAttrVig, attrFor, setAttrFor, attrIns, setAttrIns,
   hp, setHp, maxHp, setMaxHp, pe, setPe, maxPe, setMaxPe, corruption, setCorruption, maxCorruption, setMaxCorruption,
-  // 👇 AQUI: Adicionei o setSkillsList nas props!
   lascas, setLascas, currentWeight, maxWeight, skillsList, setSkillsList, executeRoll,
+  resistances, setResistances, oficioText, setOficioText, // 👇 Nossas novas variáveis!
   activeFichaTab, setActiveFichaTab,
   showWeaponForm, setShowWeaponForm, editingWeaponIndex, weaponForm, setWeaponForm, attacksList, setAttacksList, handleOpenNewWeapon, handleEditWeapon, handleDeleteWeapon, handleSaveWeapon,
   showAbilityForm, setShowAbilityForm, editingAbilityIndex, abilityForm, setAbilityForm, abilitiesList, handleOpenNewAbility, handleEditAbility, handleDeleteAbility, handleSaveAbility,
@@ -26,9 +25,22 @@ export default function CharacterSheet({
 }) {
 
   // ==========================================
-  // ESTADOS E LÓGICA DE PODERES ATIVOS
+  // ESTADOS DE PODERES E CONDIÇÕES
   // ==========================================
   const [activeToggles, setActiveToggles] = useState([]);
+  const [customCondition, setCustomCondition] = useState(""); // 👇 Estado para a condição digitada
+
+  // ==========================================
+  // ESTADOS DE DEFESA E ARMADURA
+  // ==========================================
+  const [armorBonus, setArmorBonus] = useState(0);
+  const [shieldBonus, setShieldBonus] = useState(0);
+  const [isArmorHeavy, setIsArmorHeavy] = useState(false);
+  const [isShieldHeavy, setIsShieldHeavy] = useState(false);
+  
+  // 👇 CÁLCULO DE DEFESA CORRIGIDO: Escudo Torre agora também tira Agilidade
+  const hasDisadvantage = isArmorHeavy || isShieldHeavy;
+  const calculatedAC = 10 + (hasDisadvantage ? 0 : Number(attrAgi || 0)) + Number(armorBonus || 0) + Number(shieldBonus || 0);
 
   useEffect(() => {
     if (currentWeight > maxWeight) {
@@ -99,33 +111,23 @@ export default function CharacterSheet({
   };
 
   // ==========================================
-  // MOTOR DE CÁLCULO E CLIQUE DE PERÍCIAS
-  // ==========================================
-  // ==========================================
-  // MOTOR DE CÁLCULO DE PERÍCIAS (ATUALIZADO)
+  // MOTOR DE CÁLCULO DE PERÍCIAS 
   // ==========================================
   const calculateSkillTotal = (skillName) => {
     const skill = skillsList.find(s => s.name === skillName);
     if (!skill) return 0;
     
-    // 1. Pega o valor do Atributo base (da caveira)
     const attributesMap = { 'INT': attrInt, 'PRE': attrPre, 'AGI': attrAgi, 'VIG': attrVig, 'FOR': attrFor, 'INS': attrIns };
     const siglaLimpa = skill.attrShort ? skill.attrShort.trim().toUpperCase() : '';
     const attrValue = Number(attributesMap[siglaLimpa]) || 0;
     
-    // 2. A MÁGICA: Mapeia o nível de treino para o bônus real do seu livro de regras!
-    // 0 losangos = +0 (Destreinado)
-    // 1 losango  = +2 (Treinado)
-    // 2 losangos = +4 (Veterano)
-    // 3 losangos = +6 (Mestre)
     const trainingBonuses = { 0: 0, 1: 2, 2: 4, 3: 6 };
     const level = Number(skill.trainingLevel) || 0;
     const trainingBonus = trainingBonuses[level] || 0;
 
-    // 3. Retorna a soma final (Atributo + Bônus de Treino)
     return attrValue + trainingBonus;
   };
-  // 👇 AQUI: Função que lida com o clique nos losangos!
+
   const handleToggleTraining = (skillName, clickedLevel) => {
     if (!setSkillsList) {
       console.warn("Atenção: Você precisa passar a prop 'setSkillsList' para a CharacterSheet para poder salvar a perícia!");
@@ -134,8 +136,6 @@ export default function CharacterSheet({
 
     setSkillsList(prevSkills => prevSkills.map(skill => {
       if (skill.name === skillName) {
-        // Se o cara clicar no nível que já tem (ex: clicou no losango 1 e já é 1), ele zera (desmarca).
-        // Se clicar num diferente, ele assume o novo valor.
         const newLevel = skill.trainingLevel === clickedLevel ? 0 : clickedLevel;
         return { ...skill, trainingLevel: newLevel };
       }
@@ -192,7 +192,60 @@ export default function CharacterSheet({
           <StatusBar title="Esforço" current={pe} max={maxPe} colorTheme="orange" onDecrease={(val) => setPe(prev => Math.max(0, prev - val))} onIncrease={(val) => setPe(prev => Math.min(maxPe, prev + val))} onMaxChange={setMaxPe} />
           <StatusBar title="Corrupção" current={corruption} max={maxCorruption} colorTheme="green" onDecrease={(val) => setCorruption(prev => Math.max(0, prev - val))} onIncrease={(val) => setCorruption(prev => Math.min(maxCorruption, prev + val))} onMaxChange={setMaxCorruption} />
           
-          <div className="w-full max-w-md mx-auto z-20 mt-4"><DefenseBlock agility={attrAgi} /></div>
+          {/* ========================================== */}
+          {/* BLOCO DE DEFESA COM RESISTÊNCIAS           */}
+          {/* ========================================== */}
+          <div className="w-full max-w-md mx-auto mt-6">
+             <div className={`bg-black/50 border rounded-lg p-4 flex flex-col shadow-inner transition-colors ${hasDisadvantage ? 'border-red-900/50' : 'border-zinc-800'}`}>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-16 h-16 rounded-full bg-zinc-950 border-2 flex items-center justify-center shadow-lg ${hasDisadvantage ? 'border-red-800 shadow-[0_0_15px_rgba(153,27,27,0.4)]' : 'border-amber-700 shadow-[0_0_15px_rgba(180,83,9,0.4)]'}`}>
+                      <span className="text-3xl font-black text-white">{calculatedAC}</span> 
+                    </div>
+                    <div className="flex flex-col">
+                      <h3 className="text-amber-500 font-bold uppercase tracking-widest text-sm">Classe de Defesa</h3>
+                      <span className="text-[9px] text-zinc-500 uppercase mt-1">10 + Armadura + Escudo {hasDisadvantage ? '' : '+ Agilidade'}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex gap-2">
+                       <div className="flex flex-col items-end">
+                         <span className="text-[8px] text-zinc-500 uppercase tracking-widest">Bônus Armadura</span>
+                         <input type="number" value={armorBonus} onChange={(e) => setArmorBonus(e.target.value)} className="w-12 bg-zinc-900 text-white text-xs p-1 rounded text-center border border-zinc-700" />
+                       </div>
+                       <div className="flex flex-col items-end">
+                         <span className="text-[8px] text-zinc-500 uppercase tracking-widest">Bônus Escudo</span>
+                         <input type="number" value={shieldBonus} onChange={(e) => setShieldBonus(e.target.value)} className="w-12 bg-zinc-900 text-white text-xs p-1 rounded text-center border border-zinc-700" />
+                       </div>
+                    </div>
+                    <div className="flex gap-4 mt-1">
+                      <label className="flex items-center gap-1 text-[9px] text-zinc-400 cursor-pointer">
+                        <input type="checkbox" checked={isArmorHeavy} onChange={e=>setIsArmorHeavy(e.target.checked)} className="accent-red-700" /> Armadura Média/Pesada
+                      </label>
+                      <label className="flex items-center gap-1 text-[9px] text-zinc-400 cursor-pointer">
+                        <input type="checkbox" checked={isShieldHeavy} onChange={e=>setIsShieldHeavy(e.target.checked)} className="accent-red-700" /> Escudo Torre
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* 👇 CAMPO DE RESISTÊNCIAS 👇 */}
+                <div className="mt-4 border-t border-zinc-800/80 pt-3">
+                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest block mb-1">Resistências (RD / Elementos)</span>
+                  <input type="text" value={resistances || ""} onChange={(e) => setResistances && setResistances(e.target.value)} placeholder="Ex: 5 de Fogo, RD 2 Corte..." className="w-full bg-zinc-950/60 border border-zinc-800 rounded p-1.5 text-xs text-zinc-300 focus:outline-none focus:border-amber-700" />
+                </div>
+              </div>
+              
+              {hasDisadvantage && (
+                 <div className="mt-2 text-center animate-fade-in">
+                    <span className="bg-red-950/40 border border-red-900/50 text-red-400 text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded inline-block w-full">
+                      ⚠️ O peso causa Desvantagem em Furtividade e Acrobacia.
+                    </span>
+                 </div>
+              )}
+          </div>
 
           <div className="w-full max-w-md mx-auto mt-4 bg-zinc-950/80 border border-purple-900/50 rounded-lg p-3 shadow-lg">
             <h4 className="text-[10px] text-purple-400 uppercase tracking-widest font-bold mb-2">Condições & Efeitos Ativos</h4>
@@ -213,6 +266,27 @@ export default function CharacterSheet({
                 <span className="text-xs text-zinc-600 italic px-1">Seu corpo está limpo de efeitos.</span>
               )}
             </div>
+            {/* 👇 ADICIONAR CONDIÇÃO CUSTOMIZADA 👇 */}
+            <div className="flex gap-2 mt-3 border-t border-purple-900/30 pt-3">
+              <input 
+                type="text" 
+                value={customCondition} 
+                onChange={e=>setCustomCondition(e.target.value)} 
+                placeholder="Condição negativa (Ex: Sangrando)..." 
+                className="flex-1 bg-black/50 border border-purple-900/50 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-purple-500" 
+              />
+              <button 
+                onClick={() => { 
+                  if(customCondition.trim() && !activeToggles.includes(customCondition.trim())) { 
+                    setActiveToggles(prev => [...prev, customCondition.trim()]); 
+                    setCustomCondition(""); 
+                  } 
+                }} 
+                className="bg-purple-900/60 hover:bg-purple-700 text-purple-200 text-[10px] font-bold uppercase px-3 py-1 rounded transition-colors"
+              >
+                + Add
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -228,8 +302,15 @@ export default function CharacterSheet({
 
        {activeFichaTab === 'perícias' && (
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-4 min-h-0">
-            <div className="flex justify-end items-end border-b border-zinc-800 pb-2 mb-2 px-2 pr-4"><div className="flex items-center text-[10px] text-zinc-400 uppercase tracking-wider font-bold gap-3 sm:gap-6"><div className="w-10 text-center text-amber-700/80" title="Bônus de Itens e Poderes">Outros</div><div className="w-12 text-center">Treino</div><div className="w-8 text-right">Total</div></div></div>
-            {skillsList.map((skill, index) => ( 
+            <div className="flex justify-end items-end border-b border-zinc-800 pb-2 mb-2 px-2 pr-4">
+              <div className="flex items-center text-[10px] text-zinc-400 uppercase tracking-wider font-bold gap-3 sm:gap-6">
+                <div className="w-10 text-center text-amber-700/80" title="Bônus de Itens e Poderes">Outros</div>
+                <div className="w-12 text-center">Treino</div>
+                <div className="w-8 text-right">Total</div>
+              </div>
+            </div>
+            
+            {skillsList.map((skill, index) => (
               <SkillRow 
                 key={index} 
                 name={skill.name} 
@@ -237,21 +318,22 @@ export default function CharacterSheet({
                 color={skill.color} 
                 trainingLevel={skill.trainingLevel} 
                 baseTotal={calculateSkillTotal(skill.name)} 
-                // 👇 AQUI: Passamos a função de click pros losangos
+                oficioText={oficioText} 
+                setOficioText={setOficioText}
                 onToggleTraining={(level) => handleToggleTraining(skill.name, level)}
                 onRoll={(nome, bonusTotal) => {
                   if (nome.toLowerCase().trim() === 'sincronia') {
                     executeRoll('sincronia', 'Teste de Sincronia Ritual', bonusTotal);
                   } else {
-                    executeRoll('skill', `Teste de ${nome}`, bonusTotal);
+                    const isFurtividadeOuAcrobacia = nome.toLowerCase().includes('furtividade') || nome.toLowerCase().includes('acrobacia');
+                    const aviso = (hasDisadvantage && isFurtividadeOuAcrobacia) ? " [COM DESVANTAGEM]" : "";
+                    executeRoll('skill', `Teste de ${nome}${aviso}`, bonusTotal);
                   }
                 }} 
               /> 
             ))}
           </div>
         )}
-
-        {/* ... O Resto das abas ('combate', 'habilidades', 'inventário', etc) continua exatamente igual ... */}
         {activeFichaTab === 'combate' && (
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-4 flex flex-col min-h-0">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 shrink-0">
@@ -285,8 +367,8 @@ export default function CharacterSheet({
               </div>
             )}
             
-            <div className="flex flex-col">
-              {attacksList.map((atk, index) => ( 
+            <div className="flex flex-col gap-3">
+                {attacksList.map((atk, index) => ( 
                 <WeaponCard 
                   key={index} 
                   weapon={atk} 
@@ -301,15 +383,15 @@ export default function CharacterSheet({
                   }}
                   onRollAttack={(weaponObj) => {
                     if (weaponObj.isRanged) {
-                      if (weaponObj.ammo > 0) {
+                      if ((weaponObj.ammo || 0) > 0) {
                         if (setAttacksList) {
                           const updated = [...attacksList];
-                          updated[index].ammo -= 1;
+                          updated[index].ammo = (updated[index].ammo || 0) - 1;
                           setAttacksList(updated);
                         }
                         executeRoll('attack', `Ataque: ${weaponObj.name} (-1 Munição)`, calculateSkillTotal(weaponObj.skill), weaponObj);
                       } else {
-                        alert(`A arma falhou! Você não tem munição para ${weaponObj.name}. Recarregue!`);
+                        alert(`Arma descarregada! Você não tem munição para ${weaponObj.name}. Recarregue!`);
                       }
                     } else {
                       executeRoll('attack', `Ataque: ${weaponObj.name}`, calculateSkillTotal(weaponObj.skill), weaponObj);

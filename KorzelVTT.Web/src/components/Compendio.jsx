@@ -28,10 +28,10 @@ const classesData = [
       { title: "Campeão de Guerra", type: "Habilidade de Classe", cost: "Passivo", description: "Nvl 20: O custo em PE do seu Ataque Especial cai pela metade (arredondado para baixo, mínimo 1). Além disso, sempre que rolar Iniciativa, recupera imediatamente 5 PE." }
     ],
     powers: [
-      { title: "Postura do Anquilossauro", type: "Postura de Combate", cost: "Mov / 2 PE", description: "(Armas Pesadas/Duas Mãos)\nPassivo: Recebe +3 no Dano e ignora 2 pontos de RD do alvo.\nAtivo (Esmagar): Gaste 2 PE ao rolar dano. O alvo faz um teste de Fortitude; em caso de falha, você quebra a perna dele e diminui seu deslocamento pela metade." },
-      { title: "Postura do Raptor", type: "Postura de Combate", cost: "Mov / 2 PE", description: "(Armas Leves/Ágeis)\nPassivo: Você se move baixo. Ganha +3m de Deslocamento e +1 na Defesa.\nAtivo (Frenesi): Ao usar a ação atacar, gaste 2 PE para fazer um ataque extra imediato." },
-      { title: "Postura do Triceratops", type: "Postura de Combate", cost: "Mov / 1 PE", description: "(Escudos)\nPassivo: Você vira uma barreira. Aumenta o bônus de Defesa do escudo em +2.\nAtivo (Escudo Ósseo): Reação. Gaste 1 PE quando um aliado adjacente for atacado. O ataque é redirecionado para o seu escudo (usa a sua Defesa)." },
-      { title: "Postura da Serpente", type: "Postura de Combate", cost: "Mov / 1 PE", description: "(Hastes/Lanças/Chicotes)\nPassivo: Aumenta o alcance dos seus ataques em +1,5m.\nAtivo (Bote): Se um inimigo entrar no seu alcance, gaste 1 PE para fazer um Ataque de Oportunidade contra ele." },
+      { title: "Postura do Anquilossauro", type: "Postura de Combate", cost: "Mov", description: "(Armas Pesadas/Duas Mãos)\nPassivo: Recebe +3 no Dano e ignora 2 pontos de RD do alvo.\nAtivo (Esmagar): Gaste 2 PE ao rolar dano. O alvo faz um teste de Fortitude; em caso de falha, você quebra a perna dele e diminui seu deslocamento pela metade." },
+      { title: "Postura do Raptor", type: "Postura de Combate", cost: "Mov", description: "(Armas Leves/Ágeis)\nPassivo: Você se move baixo. Ganha +3m de Deslocamento e +1 na Defesa.\nAtivo (Frenesi): Ao usar a ação atacar, gaste 2 PE para fazer um ataque extra imediato." },
+      { title: "Postura do Triceratops", type: "Postura de Combate", cost: "Mov", description: "(Escudos)\nPassivo: Você vira uma barreira. Aumenta o bônus de Defesa do escudo em +2.\nAtivo (Escudo Ósseo): Reação. Gaste 1 PE quando um aliado adjacente for atacado. O ataque é redirecionado para o seu escudo (usa a sua Defesa)." },
+      { title: "Postura da Serpente", type: "Postura de Combate", cost: "Mov", description: "(Hastes/Lanças/Chicotes)\nPassivo: Aumenta o alcance dos seus ataques em +1,5m.\nAtivo (Bote): Se um inimigo entrar no seu alcance, gaste 1 PE para fazer um Ataque de Oportunidade contra ele." },
       { title: "Desarmar Técnico", type: "Poder de Guerreiro", cost: "2 PE", description: "Ao acertar um ataque, gaste 2 PE. Além do dano, faça um teste de manobra (Ataque vs Força). Se vencer, o alvo solta a arma, que cai a 3m." },
       { title: "Golpe em Arco", type: "Poder de Guerreiro", cost: "2 PE", description: "Gaste 2 PE. Se reduzir um inimigo a 0 PV com ataque corpo a corpo, realiza imediatamente um ataque extra em outro inimigo adjacente." },
       { title: "Estocada na Junta", type: "Poder de Guerreiro", cost: "2 PE", description: "Gaste 2 PE antes de atacar. Você sofre -2 no teste de ataque, mas o golpe ignora totalmente a Redução de Dano (RD) do alvo." },
@@ -54,6 +54,45 @@ const classesData = [
       { title: "Bater e Correr", type: "Poder de Guerreiro", cost: "Passivo", description: "Ao realizar a ação atacar, é possível se mover antes e depois do ataque, desde que o movimento total não exceda o deslocamento máximo." },
       { title: "Planejamento Marcial", type: "Poder de Guerreiro", cost: "Passivo", description: "No início do dia, escolha 1 Poder de Combate Geral que você não possua. Você adquire esse poder temporariamente até o próximo descanso longo." },
       { title: "Predador Apex", type: "Poder de Guerreiro", cost: "Passivo", description: "Pré-requisito: Nível 12 e ter 2+ Posturas. Mantém DUAS Posturas ativas ao mesmo tempo, soma os benefícios passivos de ambas e possui acesso aos dois ativos." }
+    ]
+  },
+  {
+    name: "Espadachim",
+    desc: "Oriundos da Ilha de Azhkhaanor, ao norte das terras gélidas, os Espadachins são mestres da disciplina e do aço. Eles não buscam a força bruta, mas o corte perfeito. Em um mundo de monstros gigantes, eles são a lâmina que encontra a fenda na escama, guiados por um código de honra implacável.",
+    stats: {
+      hp: "18 + Vigor Inicial (+5 + Vig por nível)",
+      pe: "3 + Agilidade Inicial (+3 por nível)",
+      proficiencies: "Armas simples, armas marciais (foco em lâminas e arcos longos), armaduras leves e médias.",
+      skills: "Luta (Agi ou For), Iniciativa (Agi) e Acrobacia (Agi). Mais 3 entre: Intuição, Percepção, Atletismo, Vontade, Erudição, Diplomacia."
+    },
+    fixedAbilities: [
+      { title: "Corte de Precisão", type: "Habilidade de Classe", cost: "1+ PE", description: "Nvl 1: Gaste 1 PE para adicionar +1d6 de dano extra ao focar num ponto vital do inimigo.\nEscalonamento:\n- Nível 5: 2 PE para +1d8 de dano.\n- Nível 9: 3 PE para +1d10 de dano.\n- Nível 13: 4 PE para +1d12 de dano.\n- Nível 17: 5 PE para +2d8 de dano." },
+      { title: "Guarda de Azhkhaanor", type: "Habilidade de Classe", cost: "Passivo / 1 PE", description: "Nvl 1: Enquanto empunhar arma de lâmina e armadura não-pesada, recebe +1 passivo na Defesa. \nReação: Se atacado corpo a corpo, pode gastar 1 PE para ganhar +2 na Defesa contra aquele ataque." },
+      { title: "Mestre do Horizonte", type: "Habilidade de Classe", cost: "5 PE", description: "Nvl 20 (Ação Completa): Gaste 5 PE. Você se move e ataca corpo a corpo TODOS os inimigos em 9m. O dano ignora RD e Imunidades físicas. Você ressurge em qualquer ponto desocupado da área após os golpes." }
+    ],
+    powers: [
+      { title: "Postura do Vento", type: "Postura Elemental", cost: "Mov", description: "Passivo: Passos leves. Ganha +3m de deslocamento e ignora terreno difícil.\nAtivo (Furacão): Ao Atacar, gaste 2 PE para desferir um ataque extra imediato (penalidade de -2 no acerto)." },
+      { title: "Postura da Montanha", type: "Postura Elemental", cost: "Mov ", description: "Passivo: Aterra seu peso. Recebe +2 na Defesa (se não se mover) e imunidade a derrubadas/empurrões.\nAtivo (Fenda): Gaste 2 PE antes de atacar. O golpe ignora totalmente a RD do alvo." },
+      { title: "Postura da Chama", type: "Postura Elemental", cost: "Mov", description: "Passivo: Lâmina agressiva. +2 no dano corpo a corpo e +2 em Intimidação.\nAtivo (Labareda): Reação. Ao sofrer dano adjacente, gaste 2 PE para realizar um ataque imediato de retaliação." },
+      { title: "Postura do Rio", type: "Postura Elemental", cost: "Mov", description: "Passivo: Desengajar vira Ação Bônus. Soma Agilidade em manobras (Desarmar/Derrubar).\nAtivo (Correnteza): Reação. Se o inimigo errar um golpe corpo a corpo, gaste 2 PE para Desarmá-lo com Vantagem." },
+      { title: "Saque Rápido", type: "Poder de Espadachim", cost: "Passivo", description: "Saca ou guarda arma como Ação Livre. Recebe +2 no teste do primeiro ataque realizado na mesma rodada do saque (Iaijutsu)." },
+      { title: "Lâmina Corta-Céus", type: "Poder de Espadachim", cost: "Padrão / 3 PE", description: "Golpe rápido que cria pressão de ar. Alcance Médio (9m). Dano: Dano da arma + bônus de Agilidade." },
+      { title: "Corte de Contenção", type: "Poder de Espadachim", cost: "Livre / 2 PE", description: "Ao acertar, o alvo sofre apenas metade do dano rolado, mas fica Lento (metade do deslocamento) até o fim do próximo turno dele." },
+      { title: "Estilo de Duas Lâminas", type: "Poder de Espadachim", cost: "Passivo", description: "Ao usar a ação Atacar empunhando duas armas leves, pode realizar um ataque extra com a secundária usando Ação Bônus." },
+      { title: "Passo das Sombras", type: "Poder de Espadachim", cost: "Livre / 3 PE", description: "Pré-requisito: Nível 8. Move-se rápido demais. Ganha camuflagem total (50% de chance de erro) contra o próximo ataque que sofrer na rodada." },
+      { title: "Lâmina de Aço Frio", type: "Poder de Espadachim", cost: "Livre / 2 PE", description: "Ao confirmar Acerto Crítico com arma de lâmina, gaste 2 PE para aumentar o multiplicador de dano em +1 (ex: x2 vira x3)." },
+      { title: "Corte de Sacrifício", type: "Poder de Espadachim", cost: "Livre", description: "Ao atacar, sofre -4 na Defesa até o próximo turno para adicionar +2 dados de dano na arma do ataque atual." },
+      { title: "Golpe de Execução", type: "Poder de Espadachim", cost: "Padrão / 4 PE", description: "Ataque com -5 no acerto. Se atingir alvo com menos da metade dos PVs máximos, o dano do golpe é dobrado." },
+      { title: "Aparar Projétil", type: "Poder de Espadachim", cost: "Reação / 2 PE", description: "Teste de Luta oposto ao ataque à distância inimigo (flechas/arpões). Se vencer, você não sofre dano. Inútil contra pólvora ou área." },
+      { title: "Foco de Batalha", type: "Poder de Espadachim", cost: "Bônus / 2 PE", description: "Transe letal por uma rodada inteira. Torna-se imune às condições Abalado, Assustado e Enjoado." },
+      { title: "Espírito Inabalável", type: "Poder de Espadachim", cost: "Passivo", description: "Pode somar Agilidade (no lugar de Presença/Intelecto) em testes de Vontade." },
+      { title: "Meditação Ágil", type: "Poder de Espadachim", cost: "Completa", description: "1 vez por Descanso Longo: Limpa a mente e recupera 1d6 + Agilidade em PE." },
+      { title: "Mestre das Emoções", type: "Poder de Espadachim", cost: "Livre / 2 PE", description: "Se tentarem Intimidação contra você, gaste 2 PE. O efeito ricocheteia e o agressor fica Abalado (-2)." },
+      { title: "Honra do Duelo", type: "Poder de Espadachim", cost: "Bônus / 1 PE", description: "Engaja um alvo. Se nenhum aliado atacá-lo, você recebe +2 em Ataque e Dano contra ele." },
+      { title: "Golpe Debilitante", type: "Poder de Espadachim", cost: "Livre / 3 PE", description: "Ao acertar, rasga a musculatura. O alvo sofre -2 em Ataque e testes de Força até o início do seu próximo turno." },
+      { title: "Presença Majestosa", type: "Poder de Espadachim", cost: "Passivo", description: "Soma Agilidade em vez de Presença em testes de Intimidação." },
+      { title: "Vingança Silenciosa", type: "Poder de Espadachim", cost: "Livre / 1 PE", description: "Se um aliado cair a 0 PV na sua visão, seu próximo ataque contra o agressor terá margem de ameaça Crítica +2." },
+      { title: "Mestre dos Elementos", type: "Poder de Espadachim", cost: "Passivo", description: "Pré-requisito: Nível 12 e possuir duas Posturas. Pode manter duas Posturas Elementais ativas ao mesmo tempo." }
     ]
   },
   {
