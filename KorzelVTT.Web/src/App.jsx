@@ -338,8 +338,57 @@ export default function App() {
   };
   
   const handleCreateNewCharacter = () => { setActiveCharId(null); setCharName(""); setCharOrigin(""); setCharRace(""); setCharClass(""); setCharAge(0); setCharLevel(1); setCharDeity("Nenhum"); setMut1("Carne Intacta"); setMut2("Carne Intacta"); setMut3("Carne Intacta"); setAttrInt(0); setAttrPre(0); setAttrAgi(0); setAttrVig(0); setAttrFor(0); setAttrIns(0); setHp(10); setMaxHp(10); setPe(0); setMaxPe(0); setCorruption(0); setLascas(0); setSkillsList(prev => prev.map(s => ({ ...s, trainingLevel: 0, others: 0 }))); setInventoryList([]); setAttacksList([]); setAbilitiesList([]); setNotes([]); setCurrentPage('ficha'); };
+const executeRoll = (type, title, bonus, weapon = null, customExp = null) => { 
+    // 👇 NOVA LÓGICA MESTRA DE DADOS AVULSOS 👇
+    if (type === 'custom' && customExp) {
+      const exp = customExp.toLowerCase().replace(/\s+/g, ''); // Tira os espaços
+      // Reconhece formatos como: 1d20, d100, 2d6+4, 3d8-1
+      const regex = /^(\d*)d(\d+)([+-]\d+)?$/;
+      const match = exp.match(regex);
 
-  const executeRoll = (type, title, bonus, weapon = null) => { 
+      if (!match) {
+        showToast("Formato inválido! Tente algo como: d20, 2d6 ou 1d10+4", "error");
+        return;
+      }
+
+      // Se o jogador digitar só "d20", assumimos que é 1 dado.
+      const numDice = match[1] ? parseInt(match[1], 10) : 1; 
+      const sides = parseInt(match[2], 10);
+      const modifier = match[3] ? parseInt(match[3], 10) : 0;
+
+      if (numDice <= 0 || sides <= 0) return showToast("Dado inválido!", "error");
+      if (numDice > 50) return showToast("Acalme-se! Máximo de 50 dados por vez.", "error");
+
+      setRollModal({ show: true, title: `Rolagem: ${customExp}`, type: 'custom', bonus: modifier, d20: 0, total: 0, isRolling: true, isCrit: false, isFumble: false, weapon: null, detail: "" });
+
+      setTimeout(() => {
+        let rolls = [];
+        let sum = 0;
+        for (let i = 0; i < numDice; i++) {
+          const r = Math.floor(Math.random() * sides) + 1;
+          rolls.push(r);
+          sum += r;
+        }
+        const total = sum + modifier;
+        const modText = modifier > 0 ? `+${modifier}` : modifier < 0 ? `${modifier}` : "";
+        const detailText = `Dados: [ ${rolls.join(', ')} ] ${modText}`;
+
+        let newChatMsg = { id: Date.now(), sender: isMasterMode && secretRoll ? "Mestre" : (charName || loggedUserName), type: isMasterMode && secretRoll ? "secret" : "roll", text: "" };
+        newChatMsg.text = `🎲 **Rolagem Avulsa (${customExp})**\nResultado: **${total}**\n${detailText}`;
+        
+        if (isMasterMode && secretRoll) newChatMsg.text = `[Rolagem Oculta]\n${newChatMsg.text}`;
+
+        setChatMessages(prev => [...prev, newChatMsg]);
+        if (connection && !(isMasterMode && secretRoll) && currentCampaignId) {
+          connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newChatMsg)).catch(console.error);
+        }
+
+        setRollModal(prev => ({ ...prev, isRolling: false, total: total, detail: detailText }));
+      }, 1000);
+      return;
+    }
+
+    // --- CONTINUAÇÃO DA LÓGICA ANTIGA (Ataques, Perícias, Dano) ---
     if (type === 'attack' && weapon && weapon.isRanged) {
       if ((weapon.ammo || 0) <= 0) {
         showToast(`Arma descarregada! Sem munição para ${weapon.name}.`, "error");
@@ -559,7 +608,28 @@ export default function App() {
   const handleDeleteNote = (id) => { if(window.confirm("Arrancar página?")) { const newNotes = notes.filter(n => n.id !== id); setNotes(newNotes); if(activeNoteId === id) setActiveNoteId(newNotes.length > 0 ? newNotes[0].id : null); } };
   const handleNoteChange = (field, value) => { setNotes(notes.map(n => n.id === activeNoteId ? { ...n, [field]: value } : n)); };
   const activeNote = notes.find(n => n.id === activeNoteId) || null;
-  const handleChatSubmit = (e) => { e.preventDefault(); if(!chatInput.trim()) return; let newMessage = { id: Date.now(), sender: isMasterMode ? "Mestre" : (charName || loggedUserName), text: chatInput, type: "msg" }; if (chatInput.startsWith('/r ')) { const rollExp = chatInput.replace('/r ', ''); newMessage.text = `Rolou ${rollExp}: [ 14 ]`; newMessage.type = "roll"; } if (secretRoll && isMasterMode) { newMessage.text = `[Oculto]\n${newMessage.text}`; newMessage.type = "secret"; } setChatMessages([...chatMessages, newMessage]); setChatInput(""); if (connection && currentCampaignId) { connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMessage)).catch(console.error); } };
+ const handleChatSubmit = (e) => { 
+    e.preventDefault(); 
+    if(!chatInput.trim()) return; 
+
+    // 👇 O CHAT AGORA USA A MATEMÁTICA REAL SE VOCÊ DIGITAR /r 👇
+    if (chatInput.trim().startsWith('/r ')) { 
+      const rollExp = chatInput.replace('/r ', '').trim(); 
+      executeRoll('custom', '', 0, null, rollExp);
+      setChatInput(""); 
+      return;
+    } 
+
+    let newMessage = { id: Date.now(), sender: isMasterMode ? "Mestre" : (charName || loggedUserName), text: chatInput, type: "msg" }; 
+    if (secretRoll && isMasterMode) { newMessage.text = `[Oculto]\n${newMessage.text}`; newMessage.type = "secret"; } 
+    
+    setChatMessages([...chatMessages, newMessage]); 
+    setChatInput(""); 
+    
+    if (connection && currentCampaignId) { 
+      connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMessage)).catch(console.error); 
+    } 
+  };
   const currentSceneObj = scenes.find(s => s.id === (isMasterMode ? gmActiveSceneId : playerActiveSceneId));
   
  const handleMapUpload = (e) => {

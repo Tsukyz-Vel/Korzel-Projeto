@@ -14,7 +14,7 @@ export default function CharacterSheet({
   attrInt, setAttrInt, attrPre, setAttrPre, attrAgi, setAttrAgi, attrVig, setAttrVig, attrFor, setAttrFor, attrIns, setAttrIns,
   hp, setHp, maxHp, setMaxHp, pe, setPe, maxPe, setMaxPe, corruption, setCorruption, maxCorruption, setMaxCorruption,
   lascas, setLascas, currentWeight, maxWeight, skillsList, setSkillsList, executeRoll,
-  resistances, setResistances, oficioText, setOficioText, // 👇 Nossas novas variáveis!
+  resistances, setResistances, oficioText, setOficioText,
   activeFichaTab, setActiveFichaTab,
   showWeaponForm, setShowWeaponForm, editingWeaponIndex, weaponForm, setWeaponForm, attacksList, setAttacksList, handleOpenNewWeapon, handleEditWeapon, handleDeleteWeapon, handleSaveWeapon,
   showAbilityForm, setShowAbilityForm, editingAbilityIndex, abilityForm, setAbilityForm, abilitiesList, handleOpenNewAbility, handleEditAbility, handleDeleteAbility, handleSaveAbility,
@@ -28,7 +28,10 @@ export default function CharacterSheet({
   // ESTADOS DE PODERES E CONDIÇÕES
   // ==========================================
   const [activeToggles, setActiveToggles] = useState([]);
-  const [customCondition, setCustomCondition] = useState(""); // 👇 Estado para a condição digitada
+  const [customCondition, setCustomCondition] = useState(""); 
+  
+  // 👇 ESTADO DO DADO AVULSO 👇
+  const [avulsoText, setAvulsoText] = useState(""); 
 
   // ==========================================
   // ESTADOS DE DEFESA E ARMADURA
@@ -38,7 +41,6 @@ export default function CharacterSheet({
   const [isArmorHeavy, setIsArmorHeavy] = useState(false);
   const [isShieldHeavy, setIsShieldHeavy] = useState(false);
   
-  // 👇 CÁLCULO DE DEFESA CORRIGIDO: Escudo Torre agora também tira Agilidade
   const hasDisadvantage = isArmorHeavy || isShieldHeavy;
   const calculatedAC = 10 + (hasDisadvantage ? 0 : Number(attrAgi || 0)) + Number(armorBonus || 0) + Number(shieldBonus || 0);
 
@@ -110,9 +112,6 @@ export default function CharacterSheet({
     }
   };
 
-  // ==========================================
-  // MOTOR DE CÁLCULO DE PERÍCIAS 
-  // ==========================================
   const calculateSkillTotal = (skillName) => {
     const skill = skillsList.find(s => s.name === skillName);
     if (!skill) return 0;
@@ -192,9 +191,6 @@ export default function CharacterSheet({
           <StatusBar title="Esforço" current={pe} max={maxPe} colorTheme="orange" onDecrease={(val) => setPe(prev => Math.max(0, prev - val))} onIncrease={(val) => setPe(prev => Math.min(maxPe, prev + val))} onMaxChange={setMaxPe} />
           <StatusBar title="Corrupção" current={corruption} max={maxCorruption} colorTheme="green" onDecrease={(val) => setCorruption(prev => Math.max(0, prev - val))} onIncrease={(val) => setCorruption(prev => Math.min(maxCorruption, prev + val))} onMaxChange={setMaxCorruption} />
           
-          {/* ========================================== */}
-          {/* BLOCO DE DEFESA COM RESISTÊNCIAS           */}
-          {/* ========================================== */}
           <div className="w-full max-w-md mx-auto mt-6">
              <div className={`bg-black/50 border rounded-lg p-4 flex flex-col shadow-inner transition-colors ${hasDisadvantage ? 'border-red-900/50' : 'border-zinc-800'}`}>
                 
@@ -231,7 +227,6 @@ export default function CharacterSheet({
                   </div>
                 </div>
                 
-                {/* 👇 CAMPO DE RESISTÊNCIAS 👇 */}
                 <div className="mt-4 border-t border-zinc-800/80 pt-3">
                   <span className="text-[9px] text-zinc-500 uppercase tracking-widest block mb-1">Resistências (RD / Elementos)</span>
                   <input type="text" value={resistances || ""} onChange={(e) => setResistances && setResistances(e.target.value)} placeholder="Ex: 5 de Fogo, RD 2 Corte..." className="w-full bg-zinc-950/60 border border-zinc-800 rounded p-1.5 text-xs text-zinc-300 focus:outline-none focus:border-amber-700" />
@@ -266,7 +261,6 @@ export default function CharacterSheet({
                 <span className="text-xs text-zinc-600 italic px-1">Seu corpo está limpo de efeitos.</span>
               )}
             </div>
-            {/* 👇 ADICIONAR CONDIÇÃO CUSTOMIZADA 👇 */}
             <div className="flex gap-2 mt-3 border-t border-purple-900/30 pt-3">
               <input 
                 type="text" 
@@ -336,9 +330,42 @@ export default function CharacterSheet({
         )}
         {activeFichaTab === 'combate' && (
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-4 flex flex-col min-h-0">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 shrink-0">
-              <div className="relative flex-1 w-full"><input type="text" placeholder="Rolar dados avulsos (ex: 2d6+4)..." className="w-full bg-zinc-900 border border-zinc-700 rounded-md py-2 px-4 text-white placeholder-zinc-500 focus:outline-none focus:border-red-900 focus:ring-1 focus:ring-red-900 transition-all"/><img src={d20Icon} alt="Dado" className="absolute right-3 top-2 w-5 h-5 opacity-50 cursor-pointer hover:opacity-100" onClick={() => executeRoll('skill', "Rolagem Avulsa", 0)} title="Rolar 1d20 Puro" /></div>
-              {!showWeaponForm && ( <button onClick={handleOpenNewWeapon} className="whitespace-nowrap bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2 px-4 rounded-md border border-zinc-600 transition-colors uppercase tracking-widest text-xs">+ Forjar Ataque</button> )}
+            
+            {/* 👇 BARRA DE ROLAGEM AVULSA CORRIGIDA 👇 */}
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-4 shrink-0 mb-6">
+              <div className="relative flex-1 w-full">
+                <input 
+                  type="text" 
+                  value={avulsoText}
+                  onChange={e => setAvulsoText(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && avulsoText) {
+                      executeRoll('custom', '', 0, null, avulsoText);
+                      setAvulsoText("");
+                    }
+                  }}
+                  placeholder="Rolar dados avulsos (ex: 2d6+4)..." 
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded-md py-2 px-4 text-white placeholder-zinc-500 focus:outline-none focus:border-red-900 focus:ring-1 focus:ring-red-900 transition-all pr-10"
+                />
+                <button 
+                  onClick={() => {
+                    if (avulsoText) {
+                      executeRoll('custom', '', 0, null, avulsoText);
+                      setAvulsoText("");
+                    }
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-red-700 hover:text-red-500 transition-colors opacity-70 hover:opacity-100 text-lg"
+                  title="Lançar Dados"
+                >
+                  🎲
+                </button>
+              </div>
+
+              {!showWeaponForm && (
+                <button onClick={handleOpenNewWeapon} className="whitespace-nowrap bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2 px-4 rounded-md border border-zinc-600 transition-colors uppercase tracking-widest text-xs shadow-md">
+                  + Forjar Ataque
+                </button>
+              )}
             </div>
             
             {showWeaponForm && (
