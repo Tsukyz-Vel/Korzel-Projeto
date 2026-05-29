@@ -1003,7 +1003,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
   }, [authToken, currentCampaignId, refreshTrigger]);
 
   useEffect(() => {
-    const newConnection = new signalR.HubConnectionBuilder().withUrl("https://korzelapi.somee.com/vtthub").withAutomaticReconnect().build();
+    const newConnection = //new signalR.HubConnectionBuilder().withUrl("https://korzelapi.somee.com/vtthub").withAutomaticReconnect().build();
     setConnection(newConnection);
   }, []);
 

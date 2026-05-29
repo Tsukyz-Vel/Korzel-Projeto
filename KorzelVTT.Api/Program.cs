@@ -91,6 +91,8 @@ builder.Services.AddSignalR(options =>
 
 var app = builder.Build();
 
+app.UseDeveloperExceptionPage();
+
 // Mostrar o Swagger mesmo na nuvem ajuda a testar a API no Somee nos primeiros dias
 // if (app.Environment.IsDevelopment())
 // {

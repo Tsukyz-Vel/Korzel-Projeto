@@ -5,7 +5,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "http://korzelapi.somee.com",
+      "applicationUrl": "https://korzelapi.somee.com",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -14,7 +14,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "https://localhost:7170;http://korzelapi.somee.com",
+      "applicationUrl": "https://localhost:7170;https://korzelapi.somee.com",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
