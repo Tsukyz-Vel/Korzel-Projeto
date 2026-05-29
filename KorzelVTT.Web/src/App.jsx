@@ -189,7 +189,7 @@ export default function App() {
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
-    const url = authMode === 'login' ? 'http://korzelapi.somee.com/api/auth/login' : 'http://korzelapi.somee.com/api/auth/register';
+    const url = authMode === 'login' ? 'https://korzelapi.somee.com/api/auth/login' : 'https://korzelapi.somee.com/api/auth/register';
     try {
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) });
       const contentType = res.headers.get("content-type");
@@ -222,7 +222,7 @@ export default function App() {
     }
     
     try {
-      const res = await fetch(`http://korzelapi.somee.com/api/scenes/campaign/${campaignId}`);
+      const res = await fetch(`https://korzelapi.somee.com/api/scenes/campaign/${campaignId}`);
       if (res.ok) {
         const data = await res.json();
         if (!asMaster) {
@@ -241,7 +241,7 @@ export default function App() {
           }
         } else {
           const firstScene = { campaignId: campaignId, name: "Mapa Inicial", bgImage: "", isActive: true };
-          const resCreate = await fetch(`http://korzelapi.somee.com/api/scenes`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(firstScene) });
+          const resCreate = await fetch(`https://korzelapi.somee.com/api/scenes`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(firstScene) });
           if(resCreate.ok){
              const newDbScene = await resCreate.json(); 
              setScenes([newDbScene]); 
@@ -251,7 +251,7 @@ export default function App() {
           }
         }
         try {
-          const audioRes = await fetch(`http://korzelapi.somee.com/api/audio/campaign/${campaignId}`, { headers: getAuthHeaders() });
+          const audioRes = await fetch(`https://korzelapi.somee.com/api/audio/campaign/${campaignId}`, { headers: getAuthHeaders() });
           if (audioRes.ok) {
             const tracksData = await audioRes.json();
             setAudioCategories(prev => prev.map(cat => {
@@ -267,8 +267,8 @@ export default function App() {
   const fetchAllCharacters = async () => {
     if (!authToken) return;
     const url = currentCampaignId 
-      ? `http://korzelapi.somee.com/api/characters/campaign/${currentCampaignId}` 
-      : "http://korzelapi.somee.com/api/characters";
+      ? `https://korzelapi.somee.com/api/characters/campaign/${currentCampaignId}` 
+      : "https://korzelapi.somee.com/api/characters";
       
     try { 
       const res = await fetch(url, { headers: getAuthHeaders() });
@@ -280,7 +280,7 @@ export default function App() {
   };
 
   const loadCharacterFromDb = async (idToLoad) => {
-    try { const response = await fetch(`http://korzelapi.somee.com/api/characters/${idToLoad}`, { headers: getAuthHeaders() });
+    try { const response = await fetch(`https://korzelapi.somee.com/api/characters/${idToLoad}`, { headers: getAuthHeaders() });
       if (response.ok) { const data = await response.json();
         setActiveCharId(data.id); setCharName(data.name || ""); setCharOrigin(data.origin || ""); setCharRace(data.race || ""); setCharClass(data.class || ""); setCharAge(data.age || 0); setCharLevel(data.level || 1); setCharDeity(data.deity || "Nenhum"); setMut1(data.mut1 || "Carne Intacta"); setMut2(data.mut2 || "Carne Intacta"); setMut3(data.mut3 || "Carne Intacta"); setAttrInt(data.intellect || 0); setAttrPre(data.presence || 0); setAttrAgi(data.agility || 0); setAttrVig(data.vigor || 0); setAttrFor(data.strength || 0); setAttrIns(data.instinct || 0); setHp(data.currentHP || 0); setMaxHp(data.maxHP || 0); setPe(data.currentPE || 0); setMaxPe(data.maxPE || 0); setCorruption(data.corruption || 0); setMaxCorruption(data.maxCorruption || 40); setLascas(data.lascas || 0);
         if (data.skills && data.skills.length > 0) { setSkillsList(prev => prev.map(base => { const dbSkill = data.skills.find(s => s.name === base.name); return dbSkill ? { ...base, trainingLevel: dbSkill.trainingLevel, others: dbSkill.others } : base; })); }
@@ -305,13 +305,13 @@ export default function App() {
     };
     try {
       if (activeCharId) {
-        const res = await fetch(`http://korzelapi.somee.com/api/characters/${activeCharId}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(characterData) });
+        const res = await fetch(`https://korzelapi.somee.com/api/characters/${activeCharId}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(characterData) });
         if(res.ok) {
            showToast("Ficha atualizada!", "success");
            if (connection && currentCampaignId) connection.invoke("RefreshCharacters", currentCampaignId.toString()).catch(console.error);
         } else showToast(`Erro ${res.status}.`, "error");
       } else {
-        const res = await fetch(`http://korzelapi.somee.com/api/characters`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(characterData) });
+        const res = await fetch(`https://korzelapi.somee.com/api/characters`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(characterData) });
         if(res.ok) { 
            const newData = await res.json(); 
            setActiveCharId(newData.id); 
@@ -326,7 +326,7 @@ export default function App() {
   const handleDeleteCharacter = async (id, name) => { 
     if (window.confirm(`Apagar ficha de ${name}?`)) { 
       try { 
-        const res = await fetch(`http://korzelapi.somee.com/api/characters/${id}`, { method: 'DELETE', headers: getAuthHeaders() }); 
+        const res = await fetch(`https://korzelapi.somee.com/api/characters/${id}`, { method: 'DELETE', headers: getAuthHeaders() }); 
         if (res.ok) { 
           showToast("Excluída!", "success"); 
           fetchAllCharacters(); 
@@ -486,7 +486,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
   }
 
   try {
-    const res = await fetch(`http://korzelapi.somee.com/api/characters/${charIdToUpdate}`, { headers: getAuthHeaders() });
+    const res = await fetch(`https://korzelapi.somee.com/api/characters/${charIdToUpdate}`, { headers: getAuthHeaders() });
     
     if (res.ok) {
       const charData = await res.json();
@@ -512,7 +512,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
           });
         }
 
-        const updateRes = await fetch(`http://korzelapi.somee.com/api/characters/${charIdToUpdate}`, { 
+        const updateRes = await fetch(`https://korzelapi.somee.com/api/characters/${charIdToUpdate}`, { 
           method: 'PUT', 
           headers: getAuthHeaders(), 
           body: JSON.stringify(charData) 
@@ -657,7 +657,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
           setScenes(prev => prev.map(s => s.id === gmActiveSceneId ? {...s, bgImage: base64Image} : s));
           
           try {
-            const res = await fetch(`http://korzelapi.somee.com/api/scenes/${gmActiveSceneId}/background`, {
+            const res = await fetch(`https://korzelapi.somee.com/api/scenes/${gmActiveSceneId}/background`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ bgImage: base64Image })
@@ -684,7 +684,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
   { 
     const newScene = { campaignId: currentCampaignId, name: `Nova Cena ${scenes.length + 1}`, bgImage: "", isActive: false };
     try {
-      const res = await fetch(`http://korzelapi.somee.com/api/scenes`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newScene) });
+      const res = await fetch(`https://korzelapi.somee.com/api/scenes`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newScene) });
       if (res.ok) {
         const dbScene = await res.json();
         setScenes([...scenes, dbScene]); 
@@ -735,7 +735,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
   const handleDeleteTokenFromScene = async (tokenId) => {
     setSceneTokens(prev => prev.filter(t => t.id !== tokenId));
     try {
-      const res = await fetch(`http://korzelapi.somee.com/api/scenes/tokens/${tokenId}`, { method: 'DELETE' });
+      const res = await fetch(`https://korzelapi.somee.com/api/scenes/tokens/${tokenId}`, { method: 'DELETE' });
       if (res.ok) { 
           showToast("Peça removida da mesa.", "success"); 
           
@@ -784,7 +784,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
         image: libToken.image 
       };
 
-      const res = await fetch("http://korzelapi.somee.com/api/scenes/tokens", {
+      const res = await fetch("https://korzelapi.somee.com/api/scenes/tokens", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newTokenInScene)
@@ -822,7 +822,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
       if (token && currentCampaignId) {
         if (connection) { connection.invoke("MoveToken", currentCampaignId.toString(), token.id.toString(), token.x, token.y).catch(console.error); }
         try {
-          await fetch(`http://korzelapi.somee.com/api/scenes/tokens/${token.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(token) });
+          await fetch(`https://korzelapi.somee.com/api/scenes/tokens/${token.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(token) });
         } catch (e) {}
       }
     }
@@ -847,7 +847,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
       if (tokenToUpdate) {
         const updatedToken = { ...tokenToUpdate, controlledBy: targetName };
         try { 
-          await fetch(`http://korzelapi.somee.com/api/scenes/tokens/${tokenId}`, { 
+          await fetch(`https://korzelapi.somee.com/api/scenes/tokens/${tokenId}`, { 
             method: "PUT", 
             headers: { "Content-Type": "application/json" }, 
             body: JSON.stringify(updatedToken) 
@@ -878,7 +878,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
         };
 
         try {
-          const res = await fetch('http://korzelapi.somee.com/api/audio', {
+          const res = await fetch('https://korzelapi.somee.com/api/audio', {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(newTrackData)
@@ -900,7 +900,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
     if (!window.confirm("Deseja banir esta música da sua campanha para sempre?")) return;
 
     try {
-      const res = await fetch(`http://korzelapi.somee.com/api/audio/${trackId}`, {
+      const res = await fetch(`https://korzelapi.somee.com/api/audio/${trackId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
@@ -959,7 +959,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
 
     try {
       // 2. Busca a ficha limpa direto da fonte
-      const res = await fetch(`http://korzelapi.somee.com/api/characters/${charIdToUpdate}`, { headers: getAuthHeaders() });
+      const res = await fetch(`https://korzelapi.somee.com/api/characters/${charIdToUpdate}`, { headers: getAuthHeaders() });
       
       if (res.ok) {
         const charData = await res.json();
@@ -967,7 +967,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
         charData.abilities.push(newAbility);
 
         // 3. Salva a ficha com o poder novo
-        const updateRes = await fetch(`http://korzelapi.somee.com/api/characters/${charIdToUpdate}`, {
+        const updateRes = await fetch(`https://korzelapi.somee.com/api/characters/${charIdToUpdate}`, {
           method: 'PUT',
           headers: getAuthHeaders(),
           body: JSON.stringify(charData)
@@ -1003,7 +1003,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
   }, [authToken, currentCampaignId, refreshTrigger]);
 
   useEffect(() => {
-    const newConnection = new signalR.HubConnectionBuilder().withUrl("http://korzelapi.somee.com/vtthub").withAutomaticReconnect().build();
+    const newConnection = new signalR.HubConnectionBuilder().withUrl("https://korzelapi.somee.com/vtthub").withAutomaticReconnect().build();
     setConnection(newConnection);
   }, []);
 

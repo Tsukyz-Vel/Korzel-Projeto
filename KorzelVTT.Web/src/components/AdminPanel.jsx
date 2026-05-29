@@ -6,7 +6,7 @@ export default function AdminPanel({ authToken, showToast, setCurrentPage }) {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('http://korzelapi.somee.com/api/admin/users', {
+      const res = await fetch('https://korzelapi.somee.com/api/admin/users', {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       if (res.ok) {
@@ -26,7 +26,7 @@ export default function AdminPanel({ authToken, showToast, setCurrentPage }) {
   const toggleBlock = async (id, currentStatus) => {
     if (window.confirm(currentStatus ? "Desbloquear este aventureiro?" : "Banir este aventureiro?")) {
       try {
-        const res = await fetch(`http://korzelapi.somee.com/api/admin/users/${id}/block`, {
+        const res = await fetch(`https://korzelapi.somee.com/api/admin/users/${id}/block`, {
           method: 'PUT',
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
@@ -43,7 +43,7 @@ export default function AdminPanel({ authToken, showToast, setCurrentPage }) {
   const deleteUser = async (id, name) => {
     if (window.confirm(`ATENÇÃO! Deseja obliterar a conta de ${name} para sempre? (Isto apagará todas as fichas e campanhas dele)`)) {
       try {
-        const res = await fetch(`http://korzelapi.somee.com/api/admin/users/${id}`, {
+        const res = await fetch(`https://korzelapi.somee.com/api/admin/users/${id}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
