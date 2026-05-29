@@ -1,11 +1,11 @@
 ### Listar Usuários (Teste do GET)
-GET http://localhost:5104/api/users
+GET http://korzelapi.somee.com/api/users
 Accept: application/json
 
 ###
 
 ### Criar o Mestre Administrador (Teste do POST)
-POST http://localhost:5104/api/users
+POST http://korzelapi.somee.com/api/users
 Content-Type: application/json
 
 {
@@ -17,7 +17,7 @@ Content-Type: application/json
 
 
 ### Criar Ficha de Personagem (Teste)
-POST http://localhost:5104/api/characters
+POST http://korzelapi.somee.com/api/characters
 Content-Type: application/json
 
 {
@@ -42,7 +42,7 @@ Content-Type: application/json
 }
 
 ### Treinar o Kael em Atletismo
-POST http://localhost:5104/api/characterskills
+POST http://korzelapi.somee.com/api/characterskills
 Content-Type: application/json
 
 {
@@ -54,7 +54,7 @@ Content-Type: application/json
 }
 
 ### Dar um Tridente de Guerra ao Kael
-POST http://localhost:5104/api/characteritems
+POST http://korzelapi.somee.com/api/characteritems
 Content-Type: application/json
 
 {
@@ -73,13 +73,13 @@ Content-Type: application/json
 }
 
 ### Deletar a primeira duplicata (Atletismo ID 2)
-DELETE http://localhost:5104/api/characterskills/2
+DELETE http://korzelapi.somee.com/api/characterskills/2
 
 ### Deletar a segunda duplicata (Atletismo ID 3)
-DELETE http://localhost:5104/api/characterskills/3
+DELETE http://korzelapi.somee.com/api/characterskills/3
 
 ### Atualizar a ficha do Kael (Tomou 10 de dano)
-PUT http://localhost:5104/api/characters/1
+PUT http://korzelapi.somee.com/api/characters/1
 Content-Type: application/json
 
 {
