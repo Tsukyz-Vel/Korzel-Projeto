@@ -7,7 +7,7 @@ import DiceRollerOverlay from './components/DiceRollerOverlay';
 import { initialLojaCatalog, panteaoKorzel } from './data/korzelData';
 import { parseAndRollDamage } from './utils/diceUtils';
 import Compendio from './components/Compendio';
-import * as signalR from '@microsoft/signalr';
+//import * as signalR from '@microsoft/signalr';
 import Configuracoes from './components/Configuracoes';
 import AdminPanel from './components/AdminPanel';
 
@@ -1002,12 +1002,12 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
     if (authToken) fetchAllCharacters(); 
   }, [authToken, currentCampaignId, refreshTrigger]);
 
-  useEffect(() => {
-    const newConnection = new signalR.HubConnectionBuilder().withUrl("https://korzelapi.somee.com/vtthub").withAutomaticReconnect().build();
-    setConnection(newConnection);
-  }, []);
+ // useEffect(() => {
+ //   const newConnection = new signalR.HubConnectionBuilder().withUrl("https://korzelapi.somee.com/vtthub").withAutomaticReconnect().build();
+ //   setConnection(newConnection);
+ // }, []);
 
- // 👇 SISTEMA DE ESCUTA ATUALIZADO E RE-LIGADO CORRETAMENTE 👇
+ // 👇 SISTEMA DE ESCUTA ATUALIZADO E RE-LIGADO CORRETAMENTE git 👇
   useEffect(() => {
     if (connection) {
       connection.start().then(() => {
