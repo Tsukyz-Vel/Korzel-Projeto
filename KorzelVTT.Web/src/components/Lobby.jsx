@@ -19,7 +19,7 @@ export default function Lobby({ handleEnterSession }) {
 
   const fetchData = async () => {
     try {
-      const resCamp = await fetch('http://localhost:5104/api/campaigns', {
+      const resCamp = await fetch('https://korzelapi.somee.com/api/campaigns', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (resCamp.ok) setMyCampaigns(await resCamp.json());
@@ -34,7 +34,7 @@ export default function Lobby({ handleEnterSession }) {
     if (!newCampaignName.trim()) return alert("Dê um nome para sua campanha!");
     
     try {
-      const res = await fetch('http://localhost:5104/api/campaigns', {
+      const res = await fetch('https://korzelapi.somee.com/api/campaigns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ name: newCampaignName })
@@ -55,7 +55,7 @@ export default function Lobby({ handleEnterSession }) {
     if (!joinCode.trim()) return alert("Digite o código de convite!");
 
     try {
-      const res = await fetch('http://localhost:5104/api/campaigns/join', {
+      const res = await fetch('https://korzelapi.somee.com/api/campaigns/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ inviteCode: joinCode })
@@ -82,7 +82,7 @@ export default function Lobby({ handleEnterSession }) {
   const handleDeleteCampaign = async (campaignId, campaignName) => {
     if (window.confirm(`Tem a certeza absoluta de que quer excluir a campanha "${campaignName}"? Todas as fichas, mapas e tokens associados a ela serão perdidos no vazio. Esta ação é irreversível.`)) {
       try {
-        const res = await fetch(`http://localhost:5104/api/campaigns/${campaignId}`, {
+        const res = await fetch(`https://korzelapi.somee.com/api/campaigns/${campaignId}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
