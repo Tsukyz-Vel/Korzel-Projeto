@@ -7,7 +7,7 @@ import DiceRollerOverlay from './components/DiceRollerOverlay';
 import { initialLojaCatalog, panteaoKorzel } from './data/korzelData';
 import { parseAndRollDamage } from './utils/diceUtils';
 import Compendio from './components/Compendio';
-//import * as signalR from '@microsoft/signalr';
+import * as signalR from '@microsoft/signalr';
 import Configuracoes from './components/Configuracoes';
 import AdminPanel from './components/AdminPanel';
 
