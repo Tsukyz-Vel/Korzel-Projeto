@@ -1089,7 +1089,7 @@ export default function App() {
       }
     }
   }, [isPlaying, currentTrackUrl]); // Reage instantaneamente a plays e trocas de música
-
+  const debounceVolume = useRef(null); // <- Não esqueça de colocar isso lá no topo junto com os outros useRef!
   // 🟢 CÉREBRO 2: BARRINHA DE VOLUME + SINCRONIZAÇÃO INTELIGENTE (DEBOUNCE)
   useEffect(() => {
     if (audioRef.current) {

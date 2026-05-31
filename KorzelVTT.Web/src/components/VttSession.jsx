@@ -146,7 +146,18 @@ export default function VttSession(props) {
 
   const flipToken = () => {
     if (!tokenContextMenu.tokenId) return;
-    setSceneTokens(prev => prev.map(t => t.id === tokenContextMenu.tokenId ? { ...t, flipX: !t.flipX } : t));
+    
+    const tToFlip = sceneTokens.find(t => t.id === tokenContextMenu.tokenId);
+    if(tToFlip) {
+        const updatedToken = { ...tToFlip, flipX: !tToFlip.flipX };
+        // Muda pra você
+        setSceneTokens(prev => prev.map(t => t.id === tokenContextMenu.tokenId ? updatedToken : t));
+
+        // Manda pro C# avisar os players!
+        if (connection && currentCampaignId) {
+            connection.invoke("UpdateToken", currentCampaignId.toString(), JSON.stringify(updatedToken)).catch(console.error);
+        }
+    }
     setTokenContextMenu({ ...tokenContextMenu, show: false });
   };
 
