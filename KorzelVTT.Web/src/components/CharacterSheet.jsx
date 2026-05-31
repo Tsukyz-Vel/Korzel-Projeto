@@ -21,7 +21,7 @@ export default function CharacterSheet({
   showItemForm, setShowItemForm, editingItemIndex, itemForm, setItemForm, inventoryList, handleOpenNewItem, handleEditItem, handleDeleteItem, handleSaveItem,
   charDeity, handleDeityChange, mut1, setMut1, mut2, setMut2, mut3, setMut3,
   notes, activeNoteId, setActiveNoteId, handleAddNote, handleDeleteNote, handleNoteChange, activeNote,
-  connection, setChatMessages, showToast, currentCampaignId
+  connection, setChatMessages, showToast, currentCampaignId // 👈 PROPS ESSENCIAIS
 }) {
 
   // ==========================================
@@ -30,7 +30,7 @@ export default function CharacterSheet({
   const [activeToggles, setActiveToggles] = useState([]);
   const [customCondition, setCustomCondition] = useState(""); 
   
-  // 👇 ESTADO DO DADO AVULSO 👇
+  // ESTADO DO DADO AVULSO
   const [avulsoText, setAvulsoText] = useState(""); 
 
   // ==========================================
@@ -84,42 +84,41 @@ export default function CharacterSheet({
          costNum = match ? parseInt(match[0]) : 0;
       }
 
+      // SISTEMA DE CUSTOS E TOASTS
       if (costStr.includes('pe') || costStr.includes('esforço')) {
         if (pe < costNum) { 
-          if(showToast) showToast(`Você precisa de ${costNum} PE para ativar ${ability.title}!`, "error"); 
-          return; 
+            if(showToast) showToast(`Você precisa de ${costNum} PE para ativar ${ability.title}!`, "error"); 
+            return; 
         }
         setPe(prev => prev - costNum);
-        if(showToast && costNum > 0) showToast(`⚡ Gastou ${costNum} PE para ativar ${ability.title}`, "info");
+        if(showToast && costNum > 0) showToast(`⚡ Gastou ${costNum} PE ativando ${ability.title}`, "success");
       } else if (costStr.includes('pv') || costStr.includes('vida') || costStr.includes('sangue')) {
         if (hp <= costNum) { 
-          if(showToast) showToast(`Aviso: O custo rolado foi ${costNum} PV. Ativar isso mataria você!`, "error"); 
-          return; 
+            if(showToast) showToast(`Aviso: O custo é ${costNum} PV. Isso mataria você!`, "error"); 
+            return; 
         }
         setHp(prev => prev - costNum);
-        if(showToast && costNum > 0) showToast(`🩸 Sofreu ${costNum} de dano para ativar ${ability.title}`, "warning");
+        if(showToast && costNum > 0) showToast(`🩸 Sofreu ${costNum} de dano ativando ${ability.title}`, "warning");
       }
 
       setActiveToggles(prev => [...prev, ability.title]);
 
-      // 👇 2. MONTANDO E ENVIANDO A MENSAGEM PRO SERVIDOR
-      if (connection) {
-        const tipoCusto = costStr.includes('pv') || costStr.includes('vida') ? 'PV' : costStr.includes('pe') ? 'PE' : '';
-        const textoCusto = costNum > 0 ? `\n🩸 Custo Pago: ${costNum} ${tipoCusto}${rollDetails}` : '';
+      // MONTAGEM DA MENSAGEM PARA O CHAT
+      const tipoCusto = costStr.includes('pv') || costStr.includes('vida') ? 'PV' : costStr.includes('pe') ? 'PE' : '';
+      const textoCusto = costNum > 0 ? `\n🩸 Custo Pago: ${costNum} ${tipoCusto}${rollDetails}` : '';
 
-        const newMsg = {
-          id: Date.now(),
-          sender: charName || "Personagem",
-          type: "msg",
-          text: `⚡ Ativou Poder: **${ability.title}**${textoCusto}\n*${ability.description}*`
-        };
+      const newMsg = {
+        id: Date.now(),
+        sender: charName || "Personagem",
+        type: "msg",
+        text: `⚡ Ativou Poder: **${ability.title}**${textoCusto}\n*${ability.description}*`
+      };
 
-        // Usa o currentCampaignId que vem por prop. Se não existir, avisa no console.
-        if (currentCampaignId) {
-          connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMsg)).catch(console.error);
-        } else {
-          console.error("ERRO: currentCampaignId não chegou na CharacterSheet!");
-        }
+      // ENVIO EXCLUSIVO PARA O SERVIDOR (Sem setChatMessages local!)
+      if (connection && currentCampaignId) {
+        connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMsg)).catch(console.error);
+      } else {
+        console.error("ERRO CRÍTICO: currentCampaignId está indefinido dentro da CharacterSheet!");
       }
     }
   };
@@ -343,7 +342,7 @@ export default function CharacterSheet({
         {activeFichaTab === 'combate' && (
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-4 flex flex-col min-h-0">
             
-            {/* 👇 BARRA DE ROLAGEM AVULSA CORRIGIDA 👇 */}
+            {/* BARRA DE ROLAGEM AVULSA */}
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4 shrink-0 mb-6">
               <div className="relative flex-1 w-full">
                 <input 
