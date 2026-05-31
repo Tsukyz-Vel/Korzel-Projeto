@@ -548,9 +548,9 @@ export default function VttSession(props) {
           )}
           <div className="border-t border-[#3e2723] my-1"></div>
           <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest px-3 py-1 mb-1 block">Condições</span>
-          <button onClick={() => toggleTokenStatus('bleeding')} className="text-left px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-zinc-800 rounded transition-colors">🩸 Sangrando</button>
-          <button onClick={() => toggleTokenStatus('poisoned')} className="text-left px-3 py-1.5 text-xs font-bold text-green-400 hover:bg-zinc-800 rounded transition-colors">☠️ Envenenado</button>
-          <button onClick={() => toggleTokenStatus('camouflaged')} className="text-left px-3 py-1.5 text-xs font-bold text-zinc-400 hover:bg-zinc-800 rounded transition-colors">🌫️ Camuflado</button>
+          <button onClick={() => toggleTokenStatus('bleeding')} className="text-left px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-zinc-500 rounded transition-colors">🩸 Sangrando</button>
+          <button onClick={() => toggleTokenStatus('poisoned')} className="text-left px-3 py-1.5 text-xs font-bold text-green-400 hover:bg-zinc-500 rounded transition-colors">☠️ Envenenado</button>
+          <button onClick={() => toggleTokenStatus('camouflaged')} className="text-left px-3 py-1.5 text-xs font-bold text-zinc-400 hover:bg-zinc-500 rounded transition-colors">🌫️ Camuflado</button>
         </div>
       )}
     </div>
