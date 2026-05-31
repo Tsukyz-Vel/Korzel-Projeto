@@ -145,7 +145,7 @@ export default function App() {
   const [sceneTokens, setSceneTokens] = useState([]);
   const [fichaSearch, setFichaSearch] = useState('');
   const [mapScale, setMapScale] = useState(0.2);
-  const [mapOffset, setMapOffset] = useState({ x: -800, y: -800 }); 
+  const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
   const [isDraggingMap, setIsDraggingMap] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [draggingToken, setDraggingToken] = useState(null);
@@ -220,6 +220,8 @@ export default function App() {
     setCurrentCampaignId(campaignId); 
     setSessionTab('chat'); 
     setCurrentPage('sessao');
+    setMapScale(0.2);
+    setMapOffset({ x: 0, y: 0 });
     if (connection && campaignId) { 
       connection.invoke("JoinSession", campaignId.toString(), loggedUserName).catch(console.error); 
     }
@@ -238,6 +240,7 @@ export default function App() {
             setPlayerActiveSceneId(activeScene.id); 
             const todosOsTokens = data.flatMap(cena => cena.tokens || []);
             setSceneTokens(todosOsTokens); 
+            
           }
         } else {
           const firstScene = { campaignId: campaignId, name: "Mapa Inicial", bgImage: "", isActive: true };
