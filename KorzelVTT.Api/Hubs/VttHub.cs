@@ -158,6 +158,18 @@ namespace KorzelVTT.Api.Hubs
             await Clients.OthersInGroup(campaignId).SendAsync("VolumeChanged", newVolume);
         }
 
+        public async Task AddAudioTrack(string campaignId, string categoryId, string trackJson)
+        {
+            // Avisa os jogadores que uma música nova chegou na pasta!
+            await Clients.OthersInGroup(campaignId).SendAsync("AudioAdded", categoryId, trackJson);
+        }
+
+        public async Task RemoveAudioTrack(string campaignId, string categoryId, int trackId)
+        {
+            // Avisa os jogadores para deletarem a música da lista
+            await Clients.OthersInGroup(campaignId).SendAsync("AudioRemoved", categoryId, trackId);
+        }
+
         // ==========================================
         // FERRAMENTAS DO VTT (Pings, Desenhos, Clima)
         // ==========================================
