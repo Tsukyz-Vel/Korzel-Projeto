@@ -13,7 +13,7 @@ export default function SessionSidebar(props) {
     editingCatalogIndex, catalogForm, setCatalogForm, handleEditCatalogItem, handleDeleteCatalogItem,
     handleSaveCatalogItem, handleDeleteTokenFromScene, handleDeleteTokenFromLibrary,
     campaignCharacters, handleCreateNewCharacter, loadCharacterFromDb, handleDeleteCharacter,
-    handleAddAudioLink // 👈 Função nova desestruturada aqui!
+    handleAddAudioLink, currentCampaignId // 👈 Função nova desestruturada aqui!
   } = props;
  
   const [targetBuyerId, setTargetBuyerId] = useState('active');
@@ -179,8 +179,21 @@ export default function SessionSidebar(props) {
                       {activeAudioId === track.id && (
                         <div className="flex items-center gap-3 border-t border-amber-900/30 pt-2 animate-fade-in">
                           <span className="text-xs">🔈</span>
-                          <input type="range" min="0" max="1" step="0.05" value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full h-1 bg-amber-950 rounded-lg appearance-none cursor-pointer accent-amber-500" />
-                          <span className="text-xs">🔊</span>
+                          <input 
+                            type="range" 
+                            min="0" max="1" step="0.05" 
+                            value={volume} 
+                            onChange={(e) => {
+                              const novoVolume = Number(e.target.value);
+                              setVolume(novoVolume); // Atualiza pro Mestre na hora
+                              
+                              // Se for o Mestre alterando, grita no rádio para baixar o volume de todos
+                              if (isMasterMode && connection && currentCampaignId) {
+                                connection.invoke("ChangeVolume", currentCampaignId.toString(), novoVolume).catch(console.error);
+                              }
+                            }} 
+                            className="w-full h-1 bg-amber-950 rounded-lg appearance-none cursor-pointer accent-amber-500" 
+                          />
                         </div>
                       )}
                     </div>
@@ -242,10 +255,15 @@ export default function SessionSidebar(props) {
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <button onClick={() => loadCharacterFromDb(char.id)} className="flex-1 bg-blue-950/40 hover:bg-blue-900 text-blue-300 border border-blue-900 text-[9px] uppercase font-bold tracking-widest py-2 rounded transition-colors">
-                              📖 Inspecionar
-                            </button>
-                          </div>
+                              <button onClick={() => loadCharacterFromDb(char.id)} className="flex-1 bg-blue-950/40 hover:bg-blue-900 text-blue-300 border border-blue-900 text-[9px] uppercase font-bold tracking-widest py-2 rounded transition-colors">
+                                📖 Inspecionar
+                              </button>
+                              
+                              {/* 👇 O BOTÃO QUE FALTAVA PARA O MESTRE 👇 */}
+                              <button onClick={() => handleDeleteCharacter(char.id, char.name)} className="bg-zinc-900/80 hover:bg-red-900 text-zinc-500 hover:text-red-200 border border-zinc-800 hover:border-red-900 text-[10px] px-3 rounded transition-colors" title="Apagar Ficha do Jogador">
+                                🗑️
+                              </button>
+                            </div> 
                         </div>
                       ))}
                     </div>

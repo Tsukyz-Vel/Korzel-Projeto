@@ -1111,6 +1111,9 @@ export default function App() {
     connection.on("MusicStopped", () => setIsPlaying(false));
     connection.on("UpdatePlayerList", (playerList) => setOnlinePlayers(playerList));
     connection.on("CatalogUpdated", (catalogJson) => setCatalog(JSON.parse(catalogJson)));
+    connection.on("VolumeChanged", (newVolume) => {
+        setVolume(newVolume);
+    });
     
   }, [connection]); // 👈 A mágica: dependência apenas na conexão. Não recarrega nunca mais.
 
