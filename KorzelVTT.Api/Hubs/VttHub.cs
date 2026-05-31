@@ -79,10 +79,10 @@ namespace KorzelVTT.Api.Hubs
         // ==========================================
         // SISTEMA DE CHAT OTIMIZADO
         // ==========================================
-        public async Task SendChatMessage(string sessionId, string messageJson)
+       public async Task SendChatMessage(string sessionId, string messageJson)
         {
-            // Disparo ultra rápido e direto para quem está na sala
-            await Clients.OthersInGroup(sessionId).SendAsync("ChatMessageReceived", messageJson);
+            // O CERTO: Dispara para TODOS na sala, garantindo que o Mestre e os Players vejam a mesma coisa
+            await Clients.Group(sessionId).SendAsync("ChatMessageReceived", messageJson);
         }
 
         // ==========================================
