@@ -221,7 +221,7 @@ export default function App() {
     setSessionTab('chat'); 
     setCurrentPage('sessao');
     setMapScale(0.2);
-   setMapOffset({ 
+    setMapOffset({ 
         x: (window.innerWidth / 2) - 300, 
         y: (window.innerHeight / 2) - 300 
     });
@@ -1057,52 +1057,38 @@ export default function App() {
        showToast("Erro de conexão ao forjar poder.", "error");
     }
   };
-
   // ==========================================
   // 4. USE EFFECTS (EFEITOS E SIGNALR)
   // ==========================================
   useEffect(() => { localStorage.setItem('korzel_catalog', JSON.stringify(catalog)); }, [catalog]);
   useEffect(() => { localStorage.setItem('korzel_token_library', JSON.stringify(tokenLibrary)); }, [tokenLibrary]);
   
-  
   useEffect(() => { if (audioRef.current) audioRef.current.loop = isLooping; }, [isLooping]);
-// 🟢 1. CÉREBRO DE TROCA DE MÚSICA E PLAY/PAUSE
-  useEffect(() => { 
-    if (audioRef.current) { 
-      // Se a música mudou, injetamos a URL direto na veia do navegador antes do HTML atualizar
-      if (activeAudioId !== lastPlayedAudioId.current) {
-        const trackUrl = audioCategories.flatMap(c => c.tracks).find(t => t.id === activeAudioId)?.url;
-        if (trackUrl) {
-           audioRef.current.src = trackUrl; // Força a URL nova instantaneamente
-        }
-        audioRef.current.load();
-        lastPlayedAudioId.current = activeAudioId;
-      }
 
-      // Toca ou Pausa
-      if (isPlaying && activeAudioId) { 
-        // O Promise catch evita erros no console se a internet der um pico
+  // 🟢 1. Encontra automaticamente a música certa sempre que as listas ou o ID mudarem
+  const currentTrackUrl = audioCategories.flatMap(c => c.tracks).find(t => t.id === activeAudioId)?.url;
+
+  // 🟢 2. Controla o Play e Pause automaticamente
+  useEffect(() => {
+    if (audioRef.current) {
+      if (isPlaying && currentTrackUrl) {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
-           playPromise.catch(e => console.log("Aguardando carregamento de áudio...", e));
+          playPromise.catch(e => console.log("A carregar áudio..."));
         }
-      } else { 
-        audioRef.current.pause(); 
-      } 
-    } 
-  }, [isPlaying, activeAudioId, audioCategories]); // 👈 Cérebro apenas para play e pausa, SEM o volume.
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isPlaying, currentTrackUrl]);
 
-  // 🟢 2. CÉREBRO EXCLUSIVO DA BARRINHA DE VOLUME
+  // 🟢 3. Controla a Barrinha de Volume LOCALMENTE
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = Number(volume);
-      
-      // O Segredo: Avisar a mesa em tempo real toda vez que a barra mexer!
-      if (isMasterMode && connection && currentCampaignId) {
-          connection.invoke("ChangeVolume", currentCampaignId.toString(), Number(volume)).catch(console.error);
-      }
     }
-  }, [volume, isMasterMode, connection, currentCampaignId]);
+  }, [volume]);
+
   useEffect(() => { 
     if (authToken) fetchAllCharacters(); 
   }, [authToken, currentCampaignId, refreshTrigger]);
@@ -1117,6 +1103,7 @@ export default function App() {
       .build();
     setConnection(newConnection);
   }, []);
+
   useEffect(() => {
     if (connection && currentCampaignId && loggedUserName) {
       connection.invoke("JoinSession", currentCampaignId.toString(), loggedUserName)
@@ -1142,24 +1129,13 @@ export default function App() {
         const updatedToken = JSON.parse(tokenJson);
         setSceneTokens(prev => prev.map(t => String(t.id) === String(updatedToken.id) ? updatedToken : t));
     });
-    connection.on("PlayersPulled", (syncJson) => { 
-      try {
-        const data = JSON.parse(syncJson);
-        setPlayerActiveSceneId(data.sceneId);
-        setScenes(prev => prev.map(s => String(s.id) === String(data.sceneId) ? { ...s, bgImage: data.bgImage } : s));
-        setSceneTokens(prev => {
-            const outrosTokens = prev.filter(t => String(t.sceneId) !== String(data.sceneId));
-            return [...outrosTokens, ...data.tokens];
-        });
-      } catch(e) {}
-    });
-
+    
     connection.on("SceneAdded", (sceneJson) => setScenes(prev => [...prev, JSON.parse(sceneJson)]));
-  connection.on("MapChanged", async (payload) => { 
+    
+    connection.on("MapChanged", async (payload) => { 
       try {
         const data = JSON.parse(payload);
         
-        // Se veio o ID da campanha, puxamos as imagens direto do banco de dados/API
         if (data.campaignId) {
             const res = await fetch(`https://korzel-api.onrender.com/api/scenes/campaign/${data.campaignId}`);
             if (res.ok) {
@@ -1173,7 +1149,6 @@ export default function App() {
       } catch(e) { console.error("Erro no MapChanged:", e); }
     });
 
-    // ✅ NOVO OUVINTE PLAYERSPULLED LEVE E EFICIENTE
     connection.on("PlayersPulled", async (syncJson) => { 
       try {
         const data = JSON.parse(syncJson);
@@ -1198,7 +1173,8 @@ export default function App() {
     });
 
     connection.on("ChatMessageReceived", (messageJson) => setChatMessages(prev => [...prev, JSON.parse(messageJson)]));
-   connection.on("MusicStarted", (trackId, trackVolume) => { 
+    
+    connection.on("MusicStarted", (trackId, trackVolume) => { 
         setActiveAudioId(trackId); 
         setIsPlaying(true); 
         if (trackVolume !== undefined) setVolume(trackVolume);
@@ -1209,6 +1185,7 @@ export default function App() {
     connection.on("VolumeChanged", (newVolume) => {
         setVolume(newVolume);
     });
+    
     connection.on("AudioAdded", (categoryId, trackJson) => {
         const newTrack = JSON.parse(trackJson);
         setAudioCategories(prev => prev.map(cat => 
@@ -1216,13 +1193,12 @@ export default function App() {
         ));
     });
 
-    // Ouvindo quando o mestre deleta uma música
     connection.on("AudioRemoved", (categoryId, trackId) => {
         setAudioCategories(prev => prev.map(cat => 
             cat.id === categoryId ? { ...cat, tracks: cat.tracks.filter(t => t.id !== trackId) } : cat
         ));
     });
-  }, [connection]); // 👈 A mágica: dependência apenas na conexão. Não recarrega nunca mais.
+  }, [connection]);
 
   // 2. ENTRA NA SALA QUANDO A CAMPANHA É SELECIONADA
   useEffect(() => {
@@ -1238,6 +1214,7 @@ export default function App() {
       }
     }
   }, [connection, currentCampaignId, loggedUserName]);
+
   // ==========================================
   // 5. PROPS DO VTT
   // ==========================================
@@ -1304,7 +1281,7 @@ export default function App() {
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#0a0a0a] flex flex-col font-sans relative" style={{ colorScheme: 'dark' }} onMouseMove={handleMapMouseMove} onMouseUp={handleMapMouseUp} onMouseLeave={handleMapMouseUp}>
       <DiceRollerOverlay isRolling={rollModal.isRolling} result={rollModal.show && !rollModal.isRolling ? rollModal : null} onDismiss={() => setRollModal({ ...rollModal, show: false })} />
-      <audio ref={audioRef} loop={isLooping} />
+      <audio ref={audioRef} src={currentTrackUrl || ""} loop={isLooping} />
 
       {sheetModalOpen && currentPage === 'sessao' && (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 lg:p-8 animate-fade-in" onClick={() => setSheetModalOpen(false)}>
