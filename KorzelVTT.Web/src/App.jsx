@@ -644,7 +644,20 @@ export default function App() {
       connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMessage)).catch(console.error); 
     } 
   };
-  
+  const handleClearChat = () => {
+    if (!window.confirm("Deseja purificar o chat da mesa? Isso apagará o histórico de todos os jogadores.")) return;
+    
+    // Usamos o Cavalo de Troia! Enviamos uma mensagem falsa com um "tipo oculto"
+    const clearMsg = { id: Date.now(), sender: "System", type: "HIDDEN_CLEAR_CHAT", text: "" };
+    
+    // Limpa pra você
+    setChatMessages([{ id: Date.now(), sender: "Sistema", text: "O Mestre purificou o chat.", type: "info" }]);
+    
+    // Manda a ordem de limpeza pros jogadores
+    if (connection && currentCampaignId) {
+      connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(clearMsg)).catch(console.error);
+    }
+  };
  const handleMapUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -1070,25 +1083,27 @@ export default function App() {
   // 1. Encontra a URL da música atual
   const currentTrackUrl = audioCategories.flatMap(c => c.tracks).find(t => t.id === activeAudioId)?.url;
 
-  // 🟢 CÉREBRO 1: PLAY, PAUSE E LOAD AUTOMÁTICO
+  // // 🟢 1. CÉREBRO DE TROCA DE MÚSICA E PLAY/PAUSE
+  const currentTrackUrl = audioCategories.flatMap(c => c.tracks).find(t => t.id === activeAudioId)?.url;
+
   useEffect(() => {
     if (audioRef.current) {
-      // Se a música trocou, FORÇA o navegador a recarregar o arquivo novo
       if (currentTrackUrl !== prevTrackUrl.current) {
-        audioRef.current.load();
+        audioRef.current.src = currentTrackUrl || ""; // Injeta na veia
+        audioRef.current.load();                      // Obriga a esquecer a antiga
         prevTrackUrl.current = currentTrackUrl;
       }
 
       if (isPlaying && currentTrackUrl) {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
-          playPromise.catch(e => console.log("Aguardando carregamento de áudio..."));
+          playPromise.catch(e => console.log("Aguardando buffer de áudio..."));
         }
       } else {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying, currentTrackUrl]); // Reage instantaneamente a plays e trocas de música
+  }, [isPlaying, currentTrackUrl]);
   const debounceVolume = useRef(null); // <- Não esqueça de colocar isso lá no topo junto com os outros useRef!
   // 🟢 CÉREBRO 2: BARRINHA DE VOLUME + SINCRONIZAÇÃO INTELIGENTE (DEBOUNCE)
   useEffect(() => {
@@ -1196,8 +1211,15 @@ export default function App() {
       } catch(e) { console.error("Erro no PlayersPulled:", e); }
     });
 
-    connection.on("ChatMessageReceived", (messageJson) => setChatMessages(prev => [...prev, JSON.parse(messageJson)]));
-    
+    connection.on("ChatMessageReceived", (messageJson) => {
+        const msg = JSON.parse(messageJson);
+        // O interceptador pega a mensagem falsa e limpa a tela dos jogadores!
+        if (msg.type === "HIDDEN_CLEAR_CHAT") {
+            setChatMessages([{ id: Date.now(), sender: "Sistema", text: "O Mestre purificou o chat.", type: "info" }]);
+            return;
+        }
+        setChatMessages(prev => [...prev, msg]);
+    });
     connection.on("MusicStarted", (trackId, trackVolume) => { 
         setActiveAudioId(trackId); 
         setIsPlaying(true); 
@@ -1256,7 +1278,7 @@ export default function App() {
     updateTokenSize, handleDragStartFromLibrary, handleDropOnMap, handleMapWheel, handleMapMouseDown,
     bringToFront, sendToBack, assignPermission, toggleTokenStatus,togglePlayAudio, handleBuyItem, updateBuyQty, handleOpenNewCatalogItem,
     handleEditCatalogItem, handleDeleteCatalogItem, handleSaveCatalogItem, executeRoll, getSkillTotal,handleAddAudioLink,
-    hp, setHp, maxHp, setMaxHp, pe, setPe, maxPe, setMaxPe, corruption, setCorruption, maxCorruption, setMaxCorruption,handleDeleteAudioTrack,
+    hp, setHp, maxHp, setMaxHp, pe, setPe, maxPe, setMaxPe, corruption, setCorruption, maxCorruption, setMaxCorruption,handleDeleteAudioTrack,handleClearChat,
     attrInt, attrPre, attrAgi, attrVig, attrFor, attrIns,resistances, setResistances,oficioText, setOficioText, inventoryList, setInventoryList, attacksList, setAttacksList, abilitiesList, setAbilitiesList, notes, setNotes, activeNoteId, setActiveNoteId,
     skillsList, setSkillsList, campaignCharacters, loggedUserName, handleCreateNewCharacter, loadCharacterFromDb, handleDeleteCharacter, handleDeleteTokenFromScene, handleDeleteTokenFromLibrary
   };
@@ -1305,7 +1327,7 @@ export default function App() {
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#0a0a0a] flex flex-col font-sans relative" style={{ colorScheme: 'dark' }} onMouseMove={handleMapMouseMove} onMouseUp={handleMapMouseUp} onMouseLeave={handleMapMouseUp}>
       <DiceRollerOverlay isRolling={rollModal.isRolling} result={rollModal.show && !rollModal.isRolling ? rollModal : null} onDismiss={() => setRollModal({ ...rollModal, show: false })} />
-      <audio ref={audioRef} src={currentTrackUrl || ""} loop={isLooping} />
+      <audio ref={audioRef} loop={isLooping} />
 
       {sheetModalOpen && currentPage === 'sessao' && (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 lg:p-8 animate-fade-in" onClick={() => setSheetModalOpen(false)}>

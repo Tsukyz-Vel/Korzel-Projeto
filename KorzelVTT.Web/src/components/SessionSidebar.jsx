@@ -13,7 +13,7 @@ export default function SessionSidebar(props) {
     editingCatalogIndex, catalogForm, setCatalogForm, handleEditCatalogItem, handleDeleteCatalogItem,
     handleSaveCatalogItem, handleDeleteTokenFromScene, handleDeleteTokenFromLibrary,
     campaignCharacters, handleCreateNewCharacter, loadCharacterFromDb, handleDeleteCharacter,
-    handleAddAudioLink, currentCampaignId // 👈 Função nova desestruturada aqui!
+    handleAddAudioLink, currentCampaignId, handleClearChat // 👈 Adicionado handleClearChat aqui!
   } = props;
  
   const [targetBuyerId, setTargetBuyerId] = useState('active');
@@ -148,7 +148,7 @@ export default function SessionSidebar(props) {
           </div>
           
           {/* APENAS BOTÃO DE LINK */}
-          <button onClick={props.handleAddAudioLink} className="w-full bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 text-[10px] font-bold uppercase tracking-widest py-2 mb-2 rounded border border-indigo-700 transition-colors shadow-md shrink-0">
+          <button onClick={handleAddAudioLink} className="w-full bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 text-[10px] font-bold uppercase tracking-widest py-2 mb-2 rounded border border-indigo-700 transition-colors shadow-md shrink-0">
             🔗 Adicionar Link Direto (.mp3)
           </button>
 
@@ -157,7 +157,7 @@ export default function SessionSidebar(props) {
               <div key={category.id} className="flex flex-col gap-2">
                 <div className="flex justify-between items-center border-b border-amber-900/30 pb-1">
                   <h5 className="text-[10px] text-amber-600 uppercase tracking-widest font-bold">{category.name}</h5>
-                  <button onClick={() => { setTargetAudioCat(category.id); props.handleAddAudioLink(); }} className="text-[10px] text-zinc-400 hover:text-amber-500 transition-colors" title="Adicionar link nesta pasta">➕</button>
+                  <button onClick={() => { setTargetAudioCat(category.id); handleAddAudioLink(); }} className="text-[10px] text-zinc-400 hover:text-amber-500 transition-colors" title="Adicionar link nesta pasta">➕</button>
                 </div>
                 {category.tracks.length === 0 ? (
                   <p className="text-[9px] text-zinc-600 italic">Nenhuma faixa nesta pasta.</p>
@@ -180,27 +180,15 @@ export default function SessionSidebar(props) {
                         <div className="flex items-center gap-3 border-t border-amber-900/30 pt-2 animate-fade-in">
                           <span className="text-xs">🔈</span>
                        <input 
-  type="range" 
-  min="0" max="1" step="0.05" 
-  value={volume} 
-  onChange={(e) => {
-    // 1. Atualiza o som para você instantaneamente enquanto arrasta
-    setVolume(parseFloat(e.target.value)); 
-  }} 
-  onMouseUp={() => {
-    // 2. Manda pro servidor o estado 'volume' limpo, apenas ao soltar o mouse!
-    if (isMasterMode && connection && currentCampaignId) {
-      connection.invoke("ChangeVolume", currentCampaignId.toString(), volume).catch(console.error);
-    }
-  }}
-  onTouchEnd={() => {
-    // 3. O mesmo para quem mestra no tablet/celular
-    if (isMasterMode && connection && currentCampaignId) {
-      connection.invoke("ChangeVolume", currentCampaignId.toString(), volume).catch(console.error);
-    }
-  }}
-  className="w-full h-1 bg-amber-950 rounded-lg appearance-none cursor-pointer accent-amber-500" 
-/>
+                            type="range" 
+                            min="0" max="1" step="0.05" 
+                            value={volume} 
+                            onChange={(e) => {
+                              // 1. Atualiza o som para você instantaneamente enquanto arrasta
+                              setVolume(parseFloat(e.target.value)); 
+                            }} 
+                            className="w-full h-1 bg-amber-950 rounded-lg appearance-none cursor-pointer accent-amber-500" 
+                          />
                         </div>
                       )}
                     </div>
@@ -312,34 +300,34 @@ export default function SessionSidebar(props) {
       )}
       
       {/* 4. ABA LOJA */}
-      {props.sessionTab === 'loja' && (
+      {sessionTab === 'loja' && (
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 min-h-0">
           <div className="bg-amber-950/20 border border-amber-900/50 p-3 rounded-lg flex justify-between items-center shadow-inner shrink-0">
             <span className="text-[10px] text-amber-600 uppercase tracking-widest font-bold">Sua Bolsa</span>
-            <span className="text-lg font-bold text-amber-500">🪙 {props.lascas || 0}</span>
+            <span className="text-lg font-bold text-amber-500">🪙 {lascas || 0}</span>
           </div>
           
-          {props.isMasterMode && !props.showCatalogForm && (
+          {isMasterMode && !showCatalogForm && (
             <button onClick={props.handleOpenNewCatalogItem} className="w-full shrink-0 bg-purple-900/50 hover:bg-purple-800 text-purple-200 text-[10px] font-bold uppercase tracking-widest py-2 rounded transition-colors border border-purple-700 shadow-md">
               + Adicionar Produto
             </button>
           )}
 
-          {props.isMasterMode && props.showCatalogForm && (
+          {isMasterMode && showCatalogForm && (
             <div className="bg-zinc-900/90 border border-purple-700/50 rounded-lg p-3 shrink-0 shadow-lg animate-fade-in">
               <h4 className="text-[10px] text-purple-400 font-bold uppercase tracking-widest border-b border-purple-900/50 pb-1 mb-2">
-                {props.editingCatalogIndex !== null ? "🔧 Editar Produto" : "📦 Novo Produto"}
+                {editingCatalogIndex !== null ? "🔧 Editar Produto" : "📦 Novo Produto"}
               </h4>
               <div className="flex flex-col gap-2">
-                <input type="text" value={props.catalogForm.name} onChange={e => props.setCatalogForm({...props.catalogForm, name: e.target.value})} placeholder="Nome do Item" className="w-full bg-black/50 border border-zinc-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" />
+                <input type="text" value={catalogForm.name} onChange={e => setCatalogForm({...catalogForm, name: e.target.value})} placeholder="Nome do Item" className="w-full bg-black/50 border border-zinc-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" />
                 <div className="flex gap-2">
-                  <input type="number" value={props.catalogForm.price} onChange={e => props.setCatalogForm({...props.catalogForm, price: Number(e.target.value)})} placeholder="Preço" className="w-1/2 bg-black/50 border border-zinc-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" />
-                  <input type="number" step="0.1" value={props.catalogForm.weight} onChange={e => props.setCatalogForm({...props.catalogForm, weight: Number(e.target.value)})} placeholder="Peso" className="w-1/2 bg-black/50 border border-zinc-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" />
+                  <input type="number" value={catalogForm.price} onChange={e => setCatalogForm({...catalogForm, price: Number(e.target.value)})} placeholder="Preço" className="w-1/2 bg-black/50 border border-zinc-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" />
+                  <input type="number" step="0.1" value={catalogForm.weight} onChange={e => setCatalogForm({...catalogForm, weight: Number(e.target.value)})} placeholder="Peso" className="w-1/2 bg-black/50 border border-zinc-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" />
                 </div>
-                <input type="text" value={props.catalogForm.desc} onChange={e => props.setCatalogForm({...props.catalogForm, desc: e.target.value})} placeholder="Descrição breve" className="w-full bg-black/50 border border-zinc-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" />
+                <input type="text" value={catalogForm.desc} onChange={e => setCatalogForm({...catalogForm, desc: e.target.value})} placeholder="Descrição breve" className="w-full bg-black/50 border border-zinc-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" />
                 <div className="flex justify-end gap-2 mt-1">
-                  <button onClick={() => props.setShowCatalogForm(false)} className="px-3 py-1 text-[9px] font-bold text-zinc-400 hover:text-white uppercase transition-colors">Cancelar</button>
-                  <button onClick={props.handleSaveCatalogItem} className="px-3 py-1 text-[9px] font-bold bg-purple-800 hover:bg-purple-600 text-white rounded uppercase transition-colors shadow">Salvar</button>
+                  <button onClick={() => setShowCatalogForm(false)} className="px-3 py-1 text-[9px] font-bold text-zinc-400 hover:text-white uppercase transition-colors">Cancelar</button>
+                  <button onClick={handleSaveCatalogItem} className="px-3 py-1 text-[9px] font-bold bg-purple-800 hover:bg-purple-600 text-white rounded uppercase transition-colors shadow">Salvar</button>
                 </div>
               </div>
             </div>
@@ -347,15 +335,15 @@ export default function SessionSidebar(props) {
 
           <div className="flex flex-col gap-3 mt-2">
             <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest border-b border-zinc-800 pb-1 shrink-0">Mercado Local</span>
-            {props.catalog && props.catalog.map((item, index) => {
-              const qty = props.buyQuantities[index] || 1;
+            {catalog && catalog.map((item, index) => {
+              const qty = buyQuantities[index] || 1;
               return (
                 <div key={index} className="bg-black/40 border border-[#3e2723] rounded p-3 flex flex-col gap-2 relative group hover:border-amber-700/80 transition-colors shadow-sm shrink-0">
                   
-                  {props.isMasterMode && (
+                  {isMasterMode && (
                     <div className="absolute top-2 right-2 flex gap-2">
-                      <button onClick={() => props.handleEditCatalogItem(index)} className="text-[10px] opacity-40 hover:opacity-100 hover:text-purple-400 transition-opacity" title="Editar Produto">✏️</button>
-                      <button onClick={() => props.handleDeleteCatalogItem(index)} className="text-[10px] opacity-40 hover:opacity-100 hover:text-red-500 transition-opacity" title="Excluir Produto">🗑️</button>
+                      <button onClick={() => handleEditCatalogItem(index)} className="text-[10px] opacity-40 hover:opacity-100 hover:text-purple-400 transition-opacity" title="Editar Produto">✏️</button>
+                      <button onClick={() => handleDeleteCatalogItem(index)} className="text-[10px] opacity-40 hover:opacity-100 hover:text-red-500 transition-opacity" title="Excluir Produto">🗑️</button>
                     </div>
                   )}
                   
@@ -374,23 +362,23 @@ export default function SessionSidebar(props) {
                          className="bg-zinc-950 border border-zinc-800 text-[9px] text-zinc-300 rounded px-1 py-1 mb-1 outline-none cursor-pointer max-w-[140px]"
                        >
                          <option value="active">Para: Ficha Aberta</option>
-                         {props.savedCharacters?.map(char => (
+                         {campaignCharacters?.map(char => (
                            <option key={char.id} value={char.id}>{char.name}</option>
                          ))}
                        </select>
 
                        <div className="flex gap-2 items-center">
                          <div className="flex items-center bg-zinc-950 border border-amber-900/30 rounded">
-                           <button onClick={() => props.updateBuyQty(index, -1)} className="px-2 py-0.5 text-zinc-400 hover:text-white">-</button>
+                           <button onClick={() => updateBuyQty(index, -1)} className="px-2 py-0.5 text-zinc-400 hover:text-white">-</button>
                            <span className="text-xs text-white w-4 text-center">{qty}</span>
-                           <button onClick={() => props.updateBuyQty(index, 1)} className="px-2 py-0.5 text-zinc-400 hover:text-white">+</button>
+                           <button onClick={() => updateBuyQty(index, 1)} className="px-2 py-0.5 text-zinc-400 hover:text-white">+</button>
                          </div>
                          
                          <button 
                            onClick={() => {
                               const targetSelect = document.getElementById(`buy-target-${index}`);
                               const targetCharId = targetSelect ? targetSelect.value : "active";
-                              props.handleBuyItem(item, index, targetCharId);
+                              handleBuyItem(item, index, targetCharId);
                            }} 
                            className="bg-amber-900/80 hover:bg-amber-700 text-amber-100 text-[9px] font-bold uppercase px-3 py-1.5 rounded transition-colors shadow"
                          >
@@ -403,15 +391,31 @@ export default function SessionSidebar(props) {
               );
             })}
             
-            {(!props.catalog || props.catalog.length === 0) && (
+            {(!catalog || catalog.length === 0) && (
                <p className="text-[10px] text-zinc-500 italic text-center py-4">O mercado está vazio hoje.</p>
             )}
           </div>
         </div>
       )}
+      
       {/* 5. ABA CHAT */}
       {sessionTab === 'chat' && (
         <div className="flex-1 flex flex-col p-4 overflow-hidden h-full min-h-0">
+          
+          {/* CABEÇALHO DO CHAT COM BOTÃO DE LIMPAR */}
+          <div className="flex justify-between items-center mb-3 shrink-0 border-b border-zinc-800 pb-2">
+            <h3 className="text-zinc-400 font-bold uppercase tracking-widest text-[10px]">Chat da Mesa</h3>
+            {isMasterMode && (
+              <button 
+                onClick={handleClearChat} 
+                className="text-red-500 hover:text-red-400 text-[10px] font-bold border border-red-900 bg-red-950/30 px-2 py-1 rounded transition-colors flex items-center gap-1"
+                title="Limpar Chat para Todos"
+              >
+                <span>🗑️</span> Limpar
+              </button>
+            )}
+          </div>
+
           <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-3 pr-2 pb-4 min-h-0">
             {chatMessages.map(msg => (
               <div key={msg.id} className={`p-3 rounded-lg border shrink-0 ${msg.type === 'info' ? 'bg-blue-950/20 border-blue-900/50 text-blue-300' : msg.type === 'roll' ? 'bg-amber-950/20 border-amber-900/50 text-amber-100' : msg.type === 'secret' ? 'bg-purple-950/20 border-purple-900/50 text-purple-200' : 'bg-black/40 border-zinc-800 text-zinc-300'}`}>
@@ -433,6 +437,7 @@ export default function SessionSidebar(props) {
             </form>
           </div>
         </div>
+        
       )}
 
       {/* MODAL DE CADASTRAR PRODUTO DO MESTRE */}

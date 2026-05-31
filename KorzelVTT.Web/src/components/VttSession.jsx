@@ -441,19 +441,49 @@ export default function VttSession(props) {
           className={`absolute flex items-center justify-center transition-transform duration-100 cursor-grab`} 
           title={token.controlledBy ? `${token.name} (Controlado por: ${token.controlledBy})` : token.name}
         >
-                  {token.image ? (
+                 {token.image ? (
                     <img src={token.image} alt={token.name} className={`w-full h-full object-contain pointer-events-none ${dropShadowImg} ${token.flipX ? '-scale-x-100' : ''}`} draggable="false" />
                   ) : (
                     <span className={`text-white text-xl font-bold pointer-events-none ${token.flipX ? '-scale-x-100 block' : ''}`}>{token.name.charAt(0)}</span>
                   )}
-                  {statuses.length > 0 && (
-                    <div className="absolute -top-3 -right-3 flex flex-row-reverse flex-nowrap whitespace-nowrap gap-1 pointer-events-none z-20">
-                      {isBleeding && <span className="bg-black/80 rounded-full p-1.5 text-xs sm:text-sm leading-none border border-red-900 shadow-md">🩸</span>}
-                      {isPoisoned && <span className="bg-black/80 rounded-full p-1.5 text-xs sm:text-sm leading-none border border-green-900 shadow-md">☠️</span>}
-                      {/* 👇 Renderiza Camuflagem Corretamente 👇 */}
-                      {isCamouflaged && <span className="bg-black/80 rounded-full p-1.5 text-xs sm:text-sm leading-none border border-zinc-500 shadow-md">🌫️</span>}
-                    </div>
-                  )}
+                  
+                  {/* 👇 CONDIÇÕES INTELIGENTES QUE ACOMPANHAM O TAMANHO DO TOKEN 👇 */}
+                  {statuses.length > 0 && (() => {
+                    // Calcula 25% do tamanho da criatura (com tamanho mínimo de 16px para não sumir)
+                    const statusSize = Math.max(16, token.size * 0.25); 
+                    
+                    return (
+                      <div 
+                        className="absolute flex flex-row-reverse flex-nowrap whitespace-nowrap gap-1 pointer-events-none z-20"
+                        style={{ top: `-${statusSize * 0.1}px`, right: `-${statusSize * 0.1}px` }}
+                      >
+                        {isBleeding && (
+                          <span 
+                            style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
+                            className="bg-black/80 rounded-full flex items-center justify-center border border-red-900 shadow-md"
+                          >
+                            🩸
+                          </span>
+                        )}
+                        {isPoisoned && (
+                          <span 
+                            style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
+                            className="bg-black/80 rounded-full flex items-center justify-center border border-green-900 shadow-md"
+                          >
+                            ☠️
+                          </span>
+                        )}
+                        {isCamouflaged && (
+                          <span 
+                            style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
+                            className="bg-black/80 rounded-full flex items-center justify-center border border-zinc-500 shadow-md"
+                          >
+                            🌫️
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}
