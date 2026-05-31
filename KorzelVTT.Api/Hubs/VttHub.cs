@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
-using System.Linq; // 👈 Necessário para o .ToList() do radar
+using System.Linq; 
 using KorzelVTT.Api.Data;
 using KorzelVTT.Api.Models;
 
@@ -10,36 +10,39 @@ namespace KorzelVTT.Api.Hubs
 {
     public class VttHub : Hub
     {
-        // 👇 Preparando o terreno para o Banco de Dados
         private readonly KorzelContext _context;
 
-        // 👇 RADAR DE JOGADORES ONLINE 👇
         // Dicionário para rastrear: ID da Campanha -> Lista de Nomes
         private static readonly ConcurrentDictionary<string, HashSet<string>> _onlinePlayers = new();
-        // Para saber em qual campanha a conexão X está quando a pessoa fechar a aba
+        
+        // Para saber em qual campanha a conexão X está
         private static readonly ConcurrentDictionary<string, string> _connectionToCampaign = new();
+        
+        // Para saber o NOME do jogador dessa conexão (para poder apagar quando ele sair)
+        private static readonly ConcurrentDictionary<string, string> _connectionToPlayer = new();
 
         public VttHub(KorzelContext context)
         {
             _context = context;
         }
 
-        // 1. Método para colocar os jogadores na mesma sala (ATUALIZADO COM O NOME)
         public async Task JoinSession(string sessionId, string playerName)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
             
-            // Salva em qual campanha esta conexão entrou
-            _connectionToCampaign[Context.ConnectionId] = sessionId;
+            // Proteção extra: se o nome vier vazio, chamamos de "Anônimo"
+            string safeName = string.IsNullOrWhiteSpace(playerName) ? "Explorador Anônimo" : playerName;
 
-            // Se a campanha ainda não tem uma lista de jogadores, cria uma
+            // Salva os dados desta conexão
+            _connectionToCampaign[Context.ConnectionId] = sessionId;
+            _connectionToPlayer[Context.ConnectionId] = safeName;
+
+            // Cria a lista da sala se não existir
             if (!_onlinePlayers.ContainsKey(sessionId))
             {
                 _onlinePlayers[sessionId] = new HashSet<string>();
             }
             
-            // Proteção extra: se o nome vier vazio, chamamos de "Anônimo"
-            string safeName = string.IsNullOrWhiteSpace(playerName) ? "Explorador Anônimo" : playerName;
             _onlinePlayers[sessionId].Add(safeName);
 
             Console.WriteLine($"[SIGNALR] {safeName} entrou na sala: {sessionId}");
@@ -48,48 +51,105 @@ namespace KorzelVTT.Api.Hubs
             await Clients.Group(sessionId).SendAsync("UpdatePlayerList", _onlinePlayers[sessionId].ToList());
         }
 
-        // 👇 NOVO: Quando alguém fecha a aba do navegador ou a internet cai
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
+            // Verifica se a conexão que caiu estava em alguma sala
             if (_connectionToCampaign.TryGetValue(Context.ConnectionId, out string sessionId))
             {
-                // Avisa a sala que alguém caiu (para os outros darem ping de volta)
+                // Descobre o nome do jogador que caiu
+                if (_connectionToPlayer.TryGetValue(Context.ConnectionId, out string playerName))
+                {
+                    // Remove o jogador da lista da sala
+                    if (_onlinePlayers.ContainsKey(sessionId))
+                    {
+                        _onlinePlayers[sessionId].Remove(playerName);
+                        
+                        // Atualiza a bolinha de todo mundo, removendo o cara que caiu
+                        await Clients.Group(sessionId).SendAsync("UpdatePlayerList", _onlinePlayers[sessionId].ToList());
+                    }
+                    _connectionToPlayer.TryRemove(Context.ConnectionId, out _);
+                }
+                
                 await Clients.Group(sessionId).SendAsync("PlayerDisconnected");
                 _connectionToCampaign.TryRemove(Context.ConnectionId, out _);
             }
             await base.OnDisconnectedAsync(exception);
         }
 
-        // 2. Método para repassar um NOVO token criado pelo mestre
+        // ==========================================
+        // SISTEMA DE CHAT OTIMIZADO
+        // ==========================================
+        public async Task SendChatMessage(string sessionId, string messageJson)
+        {
+            // Sem log de console aqui para não engasgar o servidor grátis do Render quando choverem mensagens.
+            // Disparo ultra rápido e direto para quem está na sala
+            await Clients.OthersInGroup(sessionId).SendAsync("ChatMessageReceived", messageJson);
+        }
+
+        // ==========================================
+        // TOKENS, MAPAS E SINCRONIZAÇÃO
+        // ==========================================
         public async Task AddToken(string sessionId, string tokenJson)
         {
-            Console.WriteLine($"[SIGNALR] Novo token adicionado na sala {sessionId}");
             await Clients.OthersInGroup(sessionId).SendAsync("TokenAdded", tokenJson);
         }
 
-        // 3. Método para repassar o MOVIMENTO de um token
         public async Task MoveToken(string sessionId, string tokenId, float x, float y)
         {
             await Clients.OthersInGroup(sessionId).SendAsync("TokenMoved", tokenId, x, y);
         }
 
-        // 4. Método para avisar que o mestre TROCOU O MAPA
         public async Task ChangeMap(string sessionId, string imageUrl)
         {
-            Console.WriteLine($"[SIGNALR] Mapa alterado na sala {sessionId}");
             await Clients.Group(sessionId).SendAsync("MapChanged", imageUrl);
         }
 
-        // Método para avisar que o token mudou de tamanho
         public async Task UpdateTokenSize(string sessionId, string tokenId, int newSize)
         {
             await Clients.OthersInGroup(sessionId).SendAsync("TokenSizeChanged", tokenId, newSize);
         }
 
-        // Método para repassar mensagens do Chat e Rolagens de Dados
-        public async Task SendChatMessage(string sessionId, string messageJson)
+        public async Task UpdateTokenPermission(string campaignId, string tokenId, string? playerName)
         {
-            await Clients.OthersInGroup(sessionId).SendAsync("ChatMessageReceived", messageJson);
+            await Clients.Group(campaignId).SendAsync("TokenPermissionChanged", tokenId, playerName);
+        }
+
+        public async Task PullPlayersToScene(string campaignId, string syncJson)
+        {
+             await Clients.OthersInGroup(campaignId).SendAsync("PlayersPulled", syncJson);
+        }
+
+        public async Task AddScene(string campaignId, string sceneJson)
+        {
+            await Clients.OthersInGroup(campaignId).SendAsync("SceneAdded", sceneJson);
+        }
+
+        public async Task RemoveToken(string campaignId, string tokenId)
+        {
+            await Clients.OthersInGroup(campaignId).SendAsync("TokenRemoved", tokenId);
+        }
+
+        public async Task RefreshCharacters(string campaignId)
+        {
+            await Clients.OthersInGroup(campaignId).SendAsync("OnCharactersRefreshed");
+        }
+
+        public async Task UpdateCatalog(string campaignId, string catalogJson)
+        {
+            await Clients.OthersInGroup(campaignId).SendAsync("CatalogUpdated", catalogJson);
+        }
+
+        // ==========================================
+        // ÁUDIO DA SESSÃO
+        // ==========================================
+        public async Task PlayMusic(string campaignId, int trackId)
+        {
+            await Clients.OthersInGroup(campaignId).SendAsync("MusicStarted", trackId);
+        }
+
+        public async Task StopMusic(string campaignId)
+        {
+            await Clients.OthersInGroup(campaignId).SendAsync("MusicStopped");
         }
 
         // ==========================================
@@ -128,47 +188,6 @@ namespace KorzelVTT.Api.Hubs
         public async Task ToggleFog(string sessionId, bool isEnabled)
         {
             await Clients.OthersInGroup(sessionId).SendAsync("FogToggled", isEnabled);
-        }
-
-        public async Task UpdateTokenPermission(string campaignId, string tokenId, string? playerName)
-        {
-            await Clients.Group(campaignId).SendAsync("TokenPermissionChanged", tokenId, playerName);
-        }
-
-        public async Task PullPlayersToScene(string campaignId, string syncJson)
-        {
-             await Clients.OthersInGroup(campaignId).SendAsync("PlayersPulled", syncJson);
-        }
-
-        public async Task AddScene(string campaignId, string sceneJson)
-        {
-            await Clients.OthersInGroup(campaignId).SendAsync("SceneAdded", sceneJson);
-        }
-
-        public async Task RemoveToken(string campaignId, string tokenId)
-        {
-            await Clients.OthersInGroup(campaignId).SendAsync("TokenRemoved", tokenId);
-        }
-
-        public async Task RefreshCharacters(string campaignId)
-        {
-            await Clients.OthersInGroup(campaignId).SendAsync("OnCharactersRefreshed");
-        }
-
-        public async Task PlayMusic(string campaignId, int trackId)
-        {
-            await Clients.OthersInGroup(campaignId).SendAsync("MusicStarted", trackId);
-        }
-
-        public async Task StopMusic(string campaignId)
-        {
-            await Clients.OthersInGroup(campaignId).SendAsync("MusicStopped");
-        }
-
-        public async Task UpdateCatalog(string campaignId, string catalogJson)
-        {
-            // O mestre avisa todos os jogadores que a vitrine da loja mudou
-            await Clients.OthersInGroup(campaignId).SendAsync("CatalogUpdated", catalogJson);
         }
     }
 }
