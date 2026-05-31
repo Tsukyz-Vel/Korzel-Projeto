@@ -816,18 +816,36 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
   
   const handleMapMouseMove = (e) => { if (draggingToken !== null && mapRef.current) { const rect = mapRef.current.getBoundingClientRect(); const token = sceneTokens.find(t => t.id === draggingToken); const tokenSize = token ? token.size : 80; const x = (e.clientX - rect.left - mapOffset.x) / mapScale - (tokenSize / 2); const y = (e.clientY - rect.top - mapOffset.y) / mapScale - (tokenSize / 2); setSceneTokens(prev => prev.map(t => t.id === draggingToken ? { ...t, x, y } : t)); } else if (isDraggingMap) { setMapOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y }); } };
   
-  const handleMapMouseUp = async () => {
-    if (draggingToken !== null) {
-      const token = sceneTokens.find(t => t.id === draggingToken);
-      if (token && currentCampaignId) {
-        if (connection) { connection.invoke("MoveToken", currentCampaignId.toString(), token.id.toString(), token.x, token.y).catch(console.error); }
-        try {
-          await fetch(`https://korzel-api.onrender.com/api/scenes/tokens/${token.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(token) });
-        } catch (e) {}
-      }
-    }
+const handleMapMouseUp = async () => {
+    // 1. Guardamos qual token estava a ser arrastado
+    const currentTokenId = draggingToken;
+    
+    // 2. SOLTAMOS O TOKEN IMEDIATAMENTE (Acaba com o delay visual!)
     setDraggingToken(null);
     setIsDraggingMap(false);
+
+    // 3. Tratamos de salvar no servidor nos bastidores
+    if (currentTokenId !== null) {
+      const token = sceneTokens.find(t => t.id === currentTokenId);
+      if (token && currentCampaignId) {
+        // Envia para o SignalR para os outros jogadores verem
+        if (connection) { 
+            connection.invoke("MoveToken", currentCampaignId.toString(), token.id.toString(), token.x, token.y).catch(console.error); 
+        }
+        
+        // Envia para a API guardar no banco de dados
+        try {
+          // Lembre-se de verificar se este link aqui é o seu novo do Render!
+          await fetch(`https://korzel-api.onrender.com/api/scenes/tokens/${token.id}`, { 
+              method: "PUT", 
+              headers: { "Content-Type": "application/json" }, 
+              body: JSON.stringify(token) 
+          });
+        } catch (e) {
+            console.error("Erro ao salvar a posição da peça no banco", e);
+        }
+      }
+    }
   };
 
   const bringToFront = () => { const maxZ = Math.max(...sceneTokens.map(t => t.zIndex || 10)); setSceneTokens(prev => prev.map(t => t.id === tokenContextMenu.tokenId ? { ...t, zIndex: maxZ + 1 } : t)); setTokenContextMenu({ show: false, x: 0, y: 0, tokenId: null }); };
