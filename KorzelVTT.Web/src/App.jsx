@@ -358,6 +358,9 @@ export default function App() {
   const handleCreateNewCharacter = () => { setActiveCharId(null); setCharName(""); setCharOrigin(""); setCharRace(""); setCharClass(""); setCharAge(0); setCharLevel(1); setCharDeity("Nenhum"); setMut1("Carne Intacta"); setMut2("Carne Intacta"); setMut3("Carne Intacta"); setAttrInt(0); setAttrPre(0); setAttrAgi(0); setAttrVig(0); setAttrFor(0); setAttrIns(0); setHp(10); setMaxHp(10); setPe(0); setMaxPe(0); setCorruption(0); setLascas(0); setSkillsList(prev => prev.map(s => ({ ...s, trainingLevel: 0, others: 0 }))); setInventoryList([]); setAttacksList([]); setAbilitiesList([]); setNotes([]); setCurrentPage('ficha'); };
 
   const executeRoll = (type, title, bonus, weapon = null, customExp = null) => { 
+    // ==========================================
+    // 1. ROLAGEM AVULSA (/r 1d20)
+    // ==========================================
     if (type === 'custom' && customExp) {
       const exp = customExp.toLowerCase().replace(/\s+/g, ''); 
       const regex = /^(\d*)d(\d+)([+-]\d+)?$/;
@@ -392,11 +395,12 @@ export default function App() {
         let newChatMsg = { id: Date.now(), sender: isMasterMode && secretRoll ? "Mestre" : (charName || loggedUserName), type: isMasterMode && secretRoll ? "secret" : "roll", text: "" };
         newChatMsg.text = `🎲 **Rolagem Avulsa (${customExp})**\nResultado: **${total}**\n${detailText}`;
         
-        if (isMasterMode && secretRoll) newChatMsg.text = `[Rolagem Oculta]\n${newChatMsg.text}`;
-
-        setChatMessages(prev => [...prev, newChatMsg]);
-        if (connection && !(isMasterMode && secretRoll) && currentCampaignId) {
-          connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newChatMsg)).catch(console.error);
+        // 👇 A MÁGICA DA SINCRONIZAÇÃO DA ROLAGEM AVULSA 👇
+        if (isMasterMode && secretRoll) {
+          newChatMsg.text = `[Rolagem Oculta]\n${newChatMsg.text}`;
+          setChatMessages(prev => [...prev, newChatMsg]); // Oculto: Fica só na tela do Mestre
+        } else if (connection && currentCampaignId) {
+          connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newChatMsg)).catch(console.error); // Público: Vai pro C# espalhar
         }
 
         setRollModal(prev => ({ ...prev, isRolling: false, total: total, detail: detailText }));
@@ -404,6 +408,9 @@ export default function App() {
       return;
     }
 
+    // ==========================================
+    // 2. DESCONTO DE MUNIÇÃO
+    // ==========================================
     if (type === 'attack' && weapon && weapon.isRanged) {
       if ((weapon.ammo || 0) <= 0) {
         showToast(`Arma descarregada! Sem munição para ${weapon.name}.`, "error");
@@ -414,6 +421,9 @@ export default function App() {
 
     setRollModal({ show: true, title, type, bonus, d20: 0, total: 0, isRolling: true, isCrit: false, isFumble: false, weapon, detail: "" }); 
     
+    // ==========================================
+    // 3. ROLAGEM DA FICHA (Ataque, Dano, Sincronia, etc)
+    // ==========================================
     setTimeout(() => { 
       let newChatMsg = { id: Date.now(), sender: isMasterMode && secretRoll ? "Mestre" : (charName || loggedUserName), type: isMasterMode && secretRoll ? "secret" : "roll", text: "" }; 
       
@@ -474,12 +484,14 @@ export default function App() {
         setRollModal(prev => ({ ...prev, isRolling: false, d20, total, isCrit, isFumble, detail: detailText, isCombined: (type === 'attack' && weapon !== null), attackTotal: total, damageTotal: damageTotal })); 
       } 
       
-      if (isMasterMode && secretRoll) newChatMsg.text = `[Rolagem Oculta]\n${newChatMsg.text}`; 
-      setChatMessages(prev => [...prev, newChatMsg]); 
-      
-      if (connection && !(isMasterMode && secretRoll) && currentCampaignId) { 
-        connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newChatMsg)).catch(console.error); 
+      // 👇 A MÁGICA DA SINCRONIZAÇÃO DA FICHA 👇
+      if (isMasterMode && secretRoll) { 
+        newChatMsg.text = `[Rolagem Oculta]\n${newChatMsg.text}`; 
+        setChatMessages(prev => [...prev, newChatMsg]); // Oculto: Fica só na tela do Mestre
+      } else if (connection && currentCampaignId) { 
+        connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newChatMsg)).catch(console.error); // Público: Vai pro C# espalhar
       } 
+
     }, 1000); 
   };
   
@@ -627,6 +639,7 @@ export default function App() {
     e.preventDefault(); 
     if(!chatInput.trim()) return; 
 
+    // Lida com rolagem manual (ex: /r 1d20)
     if (chatInput.trim().startsWith('/r ')) { 
       const rollExp = chatInput.replace('/r ', '').trim(); 
       executeRoll('custom', '', 0, null, rollExp);
@@ -634,12 +647,24 @@ export default function App() {
       return;
     } 
 
-    let newMessage = { id: Date.now(), sender: isMasterMode ? "Mestre" : (charName || loggedUserName), text: chatInput, type: "msg" }; 
-    if (secretRoll && isMasterMode) { newMessage.text = `[Oculto]\n${newMessage.text}`; newMessage.type = "secret"; } 
+    let newMessage = { 
+      id: Date.now(), 
+      sender: isMasterMode ? "Mestre" : (charName || loggedUserName), 
+      text: chatInput, 
+      type: "msg" 
+    }; 
     
-    setChatMessages([...chatMessages, newMessage]); 
-    setChatInput(""); 
+    if (secretRoll && isMasterMode) { 
+      newMessage.text = `[Oculto]\n${newMessage.text}`; 
+      newMessage.type = "secret"; 
+    } 
     
+    // 👇 REMOVIDO: setChatMessages([...chatMessages, newMessage]);
+    
+    setChatInput(""); // Apenas limpa o campo de texto
+    
+    // Envia para o C#. Como arrumamos o Hub para usar Clients.Group, 
+    // ele vai devolver a mensagem para o seu "connection.on" e renderizar na tela!
     if (connection && currentCampaignId) { 
       connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMessage)).catch(console.error); 
     } 

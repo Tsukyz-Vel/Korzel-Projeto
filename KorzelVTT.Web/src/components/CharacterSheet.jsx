@@ -21,7 +21,7 @@ export default function CharacterSheet({
   showItemForm, setShowItemForm, editingItemIndex, itemForm, setItemForm, inventoryList, handleOpenNewItem, handleEditItem, handleDeleteItem, handleSaveItem,
   charDeity, handleDeityChange, mut1, setMut1, mut2, setMut2, mut3, setMut3,
   notes, activeNoteId, setActiveNoteId, handleAddNote, handleDeleteNote, handleNoteChange, activeNote,
-  connection, setChatMessages, showToast
+  connection, setChatMessages, showToast, currentCampaignId
 }) {
 
   // ==========================================
@@ -92,7 +92,10 @@ export default function CharacterSheet({
         setHp(prev => prev - costNum);
       }
 
-      setActiveToggles(prev => [...prev, ability.title]);
+      // ✅ ENVIE USANDO O currentCampaignId
+        if (connection && currentCampaignId) {
+          connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMsg)).catch(console.error);
+          }
 
       if (setChatMessages) {
         const tipoCusto = costStr.includes('pv') || costStr.includes('vida') ? 'PV' : costStr.includes('pe') ? 'PE' : '';

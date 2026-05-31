@@ -511,11 +511,6 @@ export default function VttSession(props) {
             <button onClick={() => setMapScale(s => Math.min(3, s + 0.1))} className="px-4 py-2 text-white hover:bg-purple-800 transition-colors font-bold">+</button>
           </div>
 
-          {!isMasterMode && (
-            <button onClick={() => setSheetModalOpen(true)} className="absolute bottom-6 right-6 w-14 h-14 bg-red-900 hover:bg-red-700 border-2 border-red-500 rounded-full flex flex-col items-center justify-center shadow-[0_0_20px_rgba(220,38,38,0.5)] transition-transform hover:scale-110 z-[100]">
-              <span className="text-xl">📖</span>
-            </button>
-          )}
 
           {onlinePlayers && onlinePlayers.length > 0 && (
             <div className="absolute bottom-6 left-6 z-40 flex items-center gap-3 bg-black/60 backdrop-blur-md p-3 rounded-full border border-zinc-800 shadow-2xl">
