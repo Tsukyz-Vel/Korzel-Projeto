@@ -108,6 +108,12 @@ namespace KorzelVTT.Api.Hubs
             await Clients.OthersInGroup(sessionId).SendAsync("TokenSizeChanged", tokenId, newSize);
         }
 
+        // 👇 ADICIONE ESTE BLOCO AQUI! ELE QUE AVISA SE ESTÁ SANGRANDO, ENVENENADO OU INVERTIDO 👇
+        public async Task UpdateToken(string campaignId, string tokenJson)
+        {
+            await Clients.OthersInGroup(campaignId).SendAsync("TokenUpdated", tokenJson);
+        }
+
         public async Task UpdateTokenPermission(string campaignId, string tokenId, string? playerName)
         {
             await Clients.Group(campaignId).SendAsync("TokenPermissionChanged", tokenId, playerName);
