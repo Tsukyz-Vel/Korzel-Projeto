@@ -11,7 +11,7 @@ export default function Configuracoes({ authToken, setLoggedUserName, showToast,
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const res = await fetch('https://korzelapi.somee.com/api/auth/me', {
+        const res = await fetch('https://korzel-api.onrender.com/api/auth/me', {
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
         if (res.ok) {
@@ -31,7 +31,7 @@ export default function Configuracoes({ authToken, setLoggedUserName, showToast,
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('https://korzelapi.somee.com/api/auth/update', {
+      const res = await fetch('https://korzel-api.onrender.com/api/auth/update', {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
