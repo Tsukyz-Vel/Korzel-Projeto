@@ -179,21 +179,22 @@ export default function SessionSidebar(props) {
                       {activeAudioId === track.id && (
                         <div className="flex items-center gap-3 border-t border-amber-900/30 pt-2 animate-fade-in">
                           <span className="text-xs">🔈</span>
-                          <input 
-                            type="range" 
-                            min="0" max="1" step="0.05" 
-                            value={volume} 
-                            onChange={(e) => {
-                              const novoVolume = Number(e.target.value);
-                              setVolume(novoVolume); // Atualiza pro Mestre na hora
-                              
-                              // Se for o Mestre alterando, grita no rádio para baixar o volume de todos
-                              if (isMasterMode && connection && currentCampaignId) {
-                                connection.invoke("ChangeVolume", currentCampaignId.toString(), novoVolume).catch(console.error);
-                              }
-                            }} 
-                            className="w-full h-1 bg-amber-950 rounded-lg appearance-none cursor-pointer accent-amber-500" 
-                          />
+                         <input 
+                              type="range" 
+                              min="0" max="1" step="0.05" 
+                              value={volume} 
+                              onChange={(e) => {
+                                // Força o valor a ser interpretado como um número quebrado
+                                const novoVolume = parseFloat(e.target.value);
+                                setVolume(novoVolume); 
+                                
+                                // Dispara a mudança em tempo real para os jogadores
+                                if (isMasterMode && connection && currentCampaignId) {
+                                  connection.invoke("ChangeVolume", currentCampaignId.toString(), novoVolume).catch(console.error);
+                                }
+                              }} 
+                              className="w-full h-1 bg-amber-950 rounded-lg appearance-none cursor-pointer accent-amber-500" 
+                            />
                         </div>
                       )}
                     </div>

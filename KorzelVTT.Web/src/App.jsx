@@ -155,6 +155,7 @@ export default function App() {
   const fileInputRef = useRef(null);
   const tokenFileInputRef = useRef(null);
   const audioRef = useRef(null);
+  const lastPlayedAudioId = useRef(null);
   const audioFileInputRef = useRef(null);
 
   const [audioCategories, setAudioCategories] = useState([{ id: 'combat', name: '⚔️ Combate', tracks: [] }, { id: 'ambient', name: '🌲 Ambiente', tracks: [] }, { id: 'tavern', name: '🍺 Taverna', tracks: [] }, { id: 'uploads', name: '📁 Meus Uploads', tracks: [] }]);
@@ -987,7 +988,8 @@ export default function App() {
     } else { 
       setActiveAudioId(trackId); 
       setIsPlaying(true); 
-      if (connection && currentCampaignId) connection.invoke("PlayMusic", currentCampaignId.toString(), trackId).catch(console.error);
+      // 👇 Agora ele envia o volume junto pro C#!
+      if (connection && currentCampaignId) connection.invoke("PlayMusic", currentCampaignId.toString(), trackId, volume).catch(console.error);
     } 
   };
 
@@ -1048,7 +1050,23 @@ export default function App() {
   
   useEffect(() => { if (audioRef.current) audioRef.current.volume = volume; }, [volume]);
   useEffect(() => { if (audioRef.current) audioRef.current.loop = isLooping; }, [isLooping]);
-  useEffect(() => { if (audioRef.current) { if (isPlaying && activeAudioId) audioRef.current.play().catch(e => console.log("Erro áudio", e)); else audioRef.current.pause(); } }, [isPlaying, activeAudioId]);
+ // 🟢 NOVO CONTROLE DE ÁUDIO BLINDADO CONTRA CACHE 🟢
+  useEffect(() => { 
+    if (audioRef.current) { 
+      // O SEGREDO: Se o ID da música mudou, obriga o navegador a "cuspir" a música antiga e carregar a nova do link
+      if (activeAudioId !== lastPlayedAudioId.current) {
+        audioRef.current.load();
+        lastPlayedAudioId.current = activeAudioId;
+      }
+
+      // Dá o play ou pausa normalmente
+      if (isPlaying && activeAudioId) { 
+        audioRef.current.play().catch(e => console.log("Erro áudio", e)); 
+      } else { 
+        audioRef.current.pause(); 
+      } 
+    } 
+  }, [isPlaying, activeAudioId]);
   
   useEffect(() => { 
     if (authToken) fetchAllCharacters(); 
@@ -1107,14 +1125,17 @@ export default function App() {
     });
 
     connection.on("ChatMessageReceived", (messageJson) => setChatMessages(prev => [...prev, JSON.parse(messageJson)]));
-    connection.on("MusicStarted", (trackId) => { setActiveAudioId(trackId); setIsPlaying(true); });
+   connection.on("MusicStarted", (trackId, trackVolume) => { 
+        setActiveAudioId(trackId); 
+        setIsPlaying(true); 
+        if (trackVolume !== undefined) setVolume(trackVolume);
+    });
     connection.on("MusicStopped", () => setIsPlaying(false));
     connection.on("UpdatePlayerList", (playerList) => setOnlinePlayers(playerList));
     connection.on("CatalogUpdated", (catalogJson) => setCatalog(JSON.parse(catalogJson)));
     connection.on("VolumeChanged", (newVolume) => {
         setVolume(newVolume);
     });
-    
   }, [connection]); // 👈 A mágica: dependência apenas na conexão. Não recarrega nunca mais.
 
   // 2. ENTRA NA SALA QUANDO A CAMPANHA É SELECIONADA
