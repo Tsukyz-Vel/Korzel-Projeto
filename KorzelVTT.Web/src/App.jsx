@@ -919,48 +919,8 @@ export default function App() {
     }
   };
 
-  const handleAudioUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64Audio = event.target.result;
-      const newTrack = {
-        campaignId: currentCampaignId,
-        name: file.name,
-        category: targetAudioCat,
-        base64Data: base64Audio
-      };
-
-      try {
-        const res = await fetch(`https://korzel-api.onrender.com/api/audio`, {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(newTrack)
-        });
-
-        if (res.ok) {
-          const savedTrack = await res.json();
-          setAudioCategories(prev => prev.map(cat =>
-            cat.id === targetAudioCat
-              ? { ...cat, tracks: [...cat.tracks, { id: savedTrack.id, name: savedTrack.name, url: savedTrack.base64Data }] }
-              : cat
-          ));
-          showToast("🎵 Música adicionada à campanha!", "success");
-        } else {
-          showToast(`Erro ao salvar música (Erro ${res.status})`, "error");
-        }
-      } catch (err) {
-        console.error("Erro no upload de áudio:", err);
-        showToast("Falha na conexão ao enviar o áudio.", "error");
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleAddAudioLink = async () => {
-    const url = window.prompt("Insira o link direto do áudio (ex: final .mp3) ou stream:");
+ const handleAddAudioLink = async () => {
+    const url = window.prompt("IMPORTANTE: Insira o link direto de um arquivo de áudio (precisa terminar em .mp3, .wav, etc). Links de vídeo do YouTube não funcionam.\n\nLink do áudio:");
     if (!url) return;
     const name = window.prompt("Nome da música:");
     if (!name) return;
@@ -969,7 +929,7 @@ export default function App() {
       campaignId: currentCampaignId,
       name: name,
       category: targetAudioCat,
-      base64Data: url // Enviando o link no lugar do Base64
+      base64Data: url // Guardando a URL no lugar do arquivo
     };
 
     try {
@@ -978,7 +938,6 @@ export default function App() {
         headers: getAuthHeaders(),
         body: JSON.stringify(newTrack)
       });
-
       if (res.ok) {
         const savedTrack = await res.json();
         setAudioCategories(prev => prev.map(cat =>
@@ -986,13 +945,9 @@ export default function App() {
             ? { ...cat, tracks: [...cat.tracks, { id: savedTrack.id, name: savedTrack.name, url: savedTrack.base64Data }] }
             : cat
         ));
-        showToast("🎵 Link de áudio adicionado com sucesso!", "success");
-      } else {
-        showToast(`Erro ao salvar música (Erro ${res.status})`, "error");
+        showToast("🎵 Link de música fixado!", "success");
       }
-    } catch (err) {
-      showToast("Falha na conexão ao enviar o link.", "error");
-    }
+    } catch (err) { showToast("Falha na conexão.", "error"); }
   };
 
   const handleDeleteAudioTrack = async (trackId, catId) => {
@@ -1116,73 +1071,63 @@ export default function App() {
     }
   }, [loggedUserName, connection, currentCampaignId]);
 
+ // 1. LIGA A ANTENA E REGISTRA OS OUVINTES (Roda só 1 vez)
   useEffect(() => {
-    if (connection) {
-      connection.start().then(() => {
-        console.log("⚡ Conectado ao servidor de Korzel!");
-        
-        connection.on("OnCharactersRefreshed", () => {
-            console.log("📡 Sinal de fumaça recebido: Atualizando fichas dos jogadores...");
-            setRefreshTrigger(prev => prev + 1);
-        });
+    if (!connection) return;
 
-        connection.on("TokenAdded", (tokenJson) => { setSceneTokens(prev => [...prev, JSON.parse(tokenJson)]); });
-        connection.on("TokenMoved", (tokenId, x, y) => { setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, x, y } : t)); });
-        connection.on("TokenPermissionChanged", (tokenId, playerName) => { setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, controlledBy: playerName } : t)); });
-        connection.on("TokenRemoved", (tokenId) => { setSceneTokens(prev => prev.filter(t => String(t.id) !== String(tokenId))); });
-        connection.on("TokenSizeChanged", (tokenId, newSize) => { setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, size: newSize } : t)); });
-        
-        connection.on("PlayersPulled", (syncJson) => { 
-          try {
-            const data = JSON.parse(syncJson);
-            setPlayerActiveSceneId(data.sceneId);
-            setScenes(prev => prev.map(s => String(s.id) === String(data.sceneId) ? { ...s, bgImage: data.bgImage } : s));
-            setSceneTokens(prev => {
-                const outrosTokens = prev.filter(t => String(t.sceneId) !== String(data.sceneId));
-                return [...outrosTokens, ...data.tokens];
-            });
-          } catch(e) { console.error("Erro ao sincronizar", e); }
-        });
+    connection.start().then(() => {
+      console.log("⚡ Conectado ao servidor de Korzel!");
+    }).catch(console.error);
 
-        connection.on("SceneAdded", (sceneJson) => { setScenes(prev => [...prev, JSON.parse(sceneJson)]); });
-        connection.on("MapChanged", (payload) => { 
-          try {
-            const data = JSON.parse(payload);
-            setScenes(prev => prev.map(s => String(s.id) === String(data.sceneId) ? { ...s, bgImage: data.bgImage } : s));
-          } catch(e) {}
+    connection.on("OnCharactersRefreshed", () => setRefreshTrigger(prev => prev + 1));
+    connection.on("TokenAdded", (tokenJson) => setSceneTokens(prev => [...prev, JSON.parse(tokenJson)]));
+    connection.on("TokenMoved", (tokenId, x, y) => setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, x, y } : t)));
+    connection.on("TokenPermissionChanged", (tokenId, playerName) => setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, controlledBy: playerName } : t)));
+    connection.on("TokenRemoved", (tokenId) => setSceneTokens(prev => prev.filter(t => String(t.id) !== String(tokenId))));
+    connection.on("TokenSizeChanged", (tokenId, newSize) => setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, size: newSize } : t)));
+    
+    connection.on("PlayersPulled", (syncJson) => { 
+      try {
+        const data = JSON.parse(syncJson);
+        setPlayerActiveSceneId(data.sceneId);
+        setScenes(prev => prev.map(s => String(s.id) === String(data.sceneId) ? { ...s, bgImage: data.bgImage } : s));
+        setSceneTokens(prev => {
+            const outrosTokens = prev.filter(t => String(t.sceneId) !== String(data.sceneId));
+            return [...outrosTokens, ...data.tokens];
         });
+      } catch(e) {}
+    });
 
-        connection.on("ChatMessageReceived", (messageJson) => { setChatMessages(prev => [...prev, JSON.parse(messageJson)]); });
-        connection.on("MusicStarted", (trackId) => { setActiveAudioId(trackId); setIsPlaying(true); });
-        connection.on("MusicStopped", () => { setIsPlaying(false); });
+    connection.on("SceneAdded", (sceneJson) => setScenes(prev => [...prev, JSON.parse(sceneJson)]));
+    connection.on("MapChanged", (payload) => { 
+      try {
+        const data = JSON.parse(payload);
+        setScenes(prev => prev.map(s => String(s.id) === String(data.sceneId) ? { ...s, bgImage: data.bgImage } : s));
+      } catch(e) {}
+    });
 
-        connection.on("UpdatePlayerList", (playerList) => {
-            setOnlinePlayers(playerList);
-            if (isMasterMode && currentCampaignId) {
-                setTimeout(() => {
-                    connection.invoke("UpdateCatalog", currentCampaignId.toString(), JSON.stringify(catalog))
-                        .catch(console.error);
-                }, 1000);
-            }
-        });
-        
-        connection.on("PlayerDisconnected", () => {
-            if (currentCampaignId) {
-                connection.invoke("JoinSession", currentCampaignId.toString(), loggedUserName).catch(console.error);
-            }
-        });
+    connection.on("ChatMessageReceived", (messageJson) => setChatMessages(prev => [...prev, JSON.parse(messageJson)]));
+    connection.on("MusicStarted", (trackId) => { setActiveAudioId(trackId); setIsPlaying(true); });
+    connection.on("MusicStopped", () => setIsPlaying(false));
+    connection.on("UpdatePlayerList", (playerList) => setOnlinePlayers(playerList));
+    connection.on("CatalogUpdated", (catalogJson) => setCatalog(JSON.parse(catalogJson)));
+    
+  }, [connection]); // 👈 A mágica: dependência apenas na conexão. Não recarrega nunca mais.
 
-        connection.on("CatalogUpdated", (catalogJson) => {
-            setCatalog(JSON.parse(catalogJson));
-        });
-
-        if (currentCampaignId) {
-          connection.invoke("JoinSession", currentCampaignId.toString(), loggedUserName).catch(console.error);
-        }
-      }).catch(console.error);
+  // 2. ENTRA NA SALA QUANDO A CAMPANHA É SELECIONADA
+  useEffect(() => {
+    if (connection && currentCampaignId && loggedUserName) {
+      const entrarNaSala = () => {
+         connection.invoke("JoinSession", currentCampaignId.toString(), loggedUserName).catch(console.error);
+      };
+      
+      if (connection.state === "Connected") {
+         entrarNaSala();
+      } else {
+         connection.onreconnected(() => entrarNaSala());
+      }
     }
   }, [connection, currentCampaignId, loggedUserName]);
-
   // ==========================================
   // 5. PROPS DO VTT
   // ==========================================
@@ -1198,7 +1143,7 @@ export default function App() {
     catalog, setCatalog, showCatalogForm, setShowCatalogForm, editingCatalogIndex, setEditingCatalogIndex, catalogForm, setCatalogForm, buyQuantities, setBuyQuantities,
     currentSceneObj, handleMapUpload, addNewScene, handleTokenImageUpload, handleCreateToken,onlinePlayers, setOnlinePlayers,
     updateTokenSize, handleDragStartFromLibrary, handleDropOnMap, handleMapWheel, handleMapMouseDown,
-    bringToFront, sendToBack, assignPermission, toggleTokenStatus, handleAudioUpload, togglePlayAudio, handleBuyItem, updateBuyQty, handleOpenNewCatalogItem,
+    bringToFront, sendToBack, assignPermission, toggleTokenStatus,togglePlayAudio, handleBuyItem, updateBuyQty, handleOpenNewCatalogItem,
     handleEditCatalogItem, handleDeleteCatalogItem, handleSaveCatalogItem, executeRoll, getSkillTotal,handleAddAudioLink,
     hp, setHp, maxHp, setMaxHp, pe, setPe, maxPe, setMaxPe, corruption, setCorruption, maxCorruption, setMaxCorruption,handleDeleteAudioTrack,
     attrInt, attrPre, attrAgi, attrVig, attrFor, attrIns,resistances, setResistances,oficioText, setOficioText, inventoryList, setInventoryList, attacksList, setAttacksList, abilitiesList, setAbilitiesList, notes, setNotes, activeNoteId, setActiveNoteId,

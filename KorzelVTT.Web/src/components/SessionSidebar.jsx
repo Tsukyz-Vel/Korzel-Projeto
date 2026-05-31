@@ -136,7 +136,7 @@ export default function SessionSidebar(props) {
         </div>
       )}
 
-      {/* 2. ABA ÁUDIO (Apenas Mestre) */}
+    {/* 2. ABA ÁUDIO (Apenas Mestre) */}
       {isMasterMode && sessionTab === 'áudio' && (
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 min-h-0">
           <div className="flex justify-between items-center border-b border-zinc-800 pb-2 shrink-0">
@@ -147,54 +147,35 @@ export default function SessionSidebar(props) {
             </label>
           </div>
           
-          {/* 👇 NOVOS BOTÕES DE UPLOAD / LINK 👇 */}
-          <div className="flex gap-2 mb-2 shrink-0">
-            <button onClick={() => audioFileInputRef.current.click()} className="flex-1 bg-amber-900/50 hover:bg-amber-800 text-amber-200 text-[9px] font-bold uppercase tracking-widest py-2 rounded transition-colors border border-amber-700">
-              📁 Upar Arquivo
-            </button>
-            <button onClick={handleAddAudioLink} className="flex-1 bg-purple-900/50 hover:bg-purple-800 text-purple-200 text-[9px] font-bold uppercase tracking-widest py-2 rounded border border-purple-700 transition-colors">
-              🔗 Usar Link
-            </button>
-          </div>
-          <input type="file" ref={audioFileInputRef} onChange={handleAudioUpload} accept="audio/*" className="hidden" />
+          {/* APENAS BOTÃO DE LINK */}
+          <button onClick={props.handleAddAudioLink} className="w-full bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 text-[10px] font-bold uppercase tracking-widest py-2 mb-2 rounded border border-indigo-700 transition-colors shadow-md shrink-0">
+            🔗 Adicionar Link Direto (.mp3)
+          </button>
 
           <div className="flex flex-col gap-4">
             {audioCategories.map(category => (
               <div key={category.id} className="flex flex-col gap-2">
                 <div className="flex justify-between items-center border-b border-amber-900/30 pb-1">
                   <h5 className="text-[10px] text-amber-600 uppercase tracking-widest font-bold">{category.name}</h5>
-                  <button onClick={() => { setTargetAudioCat(category.id); audioFileInputRef.current.click(); }} className="text-[10px] text-zinc-400 hover:text-amber-500 transition-colors" title="Adicionar música nesta pasta">➕</button>
+                  <button onClick={() => { setTargetAudioCat(category.id); props.handleAddAudioLink(); }} className="text-[10px] text-zinc-400 hover:text-amber-500 transition-colors" title="Adicionar link nesta pasta">➕</button>
                 </div>
                 {category.tracks.length === 0 ? (
                   <p className="text-[9px] text-zinc-600 italic">Nenhuma faixa nesta pasta.</p>
                 ) : (
                   category.tracks.map(track => (
                     <div key={track.id} className={`p-3 rounded-lg border flex flex-col gap-3 transition-colors ${activeAudioId === track.id ? 'bg-amber-950/20 border-amber-800/50' : 'bg-black/40 border-zinc-800 hover:border-zinc-600'}`}>
-                      
                       <div className="flex justify-between items-center group/track relative">
-                        <span className={`text-xs font-bold truncate pr-2 ${activeAudioId === track.id ? 'text-amber-500' : 'text-zinc-300'}`}>
-                          {track.name}
-                        </span>
-                        
+                        <span className={`text-xs font-bold truncate pr-2 ${activeAudioId === track.id ? 'text-amber-500' : 'text-zinc-300'}`}>{track.name}</span>
                         <div className="flex items-center gap-3">
                           {isMasterMode && (
-                            <button 
-                              onClick={() => props.handleDeleteAudioTrack(track.id, category.id)} 
-                              className="text-[11px] opacity-40 hover:opacity-100 hover:text-red-500 transition-all"
-                              title="Excluir faixa do banco"
-                            >
-                              🗑️
-                            </button>
+                            <button onClick={() => props.handleDeleteAudioTrack(track.id, category.id)} className="text-[11px] opacity-40 hover:opacity-100 hover:text-red-500 transition-all" title="Excluir link do banco">🗑️</button>
                           )}
-
-                          {/* BOTÃO DE PLAY/PAUSE */}
                           <button onClick={() => togglePlayAudio(track.id)} className={`w-8 h-8 rounded flex items-center justify-center text-lg ${activeAudioId === track.id && isPlaying ? 'bg-amber-600 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
                             {activeAudioId === track.id && isPlaying ? '⏸' : '▶'}
                           </button>
                         </div>
                       </div>
                       
-                      {/* CONTROLE DE VOLUME */}
                       {activeAudioId === track.id && (
                         <div className="flex items-center gap-3 border-t border-amber-900/30 pt-2 animate-fade-in">
                           <span className="text-xs">🔈</span>
@@ -210,7 +191,6 @@ export default function SessionSidebar(props) {
           </div>
         </div>
       )}
-      
       {/* 3. ABA FICHAS (COM DIVISÓRIAS) */}
       {sessionTab === 'fichas' && (
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 relative min-h-0">
