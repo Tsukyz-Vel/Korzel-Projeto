@@ -182,7 +182,7 @@ export default function App() {
   if (charRace && charRace.toLowerCase().includes('korgath')) { calculatedMaxWeight *= 2; }
   const maxWeight = Math.max(5, calculatedMaxWeight);
   const currentWeight = inventoryList.reduce((total, item) => total + ((Number(item.quantity) || 0) * (Number(item.weight) || 0)), 0);
-  const currentSceneObj = scenes.find(s => s.id === (isMasterMode ? gmActiveSceneId : playerActiveSceneId));
+  const currentSceneObj = scenes.find(s => String(s.id) === String(isMasterMode ? gmActiveSceneId : playerActiveSceneId));
   const activeNote = notes.find(n => n.id === activeNoteId) || null;
 
   // ==========================================
@@ -660,10 +660,13 @@ export default function App() {
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
           
-          const base64Image = canvas.toDataURL("image/webp", 0.6);
-          
-          setScenes(prev => prev.map(s => s.id === gmActiveSceneId ? {...s, bgImage: base64Image} : s));
-          
+         const base64Image = canvas.toDataURL("image/webp", 0.6);
+                  
+            // 1. Atualiza forçando a comparação em String para nunca mais falhar a busca da cena
+            setScenes(prev => prev.map(s => String(s.id) === String(gmActiveSceneId) ? {...s, bgImage: base64Image} : s));
+                              
+            // 2. Limpa o "cache" do input para você conseguir testar com a mesma imagem várias vezes
+            if (fileInputRef.current) fileInputRef.current.value = "";
           try {
             const res = await fetch(`https://korzel-api.onrender.com/api/scenes/${gmActiveSceneId}/background`, {
               method: 'PUT',
@@ -671,14 +674,15 @@ export default function App() {
               body: JSON.stringify({ bgImage: base64Image })
             });
             
-            if (res.ok) { 
+          if (res.ok) { 
               showToast("🗺️ Mapa salvo com sucesso!", "success"); 
               
               if (connection && currentCampaignId) {
-                const payload = JSON.stringify({ sceneId: gmActiveSceneId, bgImage: base64Image });
+                // ✅ LEVE: Mandamos apenas os IDs. A imagem fica de fora!
+                const payload = JSON.stringify({ sceneId: gmActiveSceneId, campaignId: currentCampaignId });
                 connection.invoke("ChangeMap", currentCampaignId.toString(), payload).catch(console.error);
               }
-            } 
+            }
             else { showToast(`A API bloqueou o mapa (Erro ${res.status}).`, "error"); }
           } catch (err) { console.error("Erro ao salvar background:", err); }
         };
@@ -1134,11 +1138,46 @@ export default function App() {
     });
 
     connection.on("SceneAdded", (sceneJson) => setScenes(prev => [...prev, JSON.parse(sceneJson)]));
-    connection.on("MapChanged", (payload) => { 
+  connection.on("MapChanged", async (payload) => { 
       try {
         const data = JSON.parse(payload);
-        setScenes(prev => prev.map(s => String(s.id) === String(data.sceneId) ? { ...s, bgImage: data.bgImage } : s));
-      } catch(e) {}
+        
+        // Se veio o ID da campanha, puxamos as imagens direto do banco de dados/API
+        if (data.campaignId) {
+            const res = await fetch(`https://korzel-api.onrender.com/api/scenes/campaign/${data.campaignId}`);
+            if (res.ok) {
+                const freshScenes = await res.json();
+                const updatedScene = freshScenes.find(s => String(s.id) === String(data.sceneId));
+                if (updatedScene) {
+                    setScenes(prev => prev.map(s => String(s.id) === String(data.sceneId) ? { ...s, bgImage: updatedScene.bgImage } : s));
+                }
+            }
+        }
+      } catch(e) { console.error("Erro no MapChanged:", e); }
+    });
+
+    // ✅ NOVO OUVINTE PLAYERSPULLED LEVE E EFICIENTE
+    connection.on("PlayersPulled", async (syncJson) => { 
+      try {
+        const data = JSON.parse(syncJson);
+        setPlayerActiveSceneId(data.sceneId);
+        
+        if (data.campaignId) {
+            const res = await fetch(`https://korzel-api.onrender.com/api/scenes/campaign/${data.campaignId}`);
+            if (res.ok) {
+                const freshScenes = await res.json();
+                const updatedScene = freshScenes.find(s => String(s.id) === String(data.sceneId));
+                if (updatedScene) {
+                    setScenes(prev => prev.map(s => String(s.id) === String(data.sceneId) ? { ...s, bgImage: updatedScene.bgImage } : s));
+                }
+            }
+        }
+        
+        setSceneTokens(prev => {
+            const outrosTokens = prev.filter(t => String(t.sceneId) !== String(data.sceneId));
+            return [...outrosTokens, ...(data.tokens || [])];
+        });
+      } catch(e) { console.error("Erro no PlayersPulled:", e); }
     });
 
     connection.on("ChatMessageReceived", (messageJson) => setChatMessages(prev => [...prev, JSON.parse(messageJson)]));

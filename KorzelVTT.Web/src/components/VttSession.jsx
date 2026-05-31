@@ -268,9 +268,9 @@ export default function VttSession(props) {
                   e.stopPropagation(); 
                   setPlayerActiveSceneId(scene.id); 
                   if (connection && currentCampaignId) {
-                   const syncData = { 
+                  const syncData = { 
                         sceneId: scene.id, 
-                        bgImage: scene.bgImage, 
+                        campaignId: currentCampaignId, // ✅ Mandamos a campanha no lugar da imagem
                         tokens: sceneTokens.filter(t => String(t.sceneId) === String(scene.id)) 
                     };
                     connection.invoke("PullPlayersToScene", currentCampaignId.toString(), JSON.stringify(syncData)).catch(console.error);
