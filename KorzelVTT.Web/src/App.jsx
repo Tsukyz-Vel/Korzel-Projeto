@@ -1095,10 +1095,14 @@ export default function App() {
   // 🟢 2. CÉREBRO EXCLUSIVO DA BARRINHA DE VOLUME
   useEffect(() => {
     if (audioRef.current) {
-      // Força a conversão pra número e aplica em tempo real
       audioRef.current.volume = Number(volume);
+      
+      // O Segredo: Avisar a mesa em tempo real toda vez que a barra mexer!
+      if (isMasterMode && connection && currentCampaignId) {
+          connection.invoke("ChangeVolume", currentCampaignId.toString(), Number(volume)).catch(console.error);
+      }
     }
-  }, [volume]); // 👈 Reage imediatamente a cada milímetro que você arrastar a barrinha
+  }, [volume, isMasterMode, connection, currentCampaignId]);
   useEffect(() => { 
     if (authToken) fetchAllCharacters(); 
   }, [authToken, currentCampaignId, refreshTrigger]);
@@ -1300,7 +1304,7 @@ export default function App() {
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#0a0a0a] flex flex-col font-sans relative" style={{ colorScheme: 'dark' }} onMouseMove={handleMapMouseMove} onMouseUp={handleMapMouseUp} onMouseLeave={handleMapMouseUp}>
       <DiceRollerOverlay isRolling={rollModal.isRolling} result={rollModal.show && !rollModal.isRolling ? rollModal : null} onDismiss={() => setRollModal({ ...rollModal, show: false })} />
-      <audio ref={audioRef} src={audioCategories.flatMap(c => c.tracks).find(t => t.id === activeAudioId)?.url} loop={isLooping} />
+      <audio ref={audioRef} loop={isLooping} />
 
       {sheetModalOpen && currentPage === 'sessao' && (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 lg:p-8 animate-fade-in" onClick={() => setSheetModalOpen(false)}>
