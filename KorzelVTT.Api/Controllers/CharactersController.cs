@@ -198,36 +198,41 @@ public class CharactersController : ControllerBase
     {
         int userId = GetCurrentUserId();
 
-        var character = await _context.Characters.FirstOrDefaultAsync(c => c.Id == id);
+        // 1. CARREGA A FICHA COM TODOS OS SEUS PERTENCES
+        var character = await _context.Characters
+            .Include(c => c.Skills)
+            .Include(c => c.Inventory)
+            .Include(c => c.Weapons)
+            .Include(c => c.Abilities)
+            .Include(c => c.Notes)
+            .FirstOrDefaultAsync(c => c.Id == id);
         
         if (character == null) return NotFound();
 
+        // 2. CHECA PERMISSÃO
         bool isOwner = character.UserId == userId;
         bool isMaster = false;
-
-        // 👇 Proteção Adicionada: Checa se a ficha tem campanha antes de buscar 👇
         if (character.CampaignId > 0)
         {
             var campaign = await _context.Campaigns.FindAsync(character.CampaignId);
             isMaster = campaign != null && campaign.MasterUserId == userId;
         }
 
-        if (!isOwner && !isMaster) 
-        {
-            // 👇 LOG DEDURO 👇 Se o erro acontecer, olhe no terminal do backend!
-            Console.WriteLine($"\n🚫 [BLOCK DELETE] Usuário ({userId}) tentou apagar a ficha ({id}).");
-            Console.WriteLine($"   - Dono da Ficha: {character.UserId} | É Dono? {isOwner}");
-            Console.WriteLine($"   - Mestre da Campanha: {isMaster}");
-            
-            return Forbid();
-        }
+        if (!isOwner && !isMaster) return Forbid();
 
+        // 3. APAGA OS ITENS ÓRFÃOS PRIMEIRO PARA O BANCO NÃO TRAVAR
+        _context.CharacterSkills.RemoveRange(character.Skills);
+        _context.CharacterItems.RemoveRange(character.Inventory);
+        _context.Weapons.RemoveRange(character.Weapons);
+        _context.Abilities.RemoveRange(character.Abilities);
+        _context.Notes.RemoveRange(character.Notes);
+
+        // 4. AGORA SIM, APAGA A FICHA
         _context.Characters.Remove(character);
         await _context.SaveChangesAsync();
 
         return NoContent();
     }
-
     private bool CharacterExists(int id)
     {
         return _context.Characters.Any(e => e.Id == id);
