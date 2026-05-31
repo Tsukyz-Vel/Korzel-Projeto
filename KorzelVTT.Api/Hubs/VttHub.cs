@@ -53,11 +53,11 @@ namespace KorzelVTT.Api.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            // Verifica se a conexão que caiu estava em alguma sala
-            if (_connectionToCampaign.TryGetValue(Context.ConnectionId, out string sessionId))
+            // Verifica se a conexão que caiu estava em alguma sala (Adicionado "?" para limpar os Warnings do Render)
+            if (_connectionToCampaign.TryGetValue(Context.ConnectionId, out string? sessionId))
             {
                 // Descobre o nome do jogador que caiu
-                if (_connectionToPlayer.TryGetValue(Context.ConnectionId, out string playerName))
+                if (_connectionToPlayer.TryGetValue(Context.ConnectionId, out string? playerName))
                 {
                     // Remove o jogador da lista da sala
                     if (_onlinePlayers.ContainsKey(sessionId))
@@ -81,7 +81,6 @@ namespace KorzelVTT.Api.Hubs
         // ==========================================
         public async Task SendChatMessage(string sessionId, string messageJson)
         {
-            // Sem log de console aqui para não engasgar o servidor grátis do Render quando choverem mensagens.
             // Disparo ultra rápido e direto para quem está na sala
             await Clients.OthersInGroup(sessionId).SendAsync("ChatMessageReceived", messageJson);
         }
@@ -140,9 +139,6 @@ namespace KorzelVTT.Api.Hubs
         }
 
         // ==========================================
-        // ÁUDIO DA SESSÃO
-        // ==========================================
-      // ==========================================
         // ÁUDIO DA SESSÃO (Agora com Volume Sincronizado)
         // ==========================================
         public async Task PlayMusic(string campaignId, int trackId, double currentVolume)
@@ -161,6 +157,7 @@ namespace KorzelVTT.Api.Hubs
             // Grita no rádio para baixar/subir o volume
             await Clients.OthersInGroup(campaignId).SendAsync("VolumeChanged", newVolume);
         }
+
         // ==========================================
         // FERRAMENTAS DO VTT (Pings, Desenhos, Clima)
         // ==========================================
@@ -197,12 +194,6 @@ namespace KorzelVTT.Api.Hubs
         public async Task ToggleFog(string sessionId, bool isEnabled)
         {
             await Clients.OthersInGroup(sessionId).SendAsync("FogToggled", isEnabled);
-        }
-
-        public async Task ChangeVolume(string campaignId, float newVolume)
-        {
-            // O Mestre avisa todos os outros jogadores na sala para mudarem o volume
-            await Clients.OthersInGroup(campaignId).SendAsync("VolumeChanged", newVolume);
         }
     }
 }

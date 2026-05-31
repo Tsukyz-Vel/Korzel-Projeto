@@ -1,4 +1,4 @@
-# Etapa de construção (Agora usando o .NET 10.0)
+# Etapa de construção (Agora usando o .NET 10.0 nativo sem Alpine)
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /app
 
@@ -10,7 +10,7 @@ RUN dotnet restore
 COPY . ./
 RUN dotnet publish -c Release -o out
 
-# Etapa de execução (Agora usando o .NET 10.0)
+# Etapa de execução (Agora usando o .NET 10.0 nativo sem Alpine)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build /app/out .
