@@ -44,14 +44,12 @@ public class CharactersController : ControllerBase
             .ToListAsync();
     }
 
-    // 👇 ROTA ATUALIZADA: A "Visão Verdadeira" do Mestre 👇
     // GET: api/Characters/campaign/5
     [HttpGet("campaign/{campaignId}")]
     public async Task<IActionResult> GetCampaignCharacters(int campaignId)
     {
         int userId = GetCurrentUserId();
         
-        // Descobre de quem é a campanha
         var campaign = await _context.Campaigns.FindAsync(campaignId);
         if (campaign == null) return NotFound("Campanha não encontrada.");
 
@@ -59,27 +57,24 @@ public class CharactersController : ControllerBase
 
         var query = _context.Characters.Where(c => c.CampaignId == campaignId);
 
-        // Se NÃO for o Mestre, o jogador só recebe a lista das PRÓPRIAS fichas para não espiar os outros
         if (!isMaster)
         {
             query = query.Where(c => c.UserId == userId);
         }
 
-        // Devolvemos um objeto anônimo com a flag 'IsMine' para o React fazer a separação mágica
         var characters = await query
             .Select(c => new { 
                 Id = c.Id, 
                 Name = c.Name, 
                 Class = c.Class, 
                 Level = c.Level,
-                IsMine = c.UserId == userId // Verdadeiro se a ficha for da pessoa logada
+                IsMine = c.UserId == userId 
             })
             .ToListAsync();
 
         return Ok(characters);
     }
 
-    // 👇 ROTA ATUALIZADA: Mestre pode abrir a ficha dos outros 👇
     // GET: api/Characters/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Character>> GetCharacter(int id)
@@ -92,23 +87,22 @@ public class CharactersController : ControllerBase
             .Include(c => c.Weapons)
             .Include(c => c.Abilities)
             .Include(c => c.Notes)
-            // Removemos a trava do UserId daqui para podermos checar quem é o Mestre
             .FirstOrDefaultAsync(c => c.Id == id); 
 
         if (character == null) return NotFound();
 
-        // 1. Se for o dono da ficha, pode abrir!
         if (character.UserId == userId) 
             return character;
 
-        // 2. Se não for o dono, vamos ver se ele é o Mestre desta campanha!
-        var campaign = await _context.Campaigns.FindAsync(character.CampaignId);
-        if (campaign != null && campaign.MasterUserId == userId)
+        if (character.CampaignId > 0) 
         {
-            return character; // Mestre tem permissão total de leitura!
+            var campaign = await _context.Campaigns.FindAsync(character.CampaignId);
+            if (campaign != null && campaign.MasterUserId == userId)
+            {
+                return character; 
+            }
         }
 
-        // 3. Se for um jogador tentando abrir a ficha do coleguinha, bloqueia!
         return Forbid();
     }
 
@@ -130,14 +124,17 @@ public class CharactersController : ControllerBase
 
         if (existingCharacter == null) return NotFound();
 
-        // Trava de segurança para edição: Mestre ou Dono da ficha
         bool isOwner = existingCharacter.UserId == userId;
-        var campaign = await _context.Campaigns.FindAsync(existingCharacter.CampaignId);
-        bool isMaster = campaign != null && campaign.MasterUserId == userId;
+        bool isMaster = false;
 
-        if (!isOwner && !isMaster) return Forbid(); // Só dono ou mestre salvam
+        if (existingCharacter.CampaignId > 0) 
+        {
+            var campaign = await _context.Campaigns.FindAsync(existingCharacter.CampaignId);
+            isMaster = campaign != null && campaign.MasterUserId == userId;
+        }
 
-        // Mantém o dono original da ficha para que o mestre não "roube" a ficha ao salvar
+        if (!isOwner && !isMaster) return Forbid(); 
+
         characterUpdate.UserId = existingCharacter.UserId; 
         characterUpdate.CampaignId = existingCharacter.CampaignId;
 
@@ -172,7 +169,6 @@ public class CharactersController : ControllerBase
         {
             int userId = GetCurrentUserId(); 
 
-            // ANTI-FANTASMA: Verifica se o usuário do token realmente existe no banco novo
             var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
             if (!userExists) 
             {
@@ -184,7 +180,6 @@ public class CharactersController : ControllerBase
             _context.Characters.Add(character);
             await _context.SaveChangesAsync();
             
-            // Devolve apenas o necessário para evitar loops no React
             return Ok(new { id = character.Id, message = "Ficha forjada com sucesso!" });
         }
         catch (Exception ex) 
@@ -207,12 +202,25 @@ public class CharactersController : ControllerBase
         
         if (character == null) return NotFound();
 
-        // Trava de segurança para exclusão: Mestre ou Dono da ficha
         bool isOwner = character.UserId == userId;
-        var campaign = await _context.Campaigns.FindAsync(character.CampaignId);
-        bool isMaster = campaign != null && campaign.MasterUserId == userId;
+        bool isMaster = false;
 
-        if (!isOwner && !isMaster) return Forbid();
+        // 👇 Proteção Adicionada: Checa se a ficha tem campanha antes de buscar 👇
+        if (character.CampaignId > 0)
+        {
+            var campaign = await _context.Campaigns.FindAsync(character.CampaignId);
+            isMaster = campaign != null && campaign.MasterUserId == userId;
+        }
+
+        if (!isOwner && !isMaster) 
+        {
+            // 👇 LOG DEDURO 👇 Se o erro acontecer, olhe no terminal do backend!
+            Console.WriteLine($"\n🚫 [BLOCK DELETE] Usuário ({userId}) tentou apagar a ficha ({id}).");
+            Console.WriteLine($"   - Dono da Ficha: {character.UserId} | É Dono? {isOwner}");
+            Console.WriteLine($"   - Mestre da Campanha: {isMaster}");
+            
+            return Forbid();
+        }
 
         _context.Characters.Remove(character);
         await _context.SaveChangesAsync();
