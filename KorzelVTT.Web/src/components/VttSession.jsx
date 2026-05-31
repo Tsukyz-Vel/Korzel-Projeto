@@ -183,7 +183,7 @@ export default function VttSession(props) {
       setPings(prev => [...prev, newPing]);
       setTimeout(() => { setPings(prev => prev.filter(p => p.id !== newPing.id)); }, 2000);
       
-     if (connection && currentCampaignId) connection.invoke("SendPing", currentCampaignId.toString(), coords.x, coords.y).catch(console.error);
+      if (connection && currentCampaignId) connection.invoke("SendPing", currentCampaignId.toString(), coords.x, coords.y).catch(console.error);
     
     } else if (activeTool === 'draw' && isMasterMode) {
       setCurrentDrawing([getMapCoords(e)]);
@@ -281,7 +281,7 @@ export default function VttSession(props) {
                   if (connection && currentCampaignId) {
                   const syncData = { 
                         sceneId: scene.id, 
-                        campaignId: currentCampaignId, // ✅ Mandamos a campanha no lugar da imagem
+                        campaignId: currentCampaignId, 
                         tokens: sceneTokens.filter(t => String(t.sceneId) === String(scene.id)) 
                     };
                     connection.invoke("PullPlayersToScene", currentCampaignId.toString(), JSON.stringify(syncData)).catch(console.error);
@@ -406,6 +406,9 @@ export default function VttSession(props) {
               const isPoisoned = statuses.includes('poisoned');
               const isCamouflaged = statuses.includes('camouflaged');
               
+              // 👇 1. FAÇA A MATEMÁTICA AQUI FORA DE FORMA NORMAL
+              const statusSize = Math.max(16, (token.size || 80) * 0.25);
+              
               let shadowClass = "shadow-[0_5px_10px_rgba(0,0,0,0.8)]";
               let dropShadowImg = "drop-shadow-[0_5px_10px_rgba(0,0,0,0.8)]";
               
@@ -447,43 +450,38 @@ export default function VttSession(props) {
                     <span className={`text-white text-xl font-bold pointer-events-none ${token.flipX ? '-scale-x-100 block' : ''}`}>{token.name.charAt(0)}</span>
                   )}
                   
-                  {/* 👇 CONDIÇÕES INTELIGENTES QUE ACOMPANHAM O TAMANHO DO TOKEN 👇 */}
-                  {statuses.length > 0 && (() => {
-                    // Calcula 25% do tamanho da criatura (com tamanho mínimo de 16px para não sumir)
-                    const statusSize = Math.max(16, token.size * 0.25); 
-                    
-                    return (
-                      <div 
-                        className="absolute flex flex-row-reverse flex-nowrap whitespace-nowrap gap-1 pointer-events-none z-20"
-                        style={{ top: `-${statusSize * 0.1}px`, right: `-${statusSize * 0.1}px` }}
-                      >
-                        {isBleeding && (
-                          <span 
-                            style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
-                            className="bg-black/80 rounded-full flex items-center justify-center border border-red-900 shadow-md"
-                          >
-                            🩸
-                          </span>
-                        )}
-                        {isPoisoned && (
-                          <span 
-                            style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
-                            className="bg-black/80 rounded-full flex items-center justify-center border border-green-900 shadow-md"
-                          >
-                            ☠️
-                          </span>
-                        )}
-                        {isCamouflaged && (
-                          <span 
-                            style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
-                            className="bg-black/80 rounded-full flex items-center justify-center border border-zinc-500 shadow-md"
-                          >
-                            🌫️
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })()}
+                  {/* 👇 2. O HTML FICA LIMPO E A VERCEL APROVA 👇 */}
+                  {statuses.length > 0 && (
+                    <div 
+                      className="absolute flex flex-row-reverse flex-nowrap whitespace-nowrap gap-1 pointer-events-none z-20"
+                      style={{ top: `-${statusSize * 0.1}px`, right: `-${statusSize * 0.1}px` }}
+                    >
+                      {isBleeding && (
+                        <span 
+                          style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
+                          className="bg-black/80 rounded-full flex items-center justify-center border border-red-900 shadow-md"
+                        >
+                          🩸
+                        </span>
+                      )}
+                      {isPoisoned && (
+                        <span 
+                          style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
+                          className="bg-black/80 rounded-full flex items-center justify-center border border-green-900 shadow-md"
+                        >
+                          ☠️
+                        </span>
+                      )}
+                      {isCamouflaged && (
+                        <span 
+                          style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
+                          className="bg-black/80 rounded-full flex items-center justify-center border border-zinc-500 shadow-md"
+                        >
+                          🌫️
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}

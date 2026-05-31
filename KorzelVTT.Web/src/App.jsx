@@ -1072,7 +1072,7 @@ export default function App() {
        showToast("Erro de conexão ao forjar poder.", "error");
     }
   };
-  // ==========================================
+ // ==========================================
   // 4. USE EFFECTS (EFEITOS E SIGNALR)
   // ==========================================
   useEffect(() => { localStorage.setItem('korzel_catalog', JSON.stringify(catalog)); }, [catalog]);
@@ -1080,17 +1080,14 @@ export default function App() {
   
   useEffect(() => { if (audioRef.current) audioRef.current.loop = isLooping; }, [isLooping]);
 
-  // 1. Encontra a URL da música atual
-  const currentTrackUrl = audioCategories.flatMap(c => c.tracks).find(t => t.id === activeAudioId)?.url;
-
-  // // 🟢 1. CÉREBRO DE TROCA DE MÚSICA E PLAY/PAUSE
+  // 🟢 1. CÉREBRO DE TROCA DE MÚSICA E PLAY/PAUSE
   const currentTrackUrl = audioCategories.flatMap(c => c.tracks).find(t => t.id === activeAudioId)?.url;
 
   useEffect(() => {
     if (audioRef.current) {
       if (currentTrackUrl !== prevTrackUrl.current) {
-        audioRef.current.src = currentTrackUrl || ""; // Injeta na veia
-        audioRef.current.load();                      // Obriga a esquecer a antiga
+        audioRef.current.src = currentTrackUrl || ""; 
+        audioRef.current.load();                      
         prevTrackUrl.current = currentTrackUrl;
       }
 
@@ -1104,23 +1101,24 @@ export default function App() {
       }
     }
   }, [isPlaying, currentTrackUrl]);
-  const debounceVolume = useRef(null); // <- Não esqueça de colocar isso lá no topo junto com os outros useRef!
-  // 🟢 CÉREBRO 2: BARRINHA DE VOLUME + SINCRONIZAÇÃO INTELIGENTE (DEBOUNCE)
+
+  // 🟢 2. CÉREBRO DA BARRINHA DE VOLUME + SINCRONIZAÇÃO INTELIGENTE (DEBOUNCE)
   useEffect(() => {
     if (audioRef.current) {
-      // Muda na sua caixa de som na exata mesma hora
       audioRef.current.volume = Number(volume);
 
-      // Avisa os jogadores com um atraso de 500ms para NÃO derrubar o servidor
       if (isMasterMode && connection && currentCampaignId && connection.state === "Connected") {
         clearTimeout(debounceVolume.current);
         debounceVolume.current = setTimeout(() => {
-          // Obs: Verifique se o seu C# possui um método chamado "ChangeVolume"
           connection.invoke("ChangeVolume", currentCampaignId.toString(), Number(volume)).catch(console.error);
         }, 500);
       }
     }
   }, [volume, isMasterMode, connection, currentCampaignId]);
+
+  useEffect(() => { 
+    if (authToken) fetchAllCharacters(); 
+  }, [authToken, currentCampaignId, refreshTrigger]);
   // 🟢 3. Controla a Barrinha de Volume LOCALMENTE
   useEffect(() => {
     if (audioRef.current) {
