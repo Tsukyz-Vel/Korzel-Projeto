@@ -12,23 +12,16 @@ import Configuracoes from './components/Configuracoes';
 import AdminPanel from './components/AdminPanel';
 
 export default function App() {
+  // ==========================================
+  // 1. ESTADOS (STATES) E REFS
+  // ==========================================
   const [onlinePlayers, setOnlinePlayers] = useState([]);
   const [currentPage, setCurrentPage] = useState('início'); 
   const [isMasterMode, setIsMasterMode] = useState(false); 
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
   const [authToken, setAuthToken] = useState(localStorage.getItem('korzel_token') || null);
-  let isAdmin = false;
-  if (authToken) {
-    try {
-      const payload = JSON.parse(atob(authToken.split('.')[1]));
-      // O .NET guarda o e-mail nesta chave longa ou apenas "email"
-      const userEmail = payload.email || payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] || "";
-      isAdmin = userEmail === "dinofalco123@gmail.com";
-    } catch (e) {}
-  }
   const [loggedUserName, setLoggedUserName] = useState(localStorage.getItem('korzel_username') || "");
-  
   const [authMode, setAuthMode] = useState('login'); 
   const [authForm, setAuthForm] = useState({ username: "", email: "", password: "" });
   
@@ -117,16 +110,7 @@ export default function App() {
       return [];
     }
   });
-// 👇 NOVO: Avisa o servidor na hora se o jogador mudar de nome
-  useEffect(() => {
-    if (connection && currentCampaignId && loggedUserName) {
-      // Reenvia o comando JoinSession para o servidor atualizar a bolinha com o novo nome
-      connection.invoke("JoinSession", currentCampaignId.toString(), loggedUserName)
-        .catch(console.error);
-    }
-  }, [loggedUserName, connection, currentCampaignId]);
-  useEffect(() => { localStorage.setItem('korzel_catalog', JSON.stringify(catalog)); }, [catalog]);
-  
+
   const [showCatalogForm, setShowCatalogForm] = useState(false);
   const [editingCatalogIndex, setEditingCatalogIndex] = useState(null);
   const [catalogForm, setCatalogForm] = useState({ name: "", type: "Consumível", price: 10, weight: 0.1, desc: "" });
@@ -158,10 +142,7 @@ export default function App() {
     try { const saved = localStorage.getItem('korzel_token_library'); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
 
-  useEffect(() => { localStorage.setItem('korzel_token_library', JSON.stringify(tokenLibrary)); }, [tokenLibrary]);
-
   const [sceneTokens, setSceneTokens] = useState([]);
-  
   const [fichaSearch, setFichaSearch] = useState('');
   const [mapScale, setMapScale] = useState(1);
   const [mapOffset, setMapOffset] = useState({ x: -800, y: -800 }); 
@@ -173,6 +154,8 @@ export default function App() {
   const mapRef = useRef(null);
   const fileInputRef = useRef(null);
   const tokenFileInputRef = useRef(null);
+  const audioRef = useRef(null);
+  const audioFileInputRef = useRef(null);
 
   const [audioCategories, setAudioCategories] = useState([{ id: 'combat', name: '⚔️ Combate', tracks: [] }, { id: 'ambient', name: '🌲 Ambiente', tracks: [] }, { id: 'tavern', name: '🍺 Taverna', tracks: [] }, { id: 'uploads', name: '📁 Meus Uploads', tracks: [] }]);
   const [activeAudioId, setActiveAudioId] = useState(null);
@@ -180,18 +163,33 @@ export default function App() {
   const [isLooping, setIsLooping] = useState(true);
   const [volume, setVolume] = useState(0.5);
   const [targetAudioCat, setTargetAudioCat] = useState('uploads'); 
-  const audioRef = useRef(null);
-  const audioFileInputRef = useRef(null);
-
   const [connection, setConnection] = useState(null);
+
+  // ==========================================
+  // 2. VARIÁVEIS DERIVADAS
+  // ==========================================
+  let isAdmin = false;
+  if (authToken) {
+    try {
+      const payload = JSON.parse(atob(authToken.split('.')[1]));
+      const userEmail = payload.email || payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] || "";
+      isAdmin = userEmail === "dinofalco123@gmail.com";
+    } catch (e) {}
+  }
 
   let calculatedMaxWeight = 20 + (Number(attrFor) * 10);
   if (charRace && charRace.toLowerCase().includes('korgath')) { calculatedMaxWeight *= 2; }
   const maxWeight = Math.max(5, calculatedMaxWeight);
   const currentWeight = inventoryList.reduce((total, item) => total + ((Number(item.quantity) || 0) * (Number(item.weight) || 0)), 0);
+  const currentSceneObj = scenes.find(s => s.id === (isMasterMode ? gmActiveSceneId : playerActiveSceneId));
+  const activeNote = notes.find(n => n.id === activeNoteId) || null;
 
+  // ==========================================
+  // 3. TODAS AS FUNÇÕES (FUNCTIONS)
+  // ==========================================
   const showToast = (message, type = "success") => { setToast({ show: true, message, type }); setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3500); };
   const getSkillTotal = (skillString) => { const baseName = skillString.split(" ")[0]; const skillObj = skillsList.find(s => s.name === baseName); return skillObj ? skillObj.total : 0; };
+  const getAuthHeaders = () => { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` }; };
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
@@ -214,16 +212,14 @@ export default function App() {
   };
 
   const handleLogout = () => { localStorage.removeItem('korzel_token'); localStorage.removeItem('korzel_username'); setAuthToken(null); setLoggedUserName(""); setCurrentPage('início'); };
-  const getAuthHeaders = () => { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` }; };
 
   const handleEnterSession = async (asMaster, campaignId) => {
     if (!campaignId) { showToast("Erro: Sala corrompida. Não há ID.", "error"); return; }
-
     setIsMasterMode(asMaster); 
     setCurrentCampaignId(campaignId); 
     setSessionTab('chat'); 
     setCurrentPage('sessao');
-   if (connection && campaignId) { 
+    if (connection && campaignId) { 
       connection.invoke("JoinSession", campaignId.toString(), loggedUserName).catch(console.error); 
     }
     
@@ -231,14 +227,11 @@ export default function App() {
       const res = await fetch(`https://korzel-api.onrender.com/api/scenes/campaign/${campaignId}`);
       if (res.ok) {
         const data = await res.json();
-        if (!asMaster) {
-           setGmActiveSceneId(null); 
-        }
+        if (!asMaster) setGmActiveSceneId(null); 
         
         if (data && data.length > 0) {
           setScenes(data);
           const activeScene = data.find(s => s.isActive) || data[0];
-         
           if (activeScene) { 
             setGmActiveSceneId(activeScene.id); 
             setPlayerActiveSceneId(activeScene.id); 
@@ -329,7 +322,7 @@ export default function App() {
     } catch (error) { showToast("Erro conexão.", "error"); }
   };
 
- const handleDeleteCharacter = async (id, name) => { 
+  const handleDeleteCharacter = async (id, name) => { 
     if (window.confirm(`Tem certeza que deseja apagar definitivamente a ficha de ${name}?`)) { 
       try { 
         const res = await fetch(`https://korzel-api.onrender.com/api/characters/${id}`, { 
@@ -341,7 +334,6 @@ export default function App() {
           showToast("Ficha excluída com sucesso!", "success"); 
           fetchAllCharacters(); 
           if (activeCharId === id) handleCreateNewCharacter(); 
-          // Grita no SignalR para atualizar a tela de todo mundo
           if (connection && currentCampaignId) {
              connection.invoke("RefreshCharacters", currentCampaignId.toString()).catch(console.error);
           }
@@ -355,11 +347,10 @@ export default function App() {
   };
   
   const handleCreateNewCharacter = () => { setActiveCharId(null); setCharName(""); setCharOrigin(""); setCharRace(""); setCharClass(""); setCharAge(0); setCharLevel(1); setCharDeity("Nenhum"); setMut1("Carne Intacta"); setMut2("Carne Intacta"); setMut3("Carne Intacta"); setAttrInt(0); setAttrPre(0); setAttrAgi(0); setAttrVig(0); setAttrFor(0); setAttrIns(0); setHp(10); setMaxHp(10); setPe(0); setMaxPe(0); setCorruption(0); setLascas(0); setSkillsList(prev => prev.map(s => ({ ...s, trainingLevel: 0, others: 0 }))); setInventoryList([]); setAttacksList([]); setAbilitiesList([]); setNotes([]); setCurrentPage('ficha'); };
-const executeRoll = (type, title, bonus, weapon = null, customExp = null) => { 
-    // 👇 NOVA LÓGICA MESTRA DE DADOS AVULSOS 👇
+
+  const executeRoll = (type, title, bonus, weapon = null, customExp = null) => { 
     if (type === 'custom' && customExp) {
-      const exp = customExp.toLowerCase().replace(/\s+/g, ''); // Tira os espaços
-      // Reconhece formatos como: 1d20, d100, 2d6+4, 3d8-1
+      const exp = customExp.toLowerCase().replace(/\s+/g, ''); 
       const regex = /^(\d*)d(\d+)([+-]\d+)?$/;
       const match = exp.match(regex);
 
@@ -368,7 +359,6 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
         return;
       }
 
-      // Se o jogador digitar só "d20", assumimos que é 1 dado.
       const numDice = match[1] ? parseInt(match[1], 10) : 1; 
       const sides = parseInt(match[2], 10);
       const modifier = match[3] ? parseInt(match[3], 10) : 0;
@@ -405,7 +395,6 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
       return;
     }
 
-    // --- CONTINUAÇÃO DA LÓGICA ANTIGA (Ataques, Perícias, Dano) ---
     if (type === 'attack' && weapon && weapon.isRanged) {
       if ((weapon.ammo || 0) <= 0) {
         showToast(`Arma descarregada! Sem munição para ${weapon.name}.`, "error");
@@ -624,12 +613,11 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
   const handleAddNote = () => { const newId = Date.now(); setNotes([...notes, { id: newId, title: "Página em Branco", content: "" }]); setActiveNoteId(newId); };
   const handleDeleteNote = (id) => { if(window.confirm("Arrancar página?")) { const newNotes = notes.filter(n => n.id !== id); setNotes(newNotes); if(activeNoteId === id) setActiveNoteId(newNotes.length > 0 ? newNotes[0].id : null); } };
   const handleNoteChange = (field, value) => { setNotes(notes.map(n => n.id === activeNoteId ? { ...n, [field]: value } : n)); };
-  const activeNote = notes.find(n => n.id === activeNoteId) || null;
+  
  const handleChatSubmit = (e) => { 
     e.preventDefault(); 
     if(!chatInput.trim()) return; 
 
-    // 👇 O CHAT AGORA USA A MATEMÁTICA REAL SE VOCÊ DIGITAR /r 👇
     if (chatInput.trim().startsWith('/r ')) { 
       const rollExp = chatInput.replace('/r ', '').trim(); 
       executeRoll('custom', '', 0, null, rollExp);
@@ -647,7 +635,6 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
       connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMessage)).catch(console.error); 
     } 
   };
-  const currentSceneObj = scenes.find(s => s.id === (isMasterMode ? gmActiveSceneId : playerActiveSceneId));
   
  const handleMapUpload = (e) => {
     const file = e.target.files[0];
@@ -715,6 +702,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
       }
     } catch(e) { console.error("Erro criar cena", e); }
   };
+
   const handleTokenImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -747,6 +735,7 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
       reader.readAsDataURL(file);
     }
   };
+
   const handleCreateToken = () => { if (!tokenForm.name) return alert("O token precisa de um nome!"); const newLibToken = { id: Date.now(), name: tokenForm.name, isNpc: tokenForm.isNpc, image: tokenForm.image }; setTokenLibrary([...tokenLibrary, newLibToken]); setShowTokenForm(false); setTokenForm({ name: '', isNpc: true, image: null }); showToast("Token salvo!", "success"); };
   const updateTokenSize = (id, newSize) => { setSceneTokens(prev => prev.map(t => t.id === id ? { ...t, size: Number(newSize) } : t)); if (connection && currentCampaignId) { connection.invoke("UpdateTokenSize", currentCampaignId.toString(), id.toString(), Number(newSize)).catch(console.error); } };
   const handleDeleteTokenFromScene = async (tokenId) => {
@@ -833,26 +822,20 @@ const executeRoll = (type, title, bonus, weapon = null, customExp = null) => {
   
   const handleMapMouseMove = (e) => { if (draggingToken !== null && mapRef.current) { const rect = mapRef.current.getBoundingClientRect(); const token = sceneTokens.find(t => t.id === draggingToken); const tokenSize = token ? token.size : 80; const x = (e.clientX - rect.left - mapOffset.x) / mapScale - (tokenSize / 2); const y = (e.clientY - rect.top - mapOffset.y) / mapScale - (tokenSize / 2); setSceneTokens(prev => prev.map(t => t.id === draggingToken ? { ...t, x, y } : t)); } else if (isDraggingMap) { setMapOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y }); } };
   
-const handleMapMouseUp = async () => {
-    // 1. Guardamos qual token estava a ser arrastado
+  const handleMapMouseUp = async () => {
     const currentTokenId = draggingToken;
     
-    // 2. SOLTAMOS O TOKEN IMEDIATAMENTE (Acaba com o delay visual!)
     setDraggingToken(null);
     setIsDraggingMap(false);
 
-    // 3. Tratamos de salvar no servidor nos bastidores
     if (currentTokenId !== null) {
       const token = sceneTokens.find(t => t.id === currentTokenId);
       if (token && currentCampaignId) {
-        // Envia para o SignalR para os outros jogadores verem
         if (connection) { 
             connection.invoke("MoveToken", currentCampaignId.toString(), token.id.toString(), token.x, token.y).catch(console.error); 
         }
         
-        // Envia para a API guardar no banco de dados
         try {
-          // Lembre-se de verificar se este link aqui é o seu novo do Render!
           await fetch(`https://korzel-api.onrender.com/api/scenes/tokens/${token.id}`, { 
               method: "PUT", 
               headers: { "Content-Type": "application/json" }, 
@@ -867,6 +850,7 @@ const handleMapMouseUp = async () => {
 
   const bringToFront = () => { const maxZ = Math.max(...sceneTokens.map(t => t.zIndex || 10)); setSceneTokens(prev => prev.map(t => t.id === tokenContextMenu.tokenId ? { ...t, zIndex: maxZ + 1 } : t)); setTokenContextMenu({ show: false, x: 0, y: 0, tokenId: null }); };
   const sendToBack = () => { const minZ = Math.min(...sceneTokens.map(t => t.zIndex || 10)); setSceneTokens(prev => prev.map(t => t.id === tokenContextMenu.tokenId ? { ...t, zIndex: minZ - 1 } : t)); setTokenContextMenu({ show: false, x: 0, y: 0, tokenId: null }); };
+  
   const assignPermission = async () => { 
     const playerName = window.prompt("Nome de usuário do jogador (deixe em branco para remover o controle):"); 
     
@@ -897,12 +881,12 @@ const handleMapMouseUp = async () => {
       setTokenContextMenu({ ...tokenContextMenu, show: false });
     }
   };
+
   const toggleTokenStatus = async (statusName) => { 
     if (!tokenContextMenu.tokenId) return; 
 
     let tokenAtualizado = null;
 
-    // 1. Atualiza a tela imediatamente (Interface Otimista)
     setSceneTokens(prev => prev.map(t => { 
       if (t.id === tokenContextMenu.tokenId) { 
         const currentStatuses = t.statuses || []; 
@@ -918,19 +902,15 @@ const handleMapMouseUp = async () => {
     
     setTokenContextMenu({ ...tokenContextMenu, show: false }); 
 
-    // 2. Salva no banco e avisa os outros jogadores
     if (tokenAtualizado) {
       try {
-        // Envia para a API salvar no banco (Certifique-se de que a URL é a do Render)
         await fetch(`https://korzel-api.onrender.com/api/scenes/tokens/${tokenAtualizado.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(tokenAtualizado)
         });
 
-        // Tenta enviar para o SignalR para os outros jogadores verem na hora
         if (connection && currentCampaignId) { 
-          // Nota: O seu back-end C# precisa ter um método no Hub preparado para repassar essa informação!
           connection.invoke("UpdateToken", currentCampaignId.toString(), JSON.stringify(tokenAtualizado)).catch(console.error); 
         }
       } catch (e) {
@@ -978,6 +958,7 @@ const handleMapMouseUp = async () => {
     };
     reader.readAsDataURL(file);
   };
+
   const handleDeleteAudioTrack = async (trackId, catId) => {
     if (!window.confirm("Deseja banir esta música da sua campanha para sempre?")) return;
 
@@ -989,14 +970,12 @@ const handleMapMouseUp = async () => {
 
       if (res.ok) {
         showToast("Música removida com sucesso!", "success");
-        // Remove a música da tela instantaneamente
         setAudioCategories(prev => prev.map(cat => 
           cat.id === catId 
             ? { ...cat, tracks: cat.tracks.filter(t => t.id !== trackId) } 
             : cat
         ));
         
-        // Se a música apagada era a que estava tocando, para o som
         if (activeAudioId === trackId) {
           setIsPlaying(false);
           setActiveAudioId(null);
@@ -1009,38 +988,35 @@ const handleMapMouseUp = async () => {
       console.error("Erro deletar áudio:", err);
     }
   };
+
  const togglePlayAudio = (trackId) => { 
     if (activeAudioId === trackId && isPlaying) { 
       setIsPlaying(false); 
-      // Se parou, avisa os jogadores para pararem também
       if (connection && currentCampaignId) connection.invoke("StopMusic", currentCampaignId.toString()).catch(console.error);
     } else { 
       setActiveAudioId(trackId); 
       setIsPlaying(true); 
-      // Se deu play, avisa os jogadores para tocarem esta faixa específica
       if (connection && currentCampaignId) connection.invoke("PlayMusic", currentCampaignId.toString(), trackId).catch(console.error);
     } 
   };
+
  const handleAddAbilityToSheet = async (power, targetCharId) => { 
     const newAbility = { title: power.title, type: power.type, cost: power.cost, description: power.description || power.poder || "" }; 
     
     let charIdToUpdate = null;
 
-    // 1. Descobre quem é o alvo exato
     if (targetCharId === "active" || (activeCharId && Number(targetCharId) === activeCharId)) {
-      charIdToUpdate = activeCharId; // Pega o ID numérico da ficha que o usuário está jogando agora
+      charIdToUpdate = activeCharId;
     } else {
-      charIdToUpdate = Number(targetCharId); // Pega o ID que o Mestre escolheu na lista
+      charIdToUpdate = Number(targetCharId);
     }
 
-    // Se não encontrou um ID válido (ex: o usuário não tem nenhuma ficha criada)
     if (!charIdToUpdate) {
        showToast("Crie ou selecione um personagem primeiro!", "error");
        return;
     }
 
     try {
-      // 2. Busca a ficha limpa direto da fonte
       const res = await fetch(`https://korzel-api.onrender.com/api/characters/${charIdToUpdate}`, { headers: getAuthHeaders() });
       
       if (res.ok) {
@@ -1048,7 +1024,6 @@ const handleMapMouseUp = async () => {
         charData.abilities = charData.abilities || [];
         charData.abilities.push(newAbility);
 
-        // 3. Salva a ficha com o poder novo
         const updateRes = await fetch(`https://korzel-api.onrender.com/api/characters/${charIdToUpdate}`, {
           method: 'PUT',
           headers: getAuthHeaders(),
@@ -1058,12 +1033,10 @@ const handleMapMouseUp = async () => {
         if (updateRes.ok) {
            showToast(`Poder [${newAbility.title}] forjado na ficha de ${charData.name}!`, "success");
            
-           // 4. Se a ficha alvo for a mesma que o jogador/mestre estava usando, atualiza a tela na hora!
            if (activeCharId === charIdToUpdate) {
              setAbilitiesList(prev => [...prev, newAbility]);
            }
            
-           // 5. Grita no rádio para os outros jogadores verem o poder novo do colega (se aplicável)
            if (connection && currentCampaignId) {
              connection.invoke("RefreshCharacters", currentCampaignId.toString()).catch(console.error);
            }
@@ -1075,11 +1048,17 @@ const handleMapMouseUp = async () => {
        showToast("Erro de conexão ao forjar poder.", "error");
     }
   };
+
+  // ==========================================
+  // 4. USE EFFECTS (EFEITOS E SIGNALR)
+  // ==========================================
+  useEffect(() => { localStorage.setItem('korzel_catalog', JSON.stringify(catalog)); }, [catalog]);
+  useEffect(() => { localStorage.setItem('korzel_token_library', JSON.stringify(tokenLibrary)); }, [tokenLibrary]);
+  
   useEffect(() => { if (audioRef.current) audioRef.current.volume = volume; }, [volume]);
   useEffect(() => { if (audioRef.current) audioRef.current.loop = isLooping; }, [isLooping]);
   useEffect(() => { if (audioRef.current) { if (isPlaying && activeAudioId) audioRef.current.play().catch(e => console.log("Erro áudio", e)); else audioRef.current.pause(); } }, [isPlaying, activeAudioId]);
   
-  // 👇 GATILHO REFRESH ADICIONADO AQUI 👇
   useEffect(() => { 
     if (authToken) fetchAllCharacters(); 
   }, [authToken, currentCampaignId, refreshTrigger]);
@@ -1087,28 +1066,31 @@ const handleMapMouseUp = async () => {
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder().withUrl("https://korzel-api.onrender.com/vtthub").withAutomaticReconnect().build();
     setConnection(newConnection);
- }, []);
+  }, []);
 
- // 👇 SISTEMA DE ESCUTA ATUALIZADO E RE-LIGADO CORRETAMENTE git 👇
+  useEffect(() => {
+    if (connection && currentCampaignId && loggedUserName) {
+      connection.invoke("JoinSession", currentCampaignId.toString(), loggedUserName)
+        .catch(console.error);
+    }
+  }, [loggedUserName, connection, currentCampaignId]);
+
   useEffect(() => {
     if (connection) {
       connection.start().then(() => {
         console.log("⚡ Conectado ao servidor de Korzel!");
         
-        // 1. Ouvir atualizações de fichas em tempo real (Sem precisar de F5!)
         connection.on("OnCharactersRefreshed", () => {
             console.log("📡 Sinal de fumaça recebido: Atualizando fichas dos jogadores...");
             setRefreshTrigger(prev => prev + 1);
         });
 
-        // 2. Ouvintes do Mapa e Peças
         connection.on("TokenAdded", (tokenJson) => { setSceneTokens(prev => [...prev, JSON.parse(tokenJson)]); });
         connection.on("TokenMoved", (tokenId, x, y) => { setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, x, y } : t)); });
         connection.on("TokenPermissionChanged", (tokenId, playerName) => { setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, controlledBy: playerName } : t)); });
         connection.on("TokenRemoved", (tokenId) => { setSceneTokens(prev => prev.filter(t => String(t.id) !== String(tokenId))); });
         connection.on("TokenSizeChanged", (tokenId, newSize) => { setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, size: newSize } : t)); });
         
-        // 3. Ouvintes de Sincronização Geral
         connection.on("PlayersPulled", (syncJson) => { 
           try {
             const data = JSON.parse(syncJson);
@@ -1129,27 +1111,21 @@ const handleMapMouseUp = async () => {
           } catch(e) {}
         });
 
-        // 4. Ouvintes do Chat e Rádio
         connection.on("ChatMessageReceived", (messageJson) => { setChatMessages(prev => [...prev, JSON.parse(messageJson)]); });
         connection.on("MusicStarted", (trackId) => { setActiveAudioId(trackId); setIsPlaying(true); });
         connection.on("MusicStopped", () => { setIsPlaying(false); });
 
-        // 👇 NOVAS ANTENAS: RADAR DE JOGADORES ONLINE E SYNC DE LOJA 👇
         connection.on("UpdatePlayerList", (playerList) => {
             setOnlinePlayers(playerList);
-            
-            // O Pulo do Gato: Se eu sou o Mestre, sempre que alguém entra/cai, 
-            // eu reenvio o MEU catálogo atualizado para garantir que os jogadores fiquem sincronizados.
             if (isMasterMode && currentCampaignId) {
-                // Usa um pequeno delay para garantir que o jogador terminou de carregar a tela
                 setTimeout(() => {
                     connection.invoke("UpdateCatalog", currentCampaignId.toString(), JSON.stringify(catalog))
                         .catch(console.error);
                 }, 1000);
             }
         });
+        
         connection.on("PlayerDisconnected", () => {
-            // Se alguém caiu, aviso o servidor que EU continuo aqui
             if (currentCampaignId) {
                 connection.invoke("JoinSession", currentCampaignId.toString(), loggedUserName).catch(console.error);
             }
@@ -1159,14 +1135,16 @@ const handleMapMouseUp = async () => {
             setCatalog(JSON.parse(catalogJson));
         });
 
-        // 🚨 Conexão inicial enviando o NOME do jogador para aparecer na bolinha:
         if (currentCampaignId) {
           connection.invoke("JoinSession", currentCampaignId.toString(), loggedUserName).catch(console.error);
         }
       }).catch(console.error);
     }
-  }, [connection, currentCampaignId, loggedUserName]); // <-- Adicionado loggedUserName aqui
+  }, [connection, currentCampaignId, loggedUserName]);
 
+  // ==========================================
+  // 5. PROPS DO VTT
+  // ==========================================
   const vttProps = {
     isMasterMode, currentCampaignId, charName, lascas, setLascas, sessionTab, setSessionTab, setCurrentPage, setSheetModalOpen, showToast,
     secretRoll, setSecretRoll, chatInput, setChatInput, chatMessages, setChatMessages, handleChatSubmit,
@@ -1186,6 +1164,9 @@ const handleMapMouseUp = async () => {
     skillsList, setSkillsList, campaignCharacters, loggedUserName, handleCreateNewCharacter, loadCharacterFromDb, handleDeleteCharacter, handleDeleteTokenFromScene, handleDeleteTokenFromLibrary
   };
 
+  // ==========================================
+  // 6. RENDERIZAÇÃO (JSX)
+  // ==========================================
   if (!authToken) {
     return (
       <div className="h-screen w-screen bg-[#0a0a0a] flex items-center justify-center font-sans" style={{ colorScheme: 'dark' }}>
