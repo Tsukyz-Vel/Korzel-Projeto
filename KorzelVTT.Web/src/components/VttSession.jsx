@@ -10,7 +10,7 @@ export default function VttSession(props) {
     handleMapWheel, handleDropOnMap, mapOffset, mapScale, currentSceneObj, sceneTokens, setSceneTokens, draggingToken,
     setDraggingToken, tokenContextMenu, setTokenContextMenu, setMapScale, setSheetModalOpen,
     bringToFront, sendToBack, assignPermission, toggleTokenStatus, connection,
-    onlinePlayers // 👈 Destruturado aqui para o VttSession poder ler as bolinhas
+    onlinePlayers
   } = props;
 
   const [activeTool, setActiveTool] = useState('select');
@@ -27,6 +27,13 @@ export default function VttSession(props) {
   const [currentFogPath, setCurrentFogPath] = useState(null);
   const [weather, setWeather] = useState('none'); 
   const [showWeatherMenu, setShowWeatherMenu] = useState(false);
+
+  // ==========================================
+  // ZOOM INICIAL 20%
+  // ==========================================
+  useEffect(() => {
+    setMapScale(0.2); // Força o zoom a 20% ao entrar na sessão
+  }, [setMapScale]);
 
   // ==========================================
   // OS "OUVIDOS" DAS FERRAMENTAS DO VTT
@@ -52,7 +59,6 @@ export default function VttSession(props) {
 
     connection.on("FogCleared", () => setFogPaths([]));
 
-    // Escutando o Mestre ligar/desligar a névoa
     connection.on("FogToggled", (isEnabled) => {
       setIsFogEnabled(isEnabled);
     });
@@ -75,18 +81,17 @@ export default function VttSession(props) {
   // ==========================================
   // AS "BOCAS" DAS AÇÕES RÁPIDAS
   // ==========================================
- const changeWeatherSync = (newWeather) => {
+  const changeWeatherSync = (newWeather) => {
     setWeather(newWeather);
-    // 👇 Troque "Sala_Principal" por currentCampaignId.toString()
     if (connection && currentCampaignId) connection.invoke("ChangeWeather", currentCampaignId.toString(), newWeather).catch(console.error);
   };
 
- const clearDrawingsSync = () => {
+  const clearDrawingsSync = () => {
     setDrawings([]);
     if (connection && currentCampaignId) connection.invoke("ClearDrawings", currentCampaignId.toString()).catch(console.error);
   };
 
- const clearFogSync = () => {
+  const clearFogSync = () => {
     setFogPaths([]);
     if (connection && currentCampaignId) connection.invoke("ClearFog", currentCampaignId.toString()).catch(console.error);
   };
@@ -192,7 +197,6 @@ export default function VttSession(props) {
       if (currentDrawing.length > 1) {
         const newDraw = { id: Date.now(), points: currentDrawing };
         setDrawings(prev => [...prev, newDraw]);
-        // BOCA: GRITA O DESENHO NO RÁDIO
         if (connection && currentCampaignId) connection.invoke("AddDrawing", currentCampaignId.toString(), JSON.stringify(newDraw)).catch(console.error);
       }
       setCurrentDrawing(null);
@@ -205,7 +209,6 @@ export default function VttSession(props) {
         newPath = { id: Date.now(), points: dot, type: fogMode, size: fogBrushSize };
       }
       setFogPaths(prev => [...prev, newPath]);
-      // BOCA: GRITA A NÉVOA NO RÁDIO
       if (connection && currentCampaignId) connection.invoke("AddFog", currentCampaignId.toString(), JSON.stringify(newPath)).catch(console.error);
       setCurrentFogPath(null);
     }
@@ -261,12 +264,10 @@ export default function VttSession(props) {
                 ) : (
                   <span className={`text-[10px] font-bold tracking-widest uppercase ${gmActiveSceneId === scene.id ? 'text-white' : 'text-zinc-500'}`}>{scene.name}</span>
                 )}
-                {/* 👇 BOTÃO DO OLHO ATUALIZADO 👇 */}
                <button onClick={(e) => { 
                   e.stopPropagation(); 
                   setPlayerActiveSceneId(scene.id); 
                   if (connection && currentCampaignId) {
-                    // 👇 O MESTRE EMPACOTA TUDO E ENVIA 👇
                    const syncData = { 
                         sceneId: scene.id, 
                         bgImage: scene.bgImage, 
@@ -279,7 +280,6 @@ export default function VttSession(props) {
               </div>
             ))}
             <button onClick={addNewScene} className="ml-2 w-8 h-8 flex items-center justify-center rounded border border-purple-800 text-purple-500 hover:bg-purple-900/50 transition-colors shrink-0">+</button>
-            {/* 👇 ADICIONE ISTO AQUI 👇 */}
             <div className="ml-auto flex items-center gap-2 bg-black/60 px-3 py-1 rounded border border-zinc-800 shrink-0" title="Personagens registrados nesta campanha">
                 <span className="text-xs">👥</span>
                 <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{props.savedCharacters?.length || 0} Aventureiros</span>
@@ -409,23 +409,15 @@ export default function VttSession(props) {
                  dropShadowImg = "drop-shadow-[0_0_15px_rgba(34,197,94,0.9)]";
               }
 
-              const baseColorClasses = token.isNpc ? "bg-red-950 border-red-500" : "bg-blue-950 border-blue-400";
-
             return (
         <div 
           key={token.id} 
           onMouseDown={(e) => { 
             if (activeTool === 'select' && !isSpacePressed) { 
               e.stopPropagation(); 
-              
-              // NORMALIZAÇÃO PARA COMPARAR (Tudo minúsculo e sem espaços)
               const dono = token.controlledBy ? token.controlledBy.toString().trim().toLowerCase() : "";
               const jogador = loggedUserName ? loggedUserName.toString().trim().toLowerCase() : "";
-              
               const podeControlar = isMasterMode || (dono !== "" && dono === jogador);
-              
-              console.log(`Debug Token: Nome=${token.name} | DonoEsperado=${dono} | JogadorLogado=${jogador} | Pode=${podeControlar}`);
-              
               if (podeControlar) {
                 setDraggingToken(token.id); 
               } else {
@@ -444,9 +436,11 @@ export default function VttSession(props) {
                     <span className={`text-white text-xl font-bold pointer-events-none ${token.flipX ? '-scale-x-100 block' : ''}`}>{token.name.charAt(0)}</span>
                   )}
                   {statuses.length > 0 && (
-                    <div className="absolute -top-3 -right-3 flex gap-1 pointer-events-none z-20">
+                    <div className="absolute -top-3 -right-3 flex flex-row-reverse flex-nowrap whitespace-nowrap gap-1 pointer-events-none z-20">
                       {isBleeding && <span className="bg-black/80 rounded-full p-1.5 text-xs sm:text-sm leading-none border border-red-900 shadow-md">🩸</span>}
                       {isPoisoned && <span className="bg-black/80 rounded-full p-1.5 text-xs sm:text-sm leading-none border border-green-900 shadow-md">☠️</span>}
+                      {/* 👇 Renderiza Camuflagem Corretamente 👇 */}
+                      {isCamouflaged && <span className="bg-black/80 rounded-full p-1.5 text-xs sm:text-sm leading-none border border-zinc-500 shadow-md">🌫️</span>}
                     </div>
                   )}
                 </div>
@@ -483,7 +477,6 @@ export default function VttSession(props) {
             </button>
           )}
 
-          {/* 🟢 JOGADORES ONLINE (ESTILO ROLL20) 🟢 */}
           {onlinePlayers && onlinePlayers.length > 0 && (
             <div className="absolute bottom-6 left-6 z-40 flex items-center gap-3 bg-black/60 backdrop-blur-md p-3 rounded-full border border-zinc-800 shadow-2xl">
               {onlinePlayers.map((player, idx) => (

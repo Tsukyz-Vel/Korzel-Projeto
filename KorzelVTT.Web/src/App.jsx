@@ -144,7 +144,7 @@ export default function App() {
 
   const [sceneTokens, setSceneTokens] = useState([]);
   const [fichaSearch, setFichaSearch] = useState('');
-  const [mapScale, setMapScale] = useState(1);
+  const [mapScale, setMapScale] = useState(0.2);
   const [mapOffset, setMapOffset] = useState({ x: -800, y: -800 }); 
   const [isDraggingMap, setIsDraggingMap] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -1057,7 +1057,7 @@ export default function App() {
   useEffect(() => { if (audioRef.current) audioRef.current.volume = volume; }, [volume]);
   useEffect(() => { if (audioRef.current) audioRef.current.loop = isLooping; }, [isLooping]);
  // 🟢 NOVO CONTROLE DE ÁUDIO BLINDADO CONTRA CACHE 🟢
-  useEffect(() => { 
+ useEffect(() => { 
     if (audioRef.current) { 
       // O SEGREDO: Se o ID da música mudou, obriga o navegador a "cuspir" a música antiga e carregar a nova do link
       if (activeAudioId !== lastPlayedAudioId.current) {
@@ -1073,7 +1073,12 @@ export default function App() {
       } 
     } 
   }, [isPlaying, activeAudioId]);
-  
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
   useEffect(() => { 
     if (authToken) fetchAllCharacters(); 
   }, [authToken, currentCampaignId, refreshTrigger]);
@@ -1109,7 +1114,10 @@ export default function App() {
     connection.on("TokenPermissionChanged", (tokenId, playerName) => setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, controlledBy: playerName } : t)));
     connection.on("TokenRemoved", (tokenId) => setSceneTokens(prev => prev.filter(t => String(t.id) !== String(tokenId))));
     connection.on("TokenSizeChanged", (tokenId, newSize) => setSceneTokens(prev => prev.map(t => String(t.id) === String(tokenId) ? { ...t, size: newSize } : t)));
-    
+    connection.on("TokenUpdated", (tokenJson) => {
+        const updatedToken = JSON.parse(tokenJson);
+        setSceneTokens(prev => prev.map(t => String(t.id) === String(updatedToken.id) ? updatedToken : t));
+    });
     connection.on("PlayersPulled", (syncJson) => { 
       try {
         const data = JSON.parse(syncJson);
