@@ -1066,27 +1066,39 @@ export default function App() {
   
   
   useEffect(() => { if (audioRef.current) audioRef.current.loop = isLooping; }, [isLooping]);
-// 🟢 CONTROLE SUPREMO DE ÁUDIO (PLAY, PAUSE E VOLUME) 🟢
- useEffect(() => { 
+// 🟢 1. CÉREBRO DE TROCA DE MÚSICA E PLAY/PAUSE
+  useEffect(() => { 
     if (audioRef.current) { 
-      // 1. Lida com a troca de música e o cache
+      // Se a música mudou, injetamos a URL direto na veia do navegador antes do HTML atualizar
       if (activeAudioId !== lastPlayedAudioId.current) {
+        const trackUrl = audioCategories.flatMap(c => c.tracks).find(t => t.id === activeAudioId)?.url;
+        if (trackUrl) {
+           audioRef.current.src = trackUrl; // Força a URL nova instantaneamente
+        }
         audioRef.current.load();
         lastPlayedAudioId.current = activeAudioId;
       }
 
-      // 2. Crava o volume em tempo real convertendo pra Número exato
-      audioRef.current.volume = Number(volume);
-
-      // 3. Dá o Play ou Pause
+      // Toca ou Pausa
       if (isPlaying && activeAudioId) { 
-        audioRef.current.play().catch(e => console.log("Erro áudio", e)); 
+        // O Promise catch evita erros no console se a internet der um pico
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+           playPromise.catch(e => console.log("Aguardando carregamento de áudio...", e));
+        }
       } else { 
         audioRef.current.pause(); 
       } 
     } 
-  }, [isPlaying, activeAudioId, volume]); // 👈 Incluir o 'volume' aqui é o que faz a barrinha funcionar em tempo real
-  
+  }, [isPlaying, activeAudioId, audioCategories]); // 👈 Cérebro apenas para play e pausa, SEM o volume.
+
+  // 🟢 2. CÉREBRO EXCLUSIVO DA BARRINHA DE VOLUME
+  useEffect(() => {
+    if (audioRef.current) {
+      // Força a conversão pra número e aplica em tempo real
+      audioRef.current.volume = Number(volume);
+    }
+  }, [volume]); // 👈 Reage imediatamente a cada milímetro que você arrastar a barrinha
   useEffect(() => { 
     if (authToken) fetchAllCharacters(); 
   }, [authToken, currentCampaignId, refreshTrigger]);
