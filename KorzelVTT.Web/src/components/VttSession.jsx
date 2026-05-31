@@ -407,7 +407,8 @@ export default function VttSession(props) {
               const isCamouflaged = statuses.includes('camouflaged');
               
               // 👇 1. FAÇA A MATEMÁTICA AQUI FORA DE FORMA NORMAL
-              const statusSize = Math.max(16, (token.size || 80) * 0.25);
+              // Agora o ícone terá apenas 12% do tamanho do token
+              const statusSize = Math.max(16, (token.size || 80) * 0.12);
               
               let shadowClass = "shadow-[0_5px_10px_rgba(0,0,0,0.8)]";
               let dropShadowImg = "drop-shadow-[0_5px_10px_rgba(0,0,0,0.8)]";
@@ -548,9 +549,9 @@ export default function VttSession(props) {
           )}
           <div className="border-t border-[#3e2723] my-1"></div>
           <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest px-3 py-1 mb-1 block">Condições</span>
-          <button onClick={() => toggleTokenStatus('bleeding')} className="text-left px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-zinc-500 rounded transition-colors">🩸 Sangrando</button>
-          <button onClick={() => toggleTokenStatus('poisoned')} className="text-left px-3 py-1.5 text-xs font-bold text-green-400 hover:bg-zinc-500 rounded transition-colors">☠️ Envenenado</button>
-          <button onClick={() => toggleTokenStatus('camouflaged')} className="text-left px-3 py-1.5 text-xs font-bold text-zinc-400 hover:bg-zinc-500 rounded transition-colors">🌫️ Camuflado</button>
+          <button onClick={() => toggleTokenStatus('bleeding')} className="text-left px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-zinc-800 rounded transition-colors">🩸 Sangrando</button>
+          <button onClick={() => toggleTokenStatus('poisoned')} className="text-left px-3 py-1.5 text-xs font-bold text-green-400 hover:bg-zinc-800 rounded transition-colors">☠️ Envenenado</button>
+          <button onClick={() => toggleTokenStatus('camouflaged')} className="text-left px-3 py-1.5 text-xs font-bold text-zinc-400 hover:bg-zinc-800 rounded transition-colors">🌫️ Camuflado</button>
         </div>
       )}
     </div>
