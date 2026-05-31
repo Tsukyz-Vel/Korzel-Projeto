@@ -221,7 +221,10 @@ export default function App() {
     setSessionTab('chat'); 
     setCurrentPage('sessao');
     setMapScale(0.2);
-    setMapOffset({ x: 0, y: 0 });
+   setMapOffset({ 
+        x: (window.innerWidth / 2) - 300, 
+        y: (window.innerHeight / 2) - 300 
+    });
     if (connection && campaignId) { 
       connection.invoke("JoinSession", campaignId.toString(), loggedUserName).catch(console.error); 
     }
@@ -1061,31 +1064,29 @@ export default function App() {
   useEffect(() => { localStorage.setItem('korzel_catalog', JSON.stringify(catalog)); }, [catalog]);
   useEffect(() => { localStorage.setItem('korzel_token_library', JSON.stringify(tokenLibrary)); }, [tokenLibrary]);
   
-  useEffect(() => { if (audioRef.current) audioRef.current.volume = volume; }, [volume]);
+  
   useEffect(() => { if (audioRef.current) audioRef.current.loop = isLooping; }, [isLooping]);
- // 🟢 NOVO CONTROLE DE ÁUDIO BLINDADO CONTRA CACHE 🟢
+// 🟢 CONTROLE SUPREMO DE ÁUDIO (PLAY, PAUSE E VOLUME) 🟢
  useEffect(() => { 
     if (audioRef.current) { 
-      // O SEGREDO: Se o ID da música mudou, obriga o navegador a "cuspir" a música antiga e carregar a nova do link
+      // 1. Lida com a troca de música e o cache
       if (activeAudioId !== lastPlayedAudioId.current) {
         audioRef.current.load();
         lastPlayedAudioId.current = activeAudioId;
       }
 
-      // Dá o play ou pausa normalmente
+      // 2. Crava o volume em tempo real convertendo pra Número exato
+      audioRef.current.volume = Number(volume);
+
+      // 3. Dá o Play ou Pause
       if (isPlaying && activeAudioId) { 
         audioRef.current.play().catch(e => console.log("Erro áudio", e)); 
       } else { 
         audioRef.current.pause(); 
       } 
     } 
-  }, [isPlaying, activeAudioId]);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-    }
-  }, [volume]);
+  }, [isPlaying, activeAudioId, volume]); // 👈 Incluir o 'volume' aqui é o que faz a barrinha funcionar em tempo real
+  
   useEffect(() => { 
     if (authToken) fetchAllCharacters(); 
   }, [authToken, currentCampaignId, refreshTrigger]);
