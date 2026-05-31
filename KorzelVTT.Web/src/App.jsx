@@ -109,16 +109,22 @@ export default function App() {
   const [editingItemIndex, setEditingItemIndex] = useState(null);
   const [itemForm, setItemForm] = useState(initialItemState);
 
-  // 👇 LOJA MÁGICA QUE SALVA E GRITA PARA TODOS 👇
   const [catalog, setCatalog] = useState(() => {
     try { 
       const saved = localStorage.getItem('korzel_catalog'); 
-      return saved ? JSON.parse(saved) : initialLojaCatalog; 
+      return saved ? JSON.parse(saved) : []; 
     } catch { 
-      return initialLojaCatalog;
+      return [];
     }
   });
-
+// 👇 NOVO: Avisa o servidor na hora se o jogador mudar de nome
+  useEffect(() => {
+    if (connection && currentCampaignId && loggedUserName) {
+      // Reenvia o comando JoinSession para o servidor atualizar a bolinha com o novo nome
+      connection.invoke("JoinSession", currentCampaignId.toString(), loggedUserName)
+        .catch(console.error);
+    }
+  }, [loggedUserName, connection, currentCampaignId]);
   useEffect(() => { localStorage.setItem('korzel_catalog', JSON.stringify(catalog)); }, [catalog]);
   
   const [showCatalogForm, setShowCatalogForm] = useState(false);
@@ -323,17 +329,28 @@ export default function App() {
     } catch (error) { showToast("Erro conexão.", "error"); }
   };
 
-  const handleDeleteCharacter = async (id, name) => { 
-    if (window.confirm(`Apagar ficha de ${name}?`)) { 
+ const handleDeleteCharacter = async (id, name) => { 
+    if (window.confirm(`Tem certeza que deseja apagar definitivamente a ficha de ${name}?`)) { 
       try { 
-        const res = await fetch(`https://korzel-api.onrender.com/api/characters/${id}`, { method: 'DELETE', headers: getAuthHeaders() }); 
+        const res = await fetch(`https://korzel-api.onrender.com/api/characters/${id}`, { 
+          method: 'DELETE', 
+          headers: getAuthHeaders() 
+        }); 
+        
         if (res.ok) { 
-          showToast("Excluída!", "success"); 
+          showToast("Ficha excluída com sucesso!", "success"); 
           fetchAllCharacters(); 
           if (activeCharId === id) handleCreateNewCharacter(); 
-          if (connection && currentCampaignId) connection.invoke("RefreshCharacters", currentCampaignId.toString()).catch(console.error);
-        } 
-      } catch (error) {} 
+          // Grita no SignalR para atualizar a tela de todo mundo
+          if (connection && currentCampaignId) {
+             connection.invoke("RefreshCharacters", currentCampaignId.toString()).catch(console.error);
+          }
+        } else {
+          showToast("Erro: Apenas o Mestre ou o dono da ficha podem apagá-la.", "error");
+        }
+      } catch (error) { 
+        showToast("Erro de conexão ao tentar apagar a ficha.", "error");
+      } 
     } 
   };
   
@@ -880,39 +897,86 @@ const handleMapMouseUp = async () => {
       setTokenContextMenu({ ...tokenContextMenu, show: false });
     }
   };
-  const toggleTokenStatus = (statusName) => { if (!tokenContextMenu.tokenId) return; setSceneTokens(prev => prev.map(t => { if (t.id === tokenContextMenu.tokenId) { const currentStatuses = t.statuses || []; const newStatuses = currentStatuses.includes(statusName) ? currentStatuses.filter(s => s !== statusName) : [...currentStatuses, statusName]; return { ...t, statuses: newStatuses }; } return t; })); setTokenContextMenu({ ...tokenContextMenu, show: false }); };
-  const handleAudioUpload = (e) => { 
-    const file = e.target.files[0]; 
-    if (file && currentCampaignId) { 
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const base64Audio = event.target.result;
+  const toggleTokenStatus = async (statusName) => { 
+    if (!tokenContextMenu.tokenId) return; 
+
+    let tokenAtualizado = null;
+
+    // 1. Atualiza a tela imediatamente (Interface Otimista)
+    setSceneTokens(prev => prev.map(t => { 
+      if (t.id === tokenContextMenu.tokenId) { 
+        const currentStatuses = t.statuses || []; 
+        const newStatuses = currentStatuses.includes(statusName) 
+          ? currentStatuses.filter(s => s !== statusName) 
+          : [...currentStatuses, statusName]; 
         
-        const newTrackData = {
-          campaignId: currentCampaignId,
-          name: file.name,
-          category: targetAudioCat,
-          base64Data: base64Audio
-        };
+        tokenAtualizado = { ...t, statuses: newStatuses };
+        return tokenAtualizado; 
+      } 
+      return t; 
+    })); 
+    
+    setTokenContextMenu({ ...tokenContextMenu, show: false }); 
 
-        try {
-          const res = await fetch('https://korzel-api.onrender.com/api/audio', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(newTrackData)
-          });
+    // 2. Salva no banco e avisa os outros jogadores
+    if (tokenAtualizado) {
+      try {
+        // Envia para a API salvar no banco (Certifique-se de que a URL é a do Render)
+        await fetch(`https://korzel-api.onrender.com/api/scenes/tokens/${tokenAtualizado.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(tokenAtualizado)
+        });
 
-          if (res.ok) {
-            const savedTrack = await res.json();
-            // Atualiza a tela com a música que veio do banco
-            setAudioCategories(prev => prev.map(cat => cat.id === targetAudioCat ? { ...cat, tracks: [...cat.tracks, { id: savedTrack.id, name: savedTrack.name, url: base64Audio }] } : cat));
-            showToast("Música adicionada à campanha!", "success");
-          }
-        } catch (err) { console.error("Erro ao subir áudio", err); }
+        // Tenta enviar para o SignalR para os outros jogadores verem na hora
+        if (connection && currentCampaignId) { 
+          // Nota: O seu back-end C# precisa ter um método no Hub preparado para repassar essa informação!
+          connection.invoke("UpdateToken", currentCampaignId.toString(), JSON.stringify(tokenAtualizado)).catch(console.error); 
+        }
+      } catch (e) {
+        console.error("Erro ao salvar o status da peça:", e);
+      }
+    }
+  };
+
+  const handleAudioUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64Audio = event.target.result;
+      const newTrack = {
+        campaignId: currentCampaignId,
+        name: file.name,
+        category: targetAudioCat,
+        base64Data: base64Audio
       };
-      reader.readAsDataURL(file); // Lê o MP3/OGG e converte para texto Base64
-    } 
-    e.target.value = null; 
+
+      try {
+        const res = await fetch(`https://korzel-api.onrender.com/api/audio`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(newTrack)
+        });
+
+        if (res.ok) {
+          const savedTrack = await res.json();
+          setAudioCategories(prev => prev.map(cat =>
+            cat.id === targetAudioCat
+              ? { ...cat, tracks: [...cat.tracks, { id: savedTrack.id, name: savedTrack.name, url: savedTrack.base64Data }] }
+              : cat
+          ));
+          showToast("🎵 Música adicionada à campanha!", "success");
+        } else {
+          showToast(`Erro ao salvar música (Erro ${res.status})`, "error");
+        }
+      } catch (err) {
+        console.error("Erro no upload de áudio:", err);
+        showToast("Falha na conexão ao enviar o áudio.", "error");
+      }
+    };
+    reader.readAsDataURL(file);
   };
   const handleDeleteAudioTrack = async (trackId, catId) => {
     if (!window.confirm("Deseja banir esta música da sua campanha para sempre?")) return;
@@ -1070,11 +1134,20 @@ const handleMapMouseUp = async () => {
         connection.on("MusicStarted", (trackId) => { setActiveAudioId(trackId); setIsPlaying(true); });
         connection.on("MusicStopped", () => { setIsPlaying(false); });
 
-        // 👇 5. NOVAS ANTENAS: RADAR DE JOGADORES ONLINE 👇
+        // 👇 NOVAS ANTENAS: RADAR DE JOGADORES ONLINE E SYNC DE LOJA 👇
         connection.on("UpdatePlayerList", (playerList) => {
             setOnlinePlayers(playerList);
+            
+            // O Pulo do Gato: Se eu sou o Mestre, sempre que alguém entra/cai, 
+            // eu reenvio o MEU catálogo atualizado para garantir que os jogadores fiquem sincronizados.
+            if (isMasterMode && currentCampaignId) {
+                // Usa um pequeno delay para garantir que o jogador terminou de carregar a tela
+                setTimeout(() => {
+                    connection.invoke("UpdateCatalog", currentCampaignId.toString(), JSON.stringify(catalog))
+                        .catch(console.error);
+                }, 1000);
+            }
         });
-
         connection.on("PlayerDisconnected", () => {
             // Se alguém caiu, aviso o servidor que EU continuo aqui
             if (currentCampaignId) {
