@@ -179,22 +179,28 @@ export default function SessionSidebar(props) {
                       {activeAudioId === track.id && (
                         <div className="flex items-center gap-3 border-t border-amber-900/30 pt-2 animate-fade-in">
                           <span className="text-xs">🔈</span>
-                         <input 
-                              type="range" 
-                              min="0" max="1" step="0.05" 
-                              value={volume} 
-                              onChange={(e) => {
-                                // Força o valor a ser interpretado como um número quebrado
-                                const novoVolume = parseFloat(e.target.value);
-                                setVolume(novoVolume); 
-                                
-                                // Dispara a mudança em tempo real para os jogadores
-                                if (isMasterMode && connection && currentCampaignId) {
-                                  connection.invoke("ChangeVolume", currentCampaignId.toString(), novoVolume).catch(console.error);
-                                }
-                              }} 
-                              className="w-full h-1 bg-amber-950 rounded-lg appearance-none cursor-pointer accent-amber-500" 
-                            />
+                        <input 
+                            type="range" 
+                            min="0" max="1" step="0.05" 
+                            value={volume} 
+                            onChange={(e) => {
+                              // 1. Atualiza só para o Mestre instantaneamente (sem enviar pra rede)
+                              setVolume(parseFloat(e.target.value)); 
+                            }} 
+                            onMouseUp={(e) => {
+                              // 2. Avisa os jogadores APENAS quando você soltar o clique!
+                              if (isMasterMode && connection && currentCampaignId) {
+                                connection.invoke("ChangeVolume", currentCampaignId.toString(), parseFloat(e.target.value)).catch(console.error);
+                              }
+                            }}
+                            onTouchEnd={(e) => {
+                              // 3. Mesma coisa, mas para telas de celular/tablet
+                              if (isMasterMode && connection && currentCampaignId) {
+                                connection.invoke("ChangeVolume", currentCampaignId.toString(), parseFloat(e.target.value)).catch(console.error);
+                              }
+                            }}
+                            className="w-full h-1 bg-amber-950 rounded-lg appearance-none cursor-pointer accent-amber-500" 
+                          />
                         </div>
                       )}
                     </div>

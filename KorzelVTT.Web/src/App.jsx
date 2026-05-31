@@ -941,12 +941,18 @@ export default function App() {
       });
       if (res.ok) {
         const savedTrack = await res.json();
+        const novoAudio = { id: savedTrack.id, name: savedTrack.name, url: savedTrack.base64Data }; // Criamos o objeto limpo
+
         setAudioCategories(prev => prev.map(cat =>
-          cat.id === targetAudioCat
-            ? { ...cat, tracks: [...cat.tracks, { id: savedTrack.id, name: savedTrack.name, url: savedTrack.base64Data }] }
-            : cat
+          cat.id === targetAudioCat ? { ...cat, tracks: [...cat.tracks, novoAudio] } : cat
         ));
-        showToast("🎵 Link de música fixado!", "success");
+        
+        // 👇 A MÁGICA: Grita pro rádio que a música chegou, sem precisar de F5! 👇
+        if (connection && currentCampaignId) {
+          connection.invoke("AddAudioTrack", currentCampaignId.toString(), targetAudioCat, JSON.stringify(novoAudio)).catch(console.error);
+        }
+
+        showToast("🎵 Link adicionado e sincronizado!", "success");
       }
     } catch (err) { showToast("Falha na conexão.", "error"); }
   };
@@ -1135,6 +1141,19 @@ export default function App() {
     connection.on("CatalogUpdated", (catalogJson) => setCatalog(JSON.parse(catalogJson)));
     connection.on("VolumeChanged", (newVolume) => {
         setVolume(newVolume);
+    });
+    connection.on("AudioAdded", (categoryId, trackJson) => {
+        const newTrack = JSON.parse(trackJson);
+        setAudioCategories(prev => prev.map(cat => 
+            cat.id === categoryId ? { ...cat, tracks: [...cat.tracks, newTrack] } : cat
+        ));
+    });
+
+    // Ouvindo quando o mestre deleta uma música
+    connection.on("AudioRemoved", (categoryId, trackId) => {
+        setAudioCategories(prev => prev.map(cat => 
+            cat.id === categoryId ? { ...cat, tracks: cat.tracks.filter(t => t.id !== trackId) } : cat
+        ));
     });
   }, [connection]); // 👈 A mágica: dependência apenas na conexão. Não recarrega nunca mais.
 
