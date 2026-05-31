@@ -85,19 +85,25 @@ export default function CharacterSheet({
       }
 
       if (costStr.includes('pe') || costStr.includes('esforço')) {
-        if (pe < costNum) { alert(`Você precisa de ${costNum} PE para ativar ${ability.title}!`); return; }
+        if (pe < costNum) { 
+          if(showToast) showToast(`Você precisa de ${costNum} PE para ativar ${ability.title}!`, "error"); 
+          return; 
+        }
         setPe(prev => prev - costNum);
+        if(showToast && costNum > 0) showToast(`⚡ Gastou ${costNum} PE para ativar ${ability.title}`, "info");
       } else if (costStr.includes('pv') || costStr.includes('vida') || costStr.includes('sangue')) {
-        if (hp <= costNum) { alert(`Aviso: O custo rolado foi ${costNum} PV. Ativar isso mataria você!`); return; }
+        if (hp <= costNum) { 
+          if(showToast) showToast(`Aviso: O custo rolado foi ${costNum} PV. Ativar isso mataria você!`, "error"); 
+          return; 
+        }
         setHp(prev => prev - costNum);
+        if(showToast && costNum > 0) showToast(`🩸 Sofreu ${costNum} de dano para ativar ${ability.title}`, "warning");
       }
 
-      // ✅ ENVIE USANDO O currentCampaignId
-        if (connection && currentCampaignId) {
-          connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMsg)).catch(console.error);
-          }
+      setActiveToggles(prev => [...prev, ability.title]);
 
-      if (setChatMessages) {
+      // 👇 2. MONTANDO E ENVIANDO A MENSAGEM PRO SERVIDOR
+      if (connection) {
         const tipoCusto = costStr.includes('pv') || costStr.includes('vida') ? 'PV' : costStr.includes('pe') ? 'PE' : '';
         const textoCusto = costNum > 0 ? `\n🩸 Custo Pago: ${costNum} ${tipoCusto}${rollDetails}` : '';
 
@@ -107,9 +113,12 @@ export default function CharacterSheet({
           type: "msg",
           text: `⚡ Ativou Poder: **${ability.title}**${textoCusto}\n*${ability.description}*`
         };
-        setChatMessages(prev => [...prev, newMsg]);
-        if (connection) {
-          connection.invoke("SendChatMessage", "Sala_Principal", JSON.stringify(newMsg)).catch(console.error);
+
+        // Usa o currentCampaignId que vem por prop. Se não existir, avisa no console.
+        if (currentCampaignId) {
+          connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMsg)).catch(console.error);
+        } else {
+          console.error("ERRO: currentCampaignId não chegou na CharacterSheet!");
         }
       }
     }
