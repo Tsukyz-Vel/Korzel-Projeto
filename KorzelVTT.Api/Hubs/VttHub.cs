@@ -189,5 +189,11 @@ namespace KorzelVTT.Api.Hubs
         {
             await Clients.OthersInGroup(sessionId).SendAsync("FogToggled", isEnabled);
         }
+
+        public async Task ChangeVolume(string campaignId, float newVolume)
+        {
+            // O Mestre avisa todos os outros jogadores na sala para mudarem o volume
+            await Clients.OthersInGroup(campaignId).SendAsync("VolumeChanged", newVolume);
+        }
     }
 }

@@ -82,6 +82,7 @@ public class CharactersController : ControllerBase
         int userId = GetCurrentUserId();
 
         var character = await _context.Characters
+            .AsNoTracking()
             .Include(c => c.Skills)
             .Include(c => c.Inventory)
             .Include(c => c.Weapons)
