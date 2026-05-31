@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 export default function SessionSidebar(props) {
-  // Desestruturando o "pacotão" de props que vai chegar do App.jsx
   const {
     isMasterMode, sessionTab, setSessionTab, charName, chatInput, setChatInput, chatMessages,
     secretRoll, setSecretRoll, handleChatSubmit, currentSceneObj, sceneTokens, setSceneTokens,
@@ -13,13 +12,11 @@ export default function SessionSidebar(props) {
     lascas, catalog, buyQuantities, updateBuyQty, handleBuyItem, showCatalogForm, setShowCatalogForm,
     editingCatalogIndex, catalogForm, setCatalogForm, handleEditCatalogItem, handleDeleteCatalogItem,
     handleSaveCatalogItem, handleDeleteTokenFromScene, handleDeleteTokenFromLibrary,
-    
-    // 👇 AS PROPS DO BANCO DE DADOS 👇
-    campaignCharacters, handleCreateNewCharacter, loadCharacterFromDb, handleDeleteCharacter
+    campaignCharacters, handleCreateNewCharacter, loadCharacterFromDb, handleDeleteCharacter,
+    handleAddAudioLink // 👈 Função nova desestruturada aqui!
   } = props;
  
   const [targetBuyerId, setTargetBuyerId] = useState('active');
-  
   const [tokenSearch, setTokenSearch] = useState("");
 
   return (
@@ -139,7 +136,7 @@ export default function SessionSidebar(props) {
         </div>
       )}
 
-   {/* 2. ABA ÁUDIO (Apenas Mestre) */}
+      {/* 2. ABA ÁUDIO (Apenas Mestre) */}
       {isMasterMode && sessionTab === 'áudio' && (
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 min-h-0">
           <div className="flex justify-between items-center border-b border-zinc-800 pb-2 shrink-0">
@@ -149,7 +146,18 @@ export default function SessionSidebar(props) {
               <input type="checkbox" checked={isLooping} onChange={e=>setIsLooping(e.target.checked)} className="accent-amber-500 w-3 h-3" />
             </label>
           </div>
+          
+          {/* 👇 NOVOS BOTÕES DE UPLOAD / LINK 👇 */}
+          <div className="flex gap-2 mb-2 shrink-0">
+            <button onClick={() => audioFileInputRef.current.click()} className="flex-1 bg-amber-900/50 hover:bg-amber-800 text-amber-200 text-[9px] font-bold uppercase tracking-widest py-2 rounded transition-colors border border-amber-700">
+              📁 Upar Arquivo
+            </button>
+            <button onClick={handleAddAudioLink} className="flex-1 bg-purple-900/50 hover:bg-purple-800 text-purple-200 text-[9px] font-bold uppercase tracking-widest py-2 rounded border border-purple-700 transition-colors">
+              🔗 Usar Link
+            </button>
+          </div>
           <input type="file" ref={audioFileInputRef} onChange={handleAudioUpload} accept="audio/*" className="hidden" />
+
           <div className="flex flex-col gap-4">
             {audioCategories.map(category => (
               <div key={category.id} className="flex flex-col gap-2">
@@ -168,8 +176,7 @@ export default function SessionSidebar(props) {
                           {track.name}
                         </span>
                         
-                                        <div className="flex items-center gap-3">
-                          {/* 👇 TRAVA REMOVIDA! Agora a lixeira aparece em QUALQUER pasta para o Mestre 👇 */}
+                        <div className="flex items-center gap-3">
                           {isMasterMode && (
                             <button 
                               onClick={() => props.handleDeleteAudioTrack(track.id, category.id)} 
@@ -223,7 +230,6 @@ export default function SessionSidebar(props) {
             {(() => {
               const filteredChars = (campaignCharacters || []).filter(c => (c.name || "").toLowerCase().includes((fichaSearch || "").toLowerCase()));
 
-              // Preparamos a separação. (Em breve o C# enviará a flag 'isMine')
               const playerSheets = filteredChars.filter(c => c.isMine === false);
               const mySheets = filteredChars.filter(c => c.isMine !== false); 
 
@@ -259,7 +265,6 @@ export default function SessionSidebar(props) {
                             <button onClick={() => loadCharacterFromDb(char.id)} className="flex-1 bg-blue-950/40 hover:bg-blue-900 text-blue-300 border border-blue-900 text-[9px] uppercase font-bold tracking-widest py-2 rounded transition-colors">
                               📖 Inspecionar
                             </button>
-                            {/* O mestre inspeciona, mas não pode deletar a ficha do jogador aqui */}
                           </div>
                         </div>
                       ))}
@@ -300,7 +305,8 @@ export default function SessionSidebar(props) {
           </div>
         </div>
       )}
-     {/* 4. ABA LOJA */}
+      
+      {/* 4. ABA LOJA */}
       {props.sessionTab === 'loja' && (
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 min-h-0">
           <div className="bg-amber-950/20 border border-amber-900/50 p-3 rounded-lg flex justify-between items-center shadow-inner shrink-0">
@@ -308,7 +314,6 @@ export default function SessionSidebar(props) {
             <span className="text-lg font-bold text-amber-500">🪙 {props.lascas || 0}</span>
           </div>
           
-          {/* 👇 BOTÃO E FORMULÁRIO DO MESTRE 👇 */}
           {props.isMasterMode && !props.showCatalogForm && (
             <button onClick={props.handleOpenNewCatalogItem} className="w-full shrink-0 bg-purple-900/50 hover:bg-purple-800 text-purple-200 text-[10px] font-bold uppercase tracking-widest py-2 rounded transition-colors border border-purple-700 shadow-md">
               + Adicionar Produto
@@ -342,7 +347,6 @@ export default function SessionSidebar(props) {
               return (
                 <div key={index} className="bg-black/40 border border-[#3e2723] rounded p-3 flex flex-col gap-2 relative group hover:border-amber-700/80 transition-colors shadow-sm shrink-0">
                   
-                  {/* 👇 BOTÕES DE EDITAR/DELETAR DO MESTRE 👇 */}
                   {props.isMasterMode && (
                     <div className="absolute top-2 right-2 flex gap-2">
                       <button onClick={() => props.handleEditCatalogItem(index)} className="text-[10px] opacity-40 hover:opacity-100 hover:text-purple-400 transition-opacity" title="Editar Produto">✏️</button>
@@ -360,7 +364,6 @@ export default function SessionSidebar(props) {
                     <span className="text-amber-500 font-bold text-sm">{item.price} Lc</span>
                     
                     <div className="flex flex-col gap-1 items-end">
-                       {/* 👇 SELETOR DE QUEM ESTÁ A COMPRAR 👇 */}
                        <select 
                          id={`buy-target-${index}`}
                          className="bg-zinc-950 border border-zinc-800 text-[9px] text-zinc-300 rounded px-1 py-1 mb-1 outline-none cursor-pointer max-w-[140px]"
@@ -378,7 +381,6 @@ export default function SessionSidebar(props) {
                            <button onClick={() => props.updateBuyQty(index, 1)} className="px-2 py-0.5 text-zinc-400 hover:text-white">+</button>
                          </div>
                          
-                         {/* 👇 CHAMA A FUNÇÃO PUXANDO O ID DO SELECT 👇 */}
                          <button 
                            onClick={() => {
                               const targetSelect = document.getElementById(`buy-target-${index}`);

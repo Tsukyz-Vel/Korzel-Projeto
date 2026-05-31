@@ -391,7 +391,7 @@ export default function App() {
         }
 
         setRollModal(prev => ({ ...prev, isRolling: false, total: total, detail: detailText }));
-      }, 1000);
+      }, 200);
       return;
     }
 
@@ -959,6 +959,42 @@ export default function App() {
     reader.readAsDataURL(file);
   };
 
+  const handleAddAudioLink = async () => {
+    const url = window.prompt("Insira o link direto do áudio (ex: final .mp3) ou stream:");
+    if (!url) return;
+    const name = window.prompt("Nome da música:");
+    if (!name) return;
+
+    const newTrack = {
+      campaignId: currentCampaignId,
+      name: name,
+      category: targetAudioCat,
+      base64Data: url // Enviando o link no lugar do Base64
+    };
+
+    try {
+      const res = await fetch(`https://korzel-api.onrender.com/api/audio`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(newTrack)
+      });
+
+      if (res.ok) {
+        const savedTrack = await res.json();
+        setAudioCategories(prev => prev.map(cat =>
+          cat.id === targetAudioCat
+            ? { ...cat, tracks: [...cat.tracks, { id: savedTrack.id, name: savedTrack.name, url: savedTrack.base64Data }] }
+            : cat
+        ));
+        showToast("🎵 Link de áudio adicionado com sucesso!", "success");
+      } else {
+        showToast(`Erro ao salvar música (Erro ${res.status})`, "error");
+      }
+    } catch (err) {
+      showToast("Falha na conexão ao enviar o link.", "error");
+    }
+  };
+
   const handleDeleteAudioTrack = async (trackId, catId) => {
     if (!window.confirm("Deseja banir esta música da sua campanha para sempre?")) return;
 
@@ -1064,10 +1100,15 @@ export default function App() {
   }, [authToken, currentCampaignId, refreshTrigger]);
 
   useEffect(() => {
-    const newConnection = new signalR.HubConnectionBuilder().withUrl("https://korzel-api.onrender.com/vtthub").withAutomaticReconnect().build();
+    // Forçando WebSockets para comunicação em tempo real sem delay HTTP
+    const newConnection = new signalR.HubConnectionBuilder()
+      .withUrl("https://korzel-api.onrender.com/vtthub", {
+        transport: signalR.HttpTransportType.WebSockets
+      })
+      .withAutomaticReconnect()
+      .build();
     setConnection(newConnection);
   }, []);
-
   useEffect(() => {
     if (connection && currentCampaignId && loggedUserName) {
       connection.invoke("JoinSession", currentCampaignId.toString(), loggedUserName)
@@ -1158,7 +1199,7 @@ export default function App() {
     currentSceneObj, handleMapUpload, addNewScene, handleTokenImageUpload, handleCreateToken,onlinePlayers, setOnlinePlayers,
     updateTokenSize, handleDragStartFromLibrary, handleDropOnMap, handleMapWheel, handleMapMouseDown,
     bringToFront, sendToBack, assignPermission, toggleTokenStatus, handleAudioUpload, togglePlayAudio, handleBuyItem, updateBuyQty, handleOpenNewCatalogItem,
-    handleEditCatalogItem, handleDeleteCatalogItem, handleSaveCatalogItem, executeRoll, getSkillTotal,
+    handleEditCatalogItem, handleDeleteCatalogItem, handleSaveCatalogItem, executeRoll, getSkillTotal,handleAddAudioLink,
     hp, setHp, maxHp, setMaxHp, pe, setPe, maxPe, setMaxPe, corruption, setCorruption, maxCorruption, setMaxCorruption,handleDeleteAudioTrack,
     attrInt, attrPre, attrAgi, attrVig, attrFor, attrIns,resistances, setResistances,oficioText, setOficioText, inventoryList, setInventoryList, attacksList, setAttacksList, abilitiesList, setAbilitiesList, notes, setNotes, activeNoteId, setActiveNoteId,
     skillsList, setSkillsList, campaignCharacters, loggedUserName, handleCreateNewCharacter, loadCharacterFromDb, handleDeleteCharacter, handleDeleteTokenFromScene, handleDeleteTokenFromLibrary
