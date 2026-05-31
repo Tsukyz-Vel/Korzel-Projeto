@@ -157,6 +157,8 @@ export default function App() {
   const audioRef = useRef(null);
   const lastPlayedAudioId = useRef(null);
   const audioFileInputRef = useRef(null);
+  const prevTrackUrl = useRef("");
+  const debounceVolume = useRef(null);
 
   const [audioCategories, setAudioCategories] = useState([{ id: 'combat', name: '⚔️ Combate', tracks: [] }, { id: 'ambient', name: '🌲 Ambiente', tracks: [] }, { id: 'tavern', name: '🍺 Taverna', tracks: [] }, { id: 'uploads', name: '📁 Meus Uploads', tracks: [] }]);
   const [activeAudioId, setActiveAudioId] = useState(null);
@@ -1065,23 +1067,45 @@ export default function App() {
   
   useEffect(() => { if (audioRef.current) audioRef.current.loop = isLooping; }, [isLooping]);
 
-  // 🟢 1. Encontra automaticamente a música certa sempre que as listas ou o ID mudarem
+  // 1. Encontra a URL da música atual
   const currentTrackUrl = audioCategories.flatMap(c => c.tracks).find(t => t.id === activeAudioId)?.url;
 
-  // 🟢 2. Controla o Play e Pause automaticamente
+  // 🟢 CÉREBRO 1: PLAY, PAUSE E LOAD AUTOMÁTICO
   useEffect(() => {
     if (audioRef.current) {
+      // Se a música trocou, FORÇA o navegador a recarregar o arquivo novo
+      if (currentTrackUrl !== prevTrackUrl.current) {
+        audioRef.current.load();
+        prevTrackUrl.current = currentTrackUrl;
+      }
+
       if (isPlaying && currentTrackUrl) {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
-          playPromise.catch(e => console.log("A carregar áudio..."));
+          playPromise.catch(e => console.log("Aguardando carregamento de áudio..."));
         }
       } else {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying, currentTrackUrl]);
+  }, [isPlaying, currentTrackUrl]); // Reage instantaneamente a plays e trocas de música
 
+  // 🟢 CÉREBRO 2: BARRINHA DE VOLUME + SINCRONIZAÇÃO INTELIGENTE (DEBOUNCE)
+  useEffect(() => {
+    if (audioRef.current) {
+      // Muda na sua caixa de som na exata mesma hora
+      audioRef.current.volume = Number(volume);
+
+      // Avisa os jogadores com um atraso de 500ms para NÃO derrubar o servidor
+      if (isMasterMode && connection && currentCampaignId && connection.state === "Connected") {
+        clearTimeout(debounceVolume.current);
+        debounceVolume.current = setTimeout(() => {
+          // Obs: Verifique se o seu C# possui um método chamado "ChangeVolume"
+          connection.invoke("ChangeVolume", currentCampaignId.toString(), Number(volume)).catch(console.error);
+        }, 500);
+      }
+    }
+  }, [volume, isMasterMode, connection, currentCampaignId]);
   // 🟢 3. Controla a Barrinha de Volume LOCALMENTE
   useEffect(() => {
     if (audioRef.current) {
