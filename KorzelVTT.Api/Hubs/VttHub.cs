@@ -142,9 +142,13 @@ namespace KorzelVTT.Api.Hubs
         // ==========================================
         // ÁUDIO DA SESSÃO
         // ==========================================
-        public async Task PlayMusic(string campaignId, int trackId)
+      // ==========================================
+        // ÁUDIO DA SESSÃO (Agora com Volume Sincronizado)
+        // ==========================================
+        public async Task PlayMusic(string campaignId, int trackId, double currentVolume)
         {
-            await Clients.OthersInGroup(campaignId).SendAsync("MusicStarted", trackId);
+            // Envia o comando de play e JÁ AVISA qual é o volume atual
+            await Clients.OthersInGroup(campaignId).SendAsync("MusicStarted", trackId, currentVolume);
         }
 
         public async Task StopMusic(string campaignId)
@@ -152,6 +156,11 @@ namespace KorzelVTT.Api.Hubs
             await Clients.OthersInGroup(campaignId).SendAsync("MusicStopped");
         }
 
+        public async Task ChangeVolume(string campaignId, double newVolume)
+        {
+            // Grita no rádio para baixar/subir o volume
+            await Clients.OthersInGroup(campaignId).SendAsync("VolumeChanged", newVolume);
+        }
         // ==========================================
         // FERRAMENTAS DO VTT (Pings, Desenhos, Clima)
         // ==========================================
