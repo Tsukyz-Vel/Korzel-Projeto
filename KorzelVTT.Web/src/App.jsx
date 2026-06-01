@@ -591,11 +591,12 @@ export default function App() {
     setShowCatalogForm(true); 
   };
 
-  const handleDeleteCatalogItem = (index) => { 
+ const handleDeleteCatalogItem = (index) => { 
     if (window.confirm("Remover da Loja?")) {
       const updatedCatalog = catalog.filter((_, i) => i !== index);
       setCatalog(updatedCatalog); 
       
+      // 👇 Sincroniza a remoção com todos os jogadores
       if (connection && currentCampaignId) {
         connection.invoke("UpdateCatalog", currentCampaignId.toString(), JSON.stringify(updatedCatalog))
           .catch(console.error);
@@ -619,6 +620,7 @@ export default function App() {
     setEditingCatalogIndex(null);
     setCatalogForm({ name: "", type: "Consumível", price: 10, weight: 0.1, desc: "" });
 
+    // 👇 Sincroniza a criação ou edição com todos os jogadores
     if (connection && currentCampaignId) {
       connection.invoke("UpdateCatalog", currentCampaignId.toString(), JSON.stringify(updatedCatalog))
         .catch(console.error);
@@ -1402,11 +1404,36 @@ export default function App() {
           </div>
         )}
         {currentPage === 'sessao' && <VttSession {...vttProps} connection={connection} />}
+        
         {currentPage === 'compêndio' && (
-          <div className="p-4 lg:p-8 flex-1 overflow-hidden animate-fade-in w-full max-w-7xl mx-auto min-h-0">
+          <div className="p-4 lg:p-8 flex-1 overflow-hidden animate-fade-in w-full max-w-7xl mx-auto min-h-0 flex flex-col relative">
+            
+            {/* 👇 NOVO HEADER DO COMPÊNDIO - UX MELHORADA 👇 */}
+            {currentCampaignId && (
+              <div className="flex flex-col sm:flex-row justify-between items-center bg-zinc-950/80 border border-amber-900/50 p-4 rounded-lg shadow-md mb-4 shrink-0 gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl drop-shadow-md">📖</span>
+                  <div className="text-center sm:text-left">
+                    <h2 className="text-amber-500 font-bold uppercase tracking-widest text-sm">Acesso Rápido ao Compêndio</h2>
+                    <p className="text-[10px] text-zinc-400 uppercase">Seus poderes forjados aqui vão direto para a ficha de {charName || "seu personagem"}.</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    setCurrentPage('sessao'); // Volta para a mesa
+                    setSheetModalOpen(true); // Garante que a ficha volte aberta na cara do jogador!
+                  }} 
+                  className="w-full sm:w-auto bg-amber-900/80 hover:bg-amber-700 text-white font-bold py-2 px-6 rounded border border-amber-700 transition-colors uppercase tracking-widest text-xs shadow-[0_0_15px_rgba(180,83,9,0.3)] flex items-center justify-center gap-2"
+                >
+                  <span>🔙</span> Voltar para a Ficha
+                </button>
+              </div>
+            )}
+
              <Compendio handleAddAbility={handleAddAbilityToSheet} savedCharacters={campaignCharacters} activeCharacterName={charName} />
           </div>
         )}
+
        <div className={currentPage === 'ficha' ? 'animate-fade-in flex-1 overflow-y-auto overflow-x-hidden w-full custom-scrollbar pb-10 relative' : 'hidden'}>
           <div className="w-full max-w-7xl mx-auto flex justify-end px-4 lg:px-8 mt-4 gap-4">
             <button onClick={saveCharacterToDb} className="bg-red-900/80 hover:bg-red-700 text-white font-bold py-2 px-6 rounded border border-red-500 transition-colors text-sm uppercase tracking-widest shadow-[0_0_15px_rgba(153,27,27,0.5)]">💾 Salvar Ficha Completa</button>
