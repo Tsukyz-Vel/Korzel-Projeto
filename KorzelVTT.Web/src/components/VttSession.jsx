@@ -32,7 +32,7 @@ export default function VttSession(props) {
   // ZOOM INICIAL 20%
   // ==========================================
   useEffect(() => {
-    setMapScale(0.2); // Força o zoom a 20% ao entrar na sessão
+    setMapScale(0.2); 
   }, [setMapScale]);
 
   // ==========================================
@@ -150,10 +150,8 @@ export default function VttSession(props) {
     const tToFlip = sceneTokens.find(t => t.id === tokenContextMenu.tokenId);
     if(tToFlip) {
         const updatedToken = { ...tToFlip, flipX: !tToFlip.flipX };
-        // Muda pra você
         setSceneTokens(prev => prev.map(t => t.id === tokenContextMenu.tokenId ? updatedToken : t));
 
-        // Manda pro C# avisar os players!
         if (connection && currentCampaignId) {
             connection.invoke("UpdateToken", currentCampaignId.toString(), JSON.stringify(updatedToken)).catch(console.error);
         }
@@ -228,7 +226,8 @@ export default function VttSession(props) {
   const getDistanceInMeters = () => {
     if (!measureStart || !measureEnd) return 0;
     const distancePx = Math.hypot(measureEnd.x - measureStart.x, measureEnd.y - measureStart.y);
-    return ((distancePx / 80) * 1.5).toFixed(1);
+    // 👇 O divisor ajustado para a escala correta (dividido por 160 ao invés de 80)
+    return ((distancePx / 160) * 1.5).toFixed(1);
   };
 
   const getDynamicCursor = () => {
@@ -339,6 +338,8 @@ export default function VttSession(props) {
                   <button onClick={() => changeWeatherSync('night')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] transition-colors ${weather === 'night' ? 'bg-indigo-900 text-white shadow-[0_0_10px_rgba(49,46,129,0.8)]' : 'bg-black text-indigo-400 hover:text-white border border-indigo-900'}`} title="Noite Escura">🌙</button>
                   <button onClick={() => changeWeatherSync('rain')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] ${weather === 'rain' ? 'bg-blue-600 text-white' : 'bg-black text-blue-400'}`} title="Chuva e Tempo Fechado">🌧️</button>
                   <button onClick={() => changeWeatherSync('snow')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] ${weather === 'snow' ? 'bg-white text-black' : 'bg-black text-zinc-300'}`} title="Neve">❄️</button>
+                  {/* 👇 Opção do Pôr do Sol Adicionada 👇 */}
+                  <button onClick={() => changeWeatherSync('sunset')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] transition-colors ${weather === 'sunset' ? 'bg-orange-600 text-white shadow-[0_0_10px_rgba(234,88,12,0.8)]' : 'bg-black text-orange-400 hover:text-white border border-orange-900'}`} title="Pôr do Sol">🌅</button>
                   <button onClick={() => changeWeatherSync('ash')} className={`w-6 h-6 rounded flex items-center justify-center text-[12px] ${weather === 'ash' ? 'bg-orange-600 text-white' : 'bg-black text-orange-400'}`} title="Cinzas / Fogo">🔥</button>
                 </div>
               )}
@@ -365,7 +366,9 @@ export default function VttSession(props) {
 >
           {weather === 'night' && <div className="absolute inset-0 pointer-events-none z-[9995] bg-[#020617]/70 mix-blend-multiply"></div>}
           {weather === 'rain' && <div className="absolute inset-0 pointer-events-none z-[9995] bg-slate-600/50 mix-blend-multiply" style={{ backdropFilter: 'grayscale(50%)' }}></div>}
-          {weather !== 'none' && weather !== 'night' && <div className={`absolute inset-0 pointer-events-none z-[9996] opacity-80 weather-${weather}`}></div>}
+          {/* 👇 Camada de overlay para o Pôr do Sol 👇 */}
+          {weather === 'sunset' && <div className="absolute inset-0 pointer-events-none z-[9995] bg-orange-600/30 mix-blend-multiply" style={{ backdropFilter: 'contrast(110%) sepia(30%)' }}></div>}
+          {weather !== 'none' && weather !== 'night' && weather !== 'sunset' && <div className={`absolute inset-0 pointer-events-none z-[9996] opacity-80 weather-${weather}`}></div>}
 
           <div id="map-background" className="absolute origin-top-left" style={{ transform: `translate(${mapOffset.x}px, ${mapOffset.y}px) scale(${mapScale})`, width: '3000px', height: '3000px', willChange: 'transform' }}>
             
@@ -405,9 +408,9 @@ export default function VttSession(props) {
               const isBleeding = statuses.includes('bleeding');
               const isPoisoned = statuses.includes('poisoned');
               const isCamouflaged = statuses.includes('camouflaged');
+              // 👇 Verificação da nova condição morto 👇
+              const isDead = statuses.includes('dead');
               
-              // 👇 1. FAÇA A MATEMÁTICA AQUI FORA DE FORMA NORMAL
-              // Agora o ícone terá apenas 12% do tamanho do token
               const statusSize = Math.max(16, (token.size || 80) * 0.12);
               
               let shadowClass = "shadow-[0_5px_10px_rgba(0,0,0,0.8)]";
@@ -442,7 +445,8 @@ export default function VttSession(props) {
           }} 
           onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setTokenContextMenu({ show: true, x: e.clientX, y: e.clientY, tokenId: token.id }); }} 
           style={{ top: `${token.y}px`, left: `${token.x}px`, width: `${token.size}px`, height: `${token.size}px`, zIndex: draggingToken === token.id ? 9999 : (token.zIndex || 10) }} 
-          className={`absolute flex items-center justify-center transition-transform duration-100 cursor-grab`} 
+          // 👇 Adicionado opacidade 40% se camuflado e escala de cinza se morto 👇
+          className={`absolute flex items-center justify-center transition-transform duration-100 cursor-grab ${isCamouflaged ? 'opacity-40' : ''} ${isDead ? 'grayscale' : ''}`} 
           title={token.controlledBy ? `${token.name} (Controlado por: ${token.controlledBy})` : token.name}
         >
                  {token.image ? (
@@ -451,7 +455,6 @@ export default function VttSession(props) {
                     <span className={`text-white text-xl font-bold pointer-events-none ${token.flipX ? '-scale-x-100 block' : ''}`}>{token.name.charAt(0)}</span>
                   )}
                   
-                  {/* 👇 2. O HTML FICA LIMPO E A VERCEL APROVA 👇 */}
                   {statuses.length > 0 && (
                     <div 
                       className="absolute flex flex-row-reverse flex-nowrap whitespace-nowrap gap-1 pointer-events-none z-20"
@@ -479,6 +482,15 @@ export default function VttSession(props) {
                           className="bg-black/80 rounded-full flex items-center justify-center border border-zinc-500 shadow-md"
                         >
                           🌫️
+                        </span>
+                      )}
+                      {/* 👇 Ícone miniatura para informar o status morto 👇 */}
+                      {isDead && (
+                        <span 
+                          style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
+                          className="bg-black/80 rounded-full flex items-center justify-center border border-zinc-700 shadow-md grayscale-0"
+                        >
+                          🪦
                         </span>
                       )}
                     </div>
@@ -510,7 +522,6 @@ export default function VttSession(props) {
             <span className="px-4 py-2 text-white text-xs font-bold tracking-widest border-x border-purple-800/50">{Math.round(mapScale * 100)}%</span>
             <button onClick={() => setMapScale(s => Math.min(3, s + 0.1))} className="px-4 py-2 text-white hover:bg-purple-800 transition-colors font-bold">+</button>
           </div>
-
 
           {onlinePlayers && onlinePlayers.length > 0 && (
             <div className="absolute bottom-6 left-6 z-40 flex items-center gap-3 bg-black/60 backdrop-blur-md p-3 rounded-full border border-zinc-800 shadow-2xl">
@@ -547,6 +558,8 @@ export default function VttSession(props) {
           <button onClick={() => toggleTokenStatus('bleeding')} className="text-left px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-zinc-800 rounded transition-colors">🩸 Sangrando</button>
           <button onClick={() => toggleTokenStatus('poisoned')} className="text-left px-3 py-1.5 text-xs font-bold text-green-400 hover:bg-zinc-800 rounded transition-colors">☠️ Envenenado</button>
           <button onClick={() => toggleTokenStatus('camouflaged')} className="text-left px-3 py-1.5 text-xs font-bold text-zinc-400 hover:bg-zinc-800 rounded transition-colors">🌫️ Camuflado</button>
+          {/* 👇 Nova opção para aplicar o efeito morto 👇 */}
+          <button onClick={() => toggleTokenStatus('dead')} className="text-left px-3 py-1.5 text-xs font-bold text-zinc-500 hover:bg-zinc-800 rounded transition-colors">💀 Morto</button>
         </div>
       )}
     </div>
