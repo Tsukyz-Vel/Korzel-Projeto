@@ -942,27 +942,27 @@ export default function App() {
     }
   };
 
-  const toggleTokenStatus = async (statusName) => { 
-    if (!tokenContextMenu.tokenId) return; 
+ const toggleTokenStatus = async (statusName) => { 
+      if (!tokenContextMenu.tokenId) return; 
 
-    let tokenAtualizado = null;
+      // 1. Encontra o token alvo ANTES de atualizar o estado
+      const tokenToUpdate = sceneTokens.find(t => t.id === tokenContextMenu.tokenId);
+      if (!tokenToUpdate) return;
 
-    setSceneTokens(prev => prev.map(t => { 
-      if (t.id === tokenContextMenu.tokenId) { 
-        const currentStatuses = t.statuses || []; 
-        const newStatuses = currentStatuses.includes(statusName) 
-          ? currentStatuses.filter(s => s !== statusName) 
-          : [...currentStatuses, statusName]; 
-        
-        tokenAtualizado = { ...t, statuses: newStatuses };
-        return tokenAtualizado; 
-      } 
-      return t; 
-    })); 
-    
-    setTokenContextMenu({ ...tokenContextMenu, show: false }); 
+      // 2. Calcula as novas condições
+      const currentStatuses = tokenToUpdate.statuses || [];
+      const newStatuses = currentStatuses.includes(statusName) 
+        ? currentStatuses.filter(s => s !== statusName) 
+        : [...currentStatuses, statusName]; 
 
-    if (tokenAtualizado) {
+      // 3. Monta o objeto atualizado
+      const tokenAtualizado = { ...tokenToUpdate, statuses: newStatuses };
+
+      // 4. Atualiza a tela (Estado React)
+      setSceneTokens(prev => prev.map(t => t.id === tokenContextMenu.tokenId ? tokenAtualizado : t)); 
+      setTokenContextMenu({ ...tokenContextMenu, show: false }); 
+
+      // 5. Salva no banco e envia para o Multiplayer!
       try {
         await fetch(`https://korzel-api.onrender.com/api/scenes/tokens/${tokenAtualizado.id}`, {
           method: "PUT",
@@ -976,8 +976,7 @@ export default function App() {
       } catch (e) {
         console.error("Erro ao salvar o status da peça:", e);
       }
-    }
-  };
+    };
 
  const handleAddAudioLink = async () => {
     const url = window.prompt("IMPORTANTE: Insira o link direto de um arquivo de áudio (precisa terminar em .mp3, .wav, etc). Links de vídeo do YouTube não funcionam.\n\nLink do áudio:");
@@ -1364,11 +1363,11 @@ export default function App() {
       {sheetModalOpen && currentPage === 'sessao' && (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 lg:p-8 animate-fade-in" onClick={() => setSheetModalOpen(false)}>
           <div className="bg-[#0a0a0a] w-full h-full max-h-[95vh] overflow-y-auto rounded-xl border-2 border-red-900/50 shadow-[0_0_50px_rgba(0,0,0,1)] relative custom-scrollbar flex flex-col" onClick={e => e.stopPropagation()}>
-           <div className="absolute top-4 right-6 z-50 flex items-center gap-4 shrink-0">
-            <button onClick={saveCharacterToDb} className="whitespace-nowrap shrink-0 bg-red-900/80 hover:bg-red-700 text-white font-bold py-1.5 px-4 rounded border border-red-500 transition-colors text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(153,27,27,0.5)]">💾 Salvar Ficha</button>
-            <button onClick={() => setSheetModalOpen(false)} className="shrink-0 text-zinc-500 hover:text-red-500 text-2xl transition-colors">✖</button>
-          </div>
-           <CharacterSheet charName={charName} setCharName={setCharName} charOrigin={charOrigin} setCharOrigin={setCharOrigin} charRace={charRace} setCharRace={setCharRace} charClass={charClass} setCharClass={setCharClass} charAge={charAge} setCharAge={setCharAge} charLevel={charLevel} setCharLevel={setCharLevel} attrInt={attrInt} setAttrInt={setAttrInt} attrPre={attrPre} setAttrPre={setAttrPre} attrAgi={attrAgi} setAttrAgi={setAttrAgi} attrVig={attrVig} setAttrVig={setAttrVig} attrFor={attrFor} setAttrFor={setAttrFor} attrIns={attrIns} setAttrIns={setAttrIns} hp={hp} setHp={setHp} maxHp={maxHp} setMaxHp={setMaxHp} pe={pe} setPe={setPe} maxPe={maxPe} setMaxPe={setMaxPe} corruption={corruption} setCorruption={setCorruption} maxCorruption={maxCorruption} setMaxCorruption={setMaxCorruption} lascas={lascas} setLascas={setLascas} currentWeight={currentWeight} maxWeight={maxWeight} skillsList={skillsList} setSkillsList={setSkillsList} executeRoll={executeRoll} getSkillTotal={getSkillTotal} resistances={resistances} setResistances={setResistances} oficioText={oficioText} setOficioText={setOficioText} activeFichaTab={activeFichaTab} setActiveFichaTab={setActiveFichaTab} showWeaponForm={showWeaponForm} setShowWeaponForm={setShowWeaponForm} editingWeaponIndex={editingWeaponIndex} weaponForm={weaponForm} setWeaponForm={setWeaponForm} attacksList={attacksList} handleOpenNewWeapon={handleOpenNewWeapon} handleEditWeapon={handleEditWeapon} handleDeleteWeapon={handleDeleteWeapon} handleSaveWeapon={handleSaveWeapon} showAbilityForm={showAbilityForm} setShowAbilityForm={setShowAbilityForm} editingAbilityIndex={editingAbilityIndex} abilityForm={abilityForm} setAbilityForm={setAbilityForm} abilitiesList={abilitiesList} handleOpenNewAbility={handleOpenNewAbility} handleEditAbility={handleEditAbility} handleDeleteAbility={handleDeleteAbility} handleSaveAbility={handleSaveAbility} showItemForm={showItemForm} setShowItemForm={setShowItemForm} editingItemIndex={editingItemIndex} itemForm={itemForm} setItemForm={setItemForm} inventoryList={inventoryList} handleOpenNewItem={handleOpenNewItem} handleEditItem={handleEditItem} handleDeleteItem={handleDeleteItem} handleSaveItem={handleSaveItem} charDeity={charDeity} handleDeityChange={handleDeityChange} mut1={mut1} setMut1={setMut1} mut2={mut2} setMut2={setMut2} mut3={mut3} setMut3={setMut3} notes={notes} activeNoteId={activeNoteId} setActiveNoteId={setActiveNoteId} handleAddNote={handleAddNote} handleDeleteNote={handleDeleteNote} handleNoteChange={handleNoteChange} activeNote={activeNote} connection={connection} setChatMessages={setChatMessages} showToast={showToast} currentCampaignId={currentCampaignId} />
+            <div className="absolute top-4 right-6 z-50 flex items-center gap-4 shrink-0">
+             <button onClick={saveCharacterToDb} className="whitespace-nowrap shrink-0 bg-red-900/80 hover:bg-red-700 text-white font-bold py-1.5 px-4 rounded border border-red-500 transition-colors text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(153,27,27,0.5)]">💾 Salvar Ficha</button>
+             <button onClick={() => setSheetModalOpen(false)} className="shrink-0 text-zinc-500 hover:text-red-500 text-2xl transition-colors">✖</button>
+           </div>
+            <CharacterSheet charName={charName} setCharName={setCharName} charOrigin={charOrigin} setCharOrigin={setCharOrigin} charRace={charRace} setCharRace={setCharRace} charClass={charClass} setCharClass={setCharClass} charAge={charAge} setCharAge={setCharAge} charLevel={charLevel} setCharLevel={setCharLevel} attrInt={attrInt} setAttrInt={setAttrInt} attrPre={attrPre} setAttrPre={setAttrPre} attrAgi={attrAgi} setAttrAgi={setAttrAgi} attrVig={attrVig} setAttrVig={setAttrVig} attrFor={attrFor} setAttrFor={setAttrFor} attrIns={attrIns} setAttrIns={setAttrIns} hp={hp} setHp={setHp} maxHp={maxHp} setMaxHp={setMaxHp} pe={pe} setPe={setPe} maxPe={maxPe} setMaxPe={setMaxPe} corruption={corruption} setCorruption={setCorruption} maxCorruption={maxCorruption} setMaxCorruption={setMaxCorruption} lascas={lascas} setLascas={setLascas} currentWeight={currentWeight} maxWeight={maxWeight} skillsList={skillsList} setSkillsList={setSkillsList} executeRoll={executeRoll} getSkillTotal={getSkillTotal} resistances={resistances} setResistances={setResistances} oficioText={oficioText} setOficioText={setOficioText} activeFichaTab={activeFichaTab} setActiveFichaTab={setActiveFichaTab} showWeaponForm={showWeaponForm} setShowWeaponForm={setShowWeaponForm} editingWeaponIndex={editingWeaponIndex} weaponForm={weaponForm} setWeaponForm={setWeaponForm} attacksList={attacksList} handleOpenNewWeapon={handleOpenNewWeapon} handleEditWeapon={handleEditWeapon} handleDeleteWeapon={handleDeleteWeapon} handleSaveWeapon={handleSaveWeapon} showAbilityForm={showAbilityForm} setShowAbilityForm={setShowAbilityForm} editingAbilityIndex={editingAbilityIndex} abilityForm={abilityForm} setAbilityForm={setAbilityForm} abilitiesList={abilitiesList} handleOpenNewAbility={handleOpenNewAbility} handleEditAbility={handleEditAbility} handleDeleteAbility={handleDeleteAbility} handleSaveAbility={handleSaveAbility} showItemForm={showItemForm} setShowItemForm={setShowItemForm} editingItemIndex={editingItemIndex} itemForm={itemForm} setItemForm={setItemForm} inventoryList={inventoryList} handleOpenNewItem={handleOpenNewItem} handleEditItem={handleEditItem} handleDeleteItem={handleDeleteItem} handleSaveItem={handleSaveItem} charDeity={charDeity} handleDeityChange={handleDeityChange} mut1={mut1} setMut1={setMut1} mut2={mut2} setMut2={setMut2} mut3={mut3} setMut3={setMut3} notes={notes} activeNoteId={activeNoteId} setActiveNoteId={setActiveNoteId} handleAddNote={handleAddNote} handleDeleteNote={handleDeleteNote} handleNoteChange={handleNoteChange} activeNote={activeNote} connection={connection} setChatMessages={setChatMessages} showToast={showToast} currentCampaignId={currentCampaignId} />
           </div>
         </div>
       )}
@@ -1444,4 +1443,4 @@ export default function App() {
       </main>
     </div>
   );
-}
+  }
