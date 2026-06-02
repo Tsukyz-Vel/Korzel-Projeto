@@ -1,14 +1,14 @@
 export default function AbilityCard({ title, type, cost, description, onEdit, onDelete }) {
   const isDivine = type === "Dádiva Divina";
   return ( 
-    <div className={`relative bg-zinc-900/30 border ${isDivine ? 'border-purple-900/50' : 'border-zinc-800'} rounded-lg p-4 mb-4 shadow-md group transition-all`}> 
+    // 👇 A bordinha vermelha foi adicionada aqui na condição falsa do isDivine 👇
+    <div className={`relative bg-zinc-900/30 border ${isDivine ? 'border-purple-900/50' : 'border-red-900/50'} rounded-lg p-4 mb-4 shadow-md group transition-all`}> 
       <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"> 
         <button onClick={onEdit} className="text-zinc-500 hover:text-yellow-500 transition-colors">✏️</button> 
         <button onClick={onDelete} className="text-zinc-500 hover:text-red-500 transition-colors">🗑️</button> 
       </div> 
       <div className="flex justify-between items-start mb-3 pr-12"> 
         <div className="flex flex-col"> 
-          {/* 👇 A mágica acontece aqui: mudamos de text-white para text-red-500 👇 */}
           <h4 className={`${isDivine ? 'text-purple-400' : 'text-red-500'} font-bold text-lg tracking-wide`}>{title}</h4> 
           <span className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1">{type}</span> 
         </div> 
