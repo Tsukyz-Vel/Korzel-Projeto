@@ -157,7 +157,7 @@ export default function SessionSidebar(props) {
               <div key={category.id} className="flex flex-col gap-2">
                 <div className="flex justify-between items-center border-b border-amber-900/30 pb-1">
                   <h5 className="text-[10px] text-amber-600 uppercase tracking-widest font-bold">{category.name}</h5>
-                  <button onClick={() => { setTargetAudioCat(category.id); handleAddAudioLink(); }} className="text-[10px] text-zinc-400 hover:text-amber-500 transition-colors" title="Adicionar link nesta pasta">➕</button>
+                 <button onClick={() => handleAddAudioLink(category.id)} className="text-[10px] text-zinc-400 hover:text-amber-500 transition-colors" title="Adicionar link nesta pasta">➕</button>
                 </div>
                 {category.tracks.length === 0 ? (
                   <p className="text-[9px] text-zinc-600 italic">Nenhuma faixa nesta pasta.</p>

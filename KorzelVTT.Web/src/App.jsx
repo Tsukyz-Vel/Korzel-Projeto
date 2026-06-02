@@ -978,7 +978,11 @@ export default function App() {
       }
     };
 
- const handleAddAudioLink = async () => {
+ const handleAddAudioLink = async (specificCategory = null) => {
+    // 1. Resolve o bug de "cair na pasta errada"
+    // Se o botão mandar o nome da pasta, usa ela. Senão, usa a padrão (Meus Uploads).
+    const categoriaCerta = typeof specificCategory === 'string' ? specificCategory : targetAudioCat;
+
     const url = window.prompt("IMPORTANTE: Insira o link direto de um arquivo de áudio (precisa terminar em .mp3, .wav, etc). Links de vídeo do YouTube não funcionam.\n\nLink do áudio:");
     if (!url) return;
     const name = window.prompt("Nome da música:");
@@ -987,7 +991,7 @@ export default function App() {
     const newTrack = {
       campaignId: currentCampaignId,
       name: name,
-      category: targetAudioCat,
+      category: categoriaCerta,
       base64Data: url // Guardando a URL no lugar do arquivo
     };
 
@@ -999,18 +1003,22 @@ export default function App() {
       });
       if (res.ok) {
         const savedTrack = await res.json();
-        const novoAudio = { id: savedTrack.id, name: savedTrack.name, url: savedTrack.base64Data }; // Criamos o objeto limpo
+        
+        // 👇 2. O SEGREDO PARA NÃO PRECISAR DO F5 👇
+        // Em vez de esperar a API devolver o link, nós usamos a variável 'url' 
+        // e 'name' que você acabou de digitar na caixinha!
+        const novoAudio = { id: savedTrack.id, name: name, url: url }; 
 
         setAudioCategories(prev => prev.map(cat =>
-          cat.id === targetAudioCat ? { ...cat, tracks: [...cat.tracks, novoAudio] } : cat
+          cat.id === categoriaCerta ? { ...cat, tracks: [...cat.tracks, novoAudio] } : cat
         ));
         
-        // 👇 A MÁGICA: Grita pro rádio que a música chegou, sem precisar de F5! 👇
+        // Grita pro rádio que a música chegou pra todo mundo!
         if (connection && currentCampaignId) {
-          connection.invoke("AddAudioTrack", currentCampaignId.toString(), targetAudioCat, JSON.stringify(novoAudio)).catch(console.error);
+          connection.invoke("AddAudioTrack", currentCampaignId.toString(), categoriaCerta, JSON.stringify(novoAudio)).catch(console.error);
         }
 
-        showToast("🎵 Link adicionado e sincronizado!", "success");
+        showToast("🎵 Link adicionado e pronto para tocar!", "success");
       }
     } catch (err) { showToast("Falha na conexão.", "error"); }
   };
