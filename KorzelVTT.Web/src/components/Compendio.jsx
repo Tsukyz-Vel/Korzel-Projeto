@@ -63,7 +63,7 @@ const classesData = [
       hp: "18 + Vigor Inicial (+5 + Vig por nível)",
       pe: "3 + Agilidade Inicial (+3 por nível)",
       proficiencies: "Armas simples, armas marciais (foco em lâminas e arcos longos), armaduras leves e médias.",
-      skills: "Luta (Agi ou For), Iniciativa (Agi) e Acrobacia (Agi). Mais 3 entre: Intuição, Percepção, Atletismo, Vontade, Erudição, Diplomacia."
+      skills: "Luta (Agi ou For), Iniciativa (Agi) e Acrobacia (Agi). Mais 3 entre: Intuição, Percepção, Atletismo, Vontade, Erudição, Diplomacia, Reflexos."
     },
     fixedAbilities: [
       { title: "Corte de Precisão", type: "Habilidade de Classe", cost: "1+ PE", description: "Nvl 1: Gaste 1 PE para adicionar +1d6 de dano extra ao focar num ponto vital do inimigo.\nEscalonamento:\n- Nível 5: 2 PE para +1d8 de dano.\n- Nível 9: 3 PE para +1d10 de dano.\n- Nível 13: 4 PE para +1d12 de dano.\n- Nível 17: 5 PE para +2d8 de dano." },
@@ -184,7 +184,7 @@ const classesData = [
       hp: "16 + Vigor Inicial (+4 + Vig por nível)",
       pe: "4 + Instinto Inicial (+4 por nível)",
       proficiencies: "Armas simples e marciais, armaduras leves, médias e escudos leves.",
-      skills: "Sobrevivência (Inst) e Pontaria (Agi). Mais 3 entre: Furtividade, Percepção, Atletismo, Adestramento, Investigação e Rastrear."
+      skills: "Sobrevivência (Inst) e Pontaria (Agi). Mais 3 entre: Furtividade, Percepção, Atletismo, Adestramento, Investigação, Rastrear, Reflexos."
     },
     fixedAbilities: [
       { title: "Marca da Presa", type: "Habilidade de Classe", cost: "1 PE", description: "Ação Bônus. Gaste 1 PE para analisar e marcar uma criatura visível. Até o fim da cena, os ataques contra ela causam dano extra. Concede Vantagem em testes de Percepção e Sobrevivência para rastrear o alvo marcado.\nEscalonamento do Dano Extra:\n- Nível 1: +1d6.\n- Nível 5: +1d8.\n- Nível 9: +1d10.\n- Nível 13: +1d12.\n- Nível 17: +2d8." },
@@ -225,7 +225,7 @@ const classesData = [
       hp: "16 + Vigor Inicial (+4 + Vig por nível)",
       pe: "3 + Agilidade Inicial (+3 por nível)",
       proficiencies: "Armas simples, armas marciais leves (adagas, espadas curtas), arcos, bestas leves e armaduras leves.",
-      skills: "Furtividade (Agi) e Acrobacia (Agi). Mais 4 entre: Ladinagem, Pontaria, Atletismo, Intuição, Enganação, Investigação, Percepção."
+      skills: "Furtividade (Agi) e Acrobacia (Agi). Mais 4 entre: Ladinagem, Pontaria, Atletismo, Intuição, Enganação, Investigação, Percepção, Reflexos."
     },
     fixedAbilities: [
       { title: "Ataque Furtivo", type: "Habilidade de Classe", cost: "Passivo", description: "Nvl 1: Acertos contra alvos desprevenidos ou flanqueados causam +1d6 de dano extra. \nEscalonamento:\nO dano extra aumenta em +1d6 a cada dois níveis ímpares (ex: +2d6 no Nível 3, +3d6 no Nível 5, até +10d6 no Nível 19)." },
@@ -271,7 +271,7 @@ const classesData = [
       hp: "18 + Vigor Inicial (+5 + Vig por nível)",
       pe: "3 + Agilidade Inicial (+3 por nível)",
       proficiencies: "Armas simples, armas leves, redes, tridentes, arpões, armas de fogo e armas de cerco. Armaduras leves e escudos.",
-      skills: "Pilotagem (Agi), Atletismo (For), Acrobacia (Agi). Mais 3 entre: Briga, Pontaria, Ofício (Carpintaria/Navegação), Sobrevivência, Intuição."
+      skills: "Pilotagem (Agi), Atletismo (For), Acrobacia (Agi). Mais 3 entre: Briga, Pontaria, Ofício (Carpintaria/Navegação), Sobrevivência, Intuição, Reflexos."
     },
     fixedAbilities: [
       { title: "Ginga", type: "Habilidade de Classe", cost: "Passivo / 1 PE", description: "Passivo: Sem armadura ou com armadura leve, soma seu Instinto na Defesa. \nAtivo: Ao mover-se 3m no turno, gaste 1 PE para bônus no Ataque e Defesa até o próximo turno. \nEscalonamento: +2 (Nível 1), +3 (Nível 5), +4 (Nível 9), +5 (Nível 13), +6 (Nível 17)." },
