@@ -124,6 +124,11 @@ export default function CharacterSheet({
   };
 
   const calculateSkillTotal = (skillName) => {
+    // 👇 NOVA REGRA: Se a perícia base for "Agilidade", puxa o valor do atributo direto!
+    if (skillName === "Agilidade") {
+      return Number(attrAgi) || 0;
+    }
+
     const skill = skillsList.find(s => s.name === skillName);
     if (!skill) return 0;
     
@@ -137,7 +142,6 @@ export default function CharacterSheet({
 
     return attrValue + trainingBonus;
   };
-
   const handleToggleTraining = (skillName, clickedLevel) => {
     if (!setSkillsList) {
       console.warn("Atenção: Você precisa passar a prop 'setSkillsList' para a CharacterSheet para poder salvar a perícia!");
@@ -388,7 +392,7 @@ export default function CharacterSheet({
                   <div className="col-span-1"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Margem</label><input type="text" value={weaponForm.critMargin} onFocus={(e) => e.target.select()} onChange={(e) => setWeaponForm({...weaponForm, critMargin: e.target.value})} placeholder="19" className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
                   <div className="col-span-1"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Multip.</label><input type="text" value={weaponForm.critMultiplier} onFocus={(e) => e.target.select()} onChange={(e) => setWeaponForm({...weaponForm, critMultiplier: e.target.value})} placeholder="x3" className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900" /></div>
                   <div className="col-span-2"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Tipo</label><select value={weaponForm.type} onChange={(e) => setWeaponForm({...weaponForm, type: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900"><option>Cortante</option><option>Perfurante</option><option>Impacto</option><option>Profano</option></select></div>
-                  <div className="col-span-2"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Perícia Base</label><select value={weaponForm.skill} onChange={(e) => setWeaponForm({...weaponForm, skill: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900"><option>Luta</option><option>Pontaria</option><option>Arremesso</option></select></div>
+                  <div className="col-span-2"><label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1">Perícia Base</label><select value={weaponForm.skill} onChange={(e) => setWeaponForm({...weaponForm, skill: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white text-sm focus:outline-none focus:border-red-900"><option>Luta</option><option>Pontaria</option><option>Arremesso</option><option>Agilidade</option></select></div>
                   
                   <div className="col-span-2 sm:col-span-2 flex items-center gap-2 pt-4">
                     <input type="checkbox" checked={weaponForm.isRanged || false} onChange={(e) => setWeaponForm({...weaponForm, isRanged: e.target.checked})} className="w-4 h-4 accent-red-700 cursor-pointer" />
