@@ -383,7 +383,7 @@ export default function CharacterSheet({
               )}
             </div>
 
-            {/* 👇 NOVO PAINEL DE REAÇÕES DE DEFESA (Matemática Fixa) 👇 */}
+           {/* 👇 NOVO PAINEL DE REAÇÕES DE DEFESA (Matemática Fixa + Toasts) 👇 */}
             <div className="bg-zinc-950/80 border border-amber-900/50 rounded-lg p-4 mb-6 shadow-inner shrink-0 animate-fade-in">
               <h3 className="text-amber-500 font-bold uppercase tracking-widest text-sm border-b border-amber-900/30 pb-2 mb-3 flex items-center gap-2">
                 <span>⚡</span> Reações de Defesa (1 por Rodada)
@@ -393,8 +393,15 @@ export default function CharacterSheet({
                   onClick={() => {
                     const totalReflexos = getSkillTotal('Reflexos');
                     const novaDefesa = calculatedAC + totalReflexos;
+                    
+                    // 1. Exibe o aviso na tela do jogador
+                    showToast(`💨 Esquiva: Defesa foi para ${novaDefesa}!`, "success");
+                    
+                    // 2. Envia para o chat da mesa
                     const newMsg = { id: Date.now(), sender: charName || "Personagem", type: "msg", text: `💨 **Reação: Esquiva**\nElevou a Defesa para **${novaDefesa}** (Base ${calculatedAC} + ${totalReflexos} Reflexos)` };
-                    if (connection && currentCampaignId) connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMsg)).catch(console.error);
+                    if (connection && currentCampaignId) {
+                      connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMsg)).catch(console.error);
+                    }
                   }} 
                   className="bg-blue-950/40 hover:bg-blue-900 border border-blue-900 text-blue-200 rounded p-2 text-xs font-bold uppercase tracking-widest transition-colors flex flex-col items-center gap-1 shadow-md"
                 >
@@ -405,8 +412,15 @@ export default function CharacterSheet({
                   onClick={() => {
                     const totalLuta = getSkillTotal('Luta');
                     const novaDefesa = calculatedAC + totalLuta;
+                    
+                    // 1. Exibe o aviso na tela do jogador
+                    showToast(`🛡️ Bloqueio: Defesa foi para ${novaDefesa}!`, "success");
+                    
+                    // 2. Envia para o chat da mesa
                     const newMsg = { id: Date.now(), sender: charName || "Personagem", type: "msg", text: `🛡️ **Reação: Bloqueio**\nElevou a Defesa para **${novaDefesa}** (Base ${calculatedAC} + ${totalLuta} Luta)` };
-                    if (connection && currentCampaignId) connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMsg)).catch(console.error);
+                    if (connection && currentCampaignId) {
+                      connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMsg)).catch(console.error);
+                    }
                   }} 
                   className="bg-red-950/40 hover:bg-red-900 border border-red-900 text-red-200 rounded p-2 text-xs font-bold uppercase tracking-widest transition-colors flex flex-col items-center gap-1 shadow-md"
                 >
@@ -415,8 +429,14 @@ export default function CharacterSheet({
                 
                 <button 
                   onClick={() => {
+                    // 1. Exibe o aviso na tela do jogador
+                    showToast("⚔️ Contra-Ataque preparado!", "success");
+                    
+                    // 2. Envia para o chat da mesa
                     const newMsg = { id: Date.now(), sender: charName || "Personagem", type: "msg", text: `⚔️ **Reação: Preparar Contra-Ataque**\nDefesa mantida em **${calculatedAC}**. Se o inimigo errar, haverá retaliação!` };
-                    if (connection && currentCampaignId) connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMsg)).catch(console.error);
+                    if (connection && currentCampaignId) {
+                      connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMsg)).catch(console.error);
+                    }
                   }} 
                   className="bg-zinc-900/80 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 rounded p-2 text-xs font-bold uppercase tracking-widest transition-colors flex flex-col items-center gap-1 shadow-md"
                 >
@@ -427,7 +447,6 @@ export default function CharacterSheet({
                 Esquiva e Bloqueio somam a perícia à sua Defesa Base. O Contra-Ataque usa apenas a Defesa Base e garante um ataque se o inimigo errar.
               </p>
             </div>
-            {/* 👆 FIM DO PAINEL DE REAÇÕES 👇 */}
             
             {showWeaponForm && (
               <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg p-4 mb-6 animate-fade-in shadow-lg shrink-0">
