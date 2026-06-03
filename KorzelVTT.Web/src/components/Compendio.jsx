@@ -20,7 +20,7 @@ const classesData = [
       hp: "20 + Vigor Inicial (+5 + Vig por nível)",
       pe: "3 por nível",
       proficiencies: "Armas marciais, armaduras pesadas e escudos.",
-      skills: "Luta (For) ou Pontaria (Agi), Fortitude (Vig). Mais 2 entre: Atletismo, Guerra, Iniciativa, Intimidação, Ofício."
+      skills: "Luta ou Pontaria, Constituição, Montaria/Pilotar (Vig). Mais 2 entre: Atletismo, Influência, Iniciativa, Intimidação, Ofício."
     },
     fixedAbilities: [
       { title: "Ataque Especial", type: "Habilidade de Classe", cost: "1+ PE", description: "Nvl 1: Gaste 1 PE para +4 no ataque ou +1 dado de dano. \nEscalonamento:\n- Nível 5: 2 PE para +8 ataque ou +2 dados de dano.\n- Nível 9: 3 PE para +12 ataque ou +3 dados de dano.\n- Nível 13: 4 PE para +16 ataque ou +4 dados de dano.\n- Nível 17: 5 PE para +20 ataque ou +5 dados de dano." },
@@ -28,23 +28,23 @@ const classesData = [
       { title: "Campeão de Guerra", type: "Habilidade de Classe", cost: "Passivo", description: "Nvl 20: O custo em PE do seu Ataque Especial cai pela metade (arredondado para baixo, mínimo 1). Além disso, sempre que rolar Iniciativa, recupera imediatamente 5 PE." }
     ],
     powers: [
-      { title: "Postura do Anquilossauro", type: "Postura de Combate", cost: "Mov", description: "(Armas Pesadas/Duas Mãos)\nPassivo: Recebe +3 no Dano e ignora 2 pontos de RD do alvo.\nAtivo (Esmagar): Gaste 2 PE ao rolar dano. O alvo faz um teste de Fortitude; em caso de falha, você quebra a perna dele e diminui seu deslocamento pela metade." },
+      { title: "Postura do Anquilossauro", type: "Postura de Combate", cost: "Mov", description: "(Armas Pesadas/Duas Mãos)\nPassivo: Recebe +3 no Dano e ignora 2 pontos de RD do alvo.\nAtivo (Esmagar): Gaste 2 PE ao rolar dano. O alvo faz um teste de Constituição; em caso de falha, você quebra a perna dele e diminui seu deslocamento pela metade." },
       { title: "Postura do Raptor", type: "Postura de Combate", cost: "Mov", description: "(Armas Leves/Ágeis)\nPassivo: Você se move baixo. Ganha +3m de Deslocamento e +1 na Defesa.\nAtivo (Frenesi): Ao usar a ação atacar, gaste 2 PE para fazer um ataque extra imediato." },
       { title: "Postura do Triceratops", type: "Postura de Combate", cost: "Mov", description: "(Escudos)\nPassivo: Você vira uma barreira. Aumenta o bônus de Defesa do escudo em +2.\nAtivo (Escudo Ósseo): Reação. Gaste 1 PE quando um aliado adjacente for atacado. O ataque é redirecionado para o seu escudo (usa a sua Defesa)." },
-      { title: "Postura da Serpente", type: "Postura de Combate", cost: "Mov", description: "(Hastes/Lanças/Chicotes)\nPassivo: Aumenta o alcance dos seus ataques em +1,5m.\nAtivo (Bote): Se um inimigo entrar no seu alcance, gaste 1 PE para fazer um Ataque de Oportunidade contra ele." },
-      { title: "Desarmar Técnico", type: "Poder de Guerreiro", cost: "2 PE", description: "Ao acertar um ataque, gaste 2 PE. Além do dano, faça um teste de manobra (Ataque vs Força). Se vencer, o alvo solta a arma, que cai a 3m." },
+      { title: "Postura do Diplodoco", type: "Postura de Combate", cost: "Mov", description: "(Hastes/Lanças/Chicotes)\nPassivo: Aumenta o alcance dos seus ataques em +1,5m.\nAtivo (Bote): Se um inimigo entrar no seu alcance, gaste 1 PE para fazer um Ataque de Oportunidade contra ele." },
+      { title: "Desarmar Técnico", type: "Poder de Guerreiro", cost: "2 PE", description: "Ao acertar um ataque, gaste 2 PE. Além do dano, faça um teste de manobra (Força vs Força). Se vencer, o alvo solta a arma, que cai a 3m." },
       { title: "Golpe em Arco", type: "Poder de Guerreiro", cost: "2 PE", description: "Gaste 2 PE. Se reduzir um inimigo a 0 PV com ataque corpo a corpo, realiza imediatamente um ataque extra em outro inimigo adjacente." },
       { title: "Estocada na Junta", type: "Poder de Guerreiro", cost: "2 PE", description: "Gaste 2 PE antes de atacar. Você sofre -2 no teste de ataque, mas o golpe ignora totalmente a Redução de Dano (RD) do alvo." },
       { title: "Quebrar Postura", type: "Poder de Guerreiro", cost: "1 PE", description: "Gaste 1 PE ao acertar um ataque. O inimigo perde a Reação e não pode realizar Ataques de Oportunidade até o início do próximo turno dele." },
       { title: "Golpe de Escudo", type: "Poder de Guerreiro", cost: "1 PE", description: "(Requer escudo). Ao acertar um ataque com arma, gaste 1 PE para bater também com o escudo (dano de arma leve). Se acertar, empurra o alvo 1,5m." },
       { title: "Durão", type: "Poder de Guerreiro", cost: "2 a 5 PE", description: "Reação. Quando sofre dano, você pode gastar 2 PE para reduzir esse dano à metade, ou gastar 5 PE para reduzir danos massivos/críticos pela metade." },
       { title: "Tornado de Dor", type: "Poder de Guerreiro", cost: "5 PE", description: "Ação Completa. Gaste 5 PE. Você gira e realiza um ataque corpo a corpo contra CADA inimigo ao seu alcance." },
-      { title: "Golpe Pessoal", type: "Poder de Guerreiro", cost: "2 PE", description: "(Customizável). Gaste 2 PE para realizar um ataque com um efeito visual e mecânico único (ex: Corte de Fogo, Estocada Longa). Efeito definido com o Mestre." },
+      { title: "Não Desistir", type: "Poder de Guerreiro", cost: "2 PE", description: "Você tira uma força de bontade descomunual se recusandoa a desistir (você pode rolar novamente qualquer teste que envolva: Luta, Constituição, Atletismo e Força)." },
       { title: "Valentão", type: "Poder de Guerreiro", cost: "Passivo", description: "Você recebe +2 em testes de ataque e dano contra inimigos caídos, flanqueados, desprevenidos ou atordoados." },
       { title: "Crítico Brutal", type: "Poder de Guerreiro", cost: "Passivo", description: "Pré-requisito: Nível 6. Seu multiplicador de crítico aumenta em +1 (ex: uma arma x2 passa a causar crítico x3)." },
       { title: "Romper", type: "Poder de Guerreiro", cost: "2 PE", description: "Gaste 2 PE. Você desfere um golpe contra um objeto ou arma do inimigo. Ignora a RD do objeto. Se destruir a arma do oponente, o dano excedente passa para o portador." },
-      { title: "Recuperar o Fôlego", type: "Poder de Guerreiro", cost: "Até 3 PE", description: "Ação Padrão. Cure 1d10 PV para cada ponto de PE gasto (máximo 3 PE). Usável uma vez por cena." },
-      { title: "Especialização em Armadura", type: "Poder de Guerreiro", cost: "Passivo", description: "Você sabe usar as placas para desviar golpes. Aumenta a Defesa de qualquer armadura média ou pesada em +2." },
+      { title: "Recuperar o Fôlego", type: "Poder de Guerreiro", cost: "Até 3 PE", description: "Ação Padrão. Cure 1d10 PV. Usável uma vez por cena." },
+      { title: "Especialização em Armadura", type: "Poder de Guerreiro", cost: "Passivo", description: "Você sabe usar as placas para desviar golpes. Aumenta a Defesa de qualquer armadura média ou pesada em +4." },
       { title: "Imbatível", type: "Poder de Guerreiro", cost: "Passivo", description: "Enquanto tiver pelo menos 1 PE sobrando, você não cai inconsciente ao chegar a 0 PV (continua lutando, mas morre se atingir o limite negativo total da sua vida)." },
       { title: "Vontade de Soldado", type: "Poder de Guerreiro", cost: "2 PE", description: "Reação. Se falhar em um teste de Vontade (medo, charme, controle mental), gaste 2 PE para rolar novamente." },
       { title: "Riposta", type: "Poder de Guerreiro", cost: "2 PE", description: "Reação. Se um inimigo errar um ataque corpo a corpo contra você, gaste 2 PE para realizar um ataque imediato contra ele." },
@@ -52,7 +52,7 @@ const classesData = [
       { title: "Provocação (Rugido)", type: "Poder de Guerreiro", cost: "1 PE", description: "Ação Padrão. Inimigos a curta distância fazem teste de Vontade. Falhas os deixam com -5 para atacar qualquer alvo que não seja você." },
       { title: "Ataque Reflexo", type: "Poder de Guerreiro", cost: "1 PE", description: "Se um inimigo ficar desprevenido ou se mover DENTRO do seu alcance, gaste 1 PE para fazer um Ataque de Oportunidade extra (não gasta sua Reação da rodada)." },
       { title: "Bater e Correr", type: "Poder de Guerreiro", cost: "Passivo", description: "Ao realizar a ação atacar, é possível se mover antes e depois do ataque, desde que o movimento total não exceda o deslocamento máximo." },
-      { title: "Planejamento Marcial", type: "Poder de Guerreiro", cost: "Passivo", description: "No início do dia, escolha 1 Poder de Combate Geral que você não possua. Você adquire esse poder temporariamente até o próximo descanso longo." },
+      { title: "Planejamento Marcial", type: "Poder de Guerreiro", cost: "Passivo", description: "Você consegue analisar a situação e ver possiveis pontos fracos do alvo (dando +2 de ataque para todos que estão focando o mesmo alvo)." },
       { title: "Predador Apex", type: "Poder de Guerreiro", cost: "Passivo", description: "Pré-requisito: Nível 12 e ter 2+ Posturas. Mantém DUAS Posturas ativas ao mesmo tempo, soma os benefícios passivos de ambas e possui acesso aos dois ativos." }
     ]
   },
@@ -143,7 +143,7 @@ const classesData = [
       hp: "22 + Vigor Inicial (+5 + Vig por nível)",
       pe: "3 + Intelecto Inicial (+3 por nível)",
       proficiencies: "Armas simples e marciais (foco em martelos e machados), armaduras pesadas e escudos.",
-      skills: "Ofício (Ferreiro/Engenharia) e Fortitude. Mais 2 entre: Briga, Investigação, Atletismo, Intuição."
+      skills: "Ofício (Ferreiro/Engenharia), Constituição e Luta. Mais 2 entre: Erudição, Investigação, Atletismo, Intuição."
     },
     fixedAbilities: [
       { title: "Manutenção de Campo", type: "Habilidade de Classe", cost: "2 PE", description: "Nvl 1: Gaste 10 minutos e 2 PE para aprimorar armas ou armaduras. Afeta 1 item, concedendo +1 (Ataque/Dano ou Defesa) até o próximo descanso longo.\nEscalonamento:\n- Nível 5: Bônus sobe para +2 e afeta 2 itens.\n- Nível 9: Bônus +3 e afeta 3 itens. (Adiciona propriedades, ex: sangramento ou RD 2).\n- Nível 13: Bônus +4 e afeta 4 itens.\n- Nível 17: Bônus +5 e afeta 5 itens." },
@@ -152,22 +152,22 @@ const classesData = [
     ],
     powers: [
       { title: "Despedaçar", type: "Poder de Ferreiro", cost: "1 PE", description: "Ao acertar um ataque, gaste 1 PE. Em vez de causar dano extra, reduz a Defesa do alvo em 2 (cumulativo até o fim da cena) ou destrói o escudo dele (caso o dano supere a dureza)." },
-      { title: "Ponto de Ruptura", type: "Poder de Ferreiro", cost: "2 PE", description: "Gaste 2 PE antes de atacar. O ataque ignora totalmente a Redução de Dano (RD) e a Dureza do alvo. Em objetos ou construtos lacaios, a destruição é imediata; em chefes, o dano crítico é automático." },
-      { title: "Impacto Sísmico", type: "Poder de Ferreiro", cost: "3 PE", description: "(Requer Martelo de Duas Mãos). Ação Padrão. Gaste 3 PE para golpear o chão. Os inimigos adjacentes sofrem dano da arma e testam Fortitude ou caem no chão." },
-      { title: "Quebra-Ossos", type: "Poder de Ferreiro", cost: "Passivo", description: "Um acerto crítico com uma arma de esmagamento aplica a condição 'Quebrado' ao alvo (sofre -2 em ataque e defesa e tem o deslocamento reduzido) até que ele receba cura mágica." },
-      { title: "Martelo de Arremesso", type: "Poder de Ferreiro", cost: "1 PE", description: "Permite arremessar martelos e machados de combate (alcance curto); as armas retornam para a mão no final do turno devido ao balanceamento perfeito. Gaste 1 PE para aumentar o dano do arremesso em +1d8." },
-      { title: "Golpe de Ajuste", type: "Poder de Ferreiro", cost: "1 PE", description: "Gaste 1 PE e faça um ataque. Se acertar, o impacto move o inimigo 3m na direção que você escolher (apenas para inimigos pequenos e médios)." },
+      { title: "Ponto de Ruptura", type: "Poder de Ferreiro", cost: "2 PE", description: "Gaste 5 PE antes de atacar. O ataque ignora totalmente a Redução de Dano (RD)." },
+      { title: "Impacto Sísmico", type: "Poder de Ferreiro", cost: "3 PE", description: "(Requer Martelo de Duas Mãos). Ação Padrão. Gaste 3 PE para golpear o chão. Os inimigos adjacentes sofrem dano da arma e testam reflexo ou caem no chão." },
+      { title: "Quebra-Ossos", type: "Poder de Ferreiro", cost: "Passivo", description: "Um acerto crítico com uma arma de impacto aplica a condição 'Quebrado' ao alvo (sofre -2 em ataque e defesa e tem o deslocamento reduzido) até que ele receba cura." },
+      { title: "Martelo de Arremesso", type: "Poder de Ferreiro", cost: "2 PE", description: "Permite arremessar martelos e machados de combate (alcance curto); Gaste 2 PE para aumentar o dano do arremesso em +1d8." },
+      { title: "Golpe de Ajuste", type: "Poder de Ferreiro", cost: "2 PE", description: "Gaste 2 PE e faça um ataque. Se acertar, o impacto move o inimigo 3m na direção que você escolher (apenas para inimigos pequenos e médios)." },
       { title: "Desmantelar", type: "Poder de Ferreiro", cost: "2 PE", description: "Reação. Quando um inimigo errar um ataque corpo a corpo contra você, gaste 2 PE para realizar uma manobra de Desarmar ou Quebrar Arma com Vantagem garantida." },
       { title: "Braço de Forja", type: "Poder de Ferreiro", cost: "Passivo", description: "O personagem ignora completamente o peso e as penalidades de movimento impostas pelas armaduras pesadas." },
       { title: "Placas Reforçadas", type: "Poder de Ferreiro", cost: "Passivo", description: "O uso contínuo de armadura pesada concede RD 2 (Redução de Dano) contra todos os ataques. O valor aumenta para RD 5 contra ataques à distância (flechas quebram ao impacto)." },
-      { title: "Escudo Torre", type: "Poder de Ferreiro", cost: "1 PE", description: "Garante proficiência com Escudos de Corpo (Torre). Eles concedem +4 na defesa (em vez de +2), mas impõem penalidade de -2 no ataque. Gaste 1 PE para fixar o escudo no solo, fornecendo Cobertura Total para você e para um aliado adjacente." },
+      { title: "Escudo Torre", type: "Poder de Ferreiro", cost: "1 PE", description: "Garante proficiência com Escudos de Corpo (Torre). Eles concedem +4 na defesa (em vez de +2), mas impõe penalidade de -2 no ataque. Gaste 1 PE para fixar o escudo no solo, fornecendo Cobertura Total para você e para um aliado adjacente." },
       { title: "Rebites de Sangue", type: "Poder de Ferreiro", cost: "Passivo", description: "O uso ofensivo da armadura transforma os agarramentos em armas. Durante um agarrão, o oponente sofre 1d6 + Força de dano perfurante por rodada devido às placas afiadas." },
       { title: "Inabalável", type: "Poder de Ferreiro", cost: "2 PE", description: "Reação. Gaste 2 PE para adquirir imunidade completa a empurrões, derrubadas ou movimentos involuntários até o início do próximo turno." },
       { title: "Capacete Fechado", type: "Poder de Ferreiro", cost: "Passivo", description: "O uso de capacete metálico completo anula a letalidade inimiga, transformando ataques críticos sofridos em acertos normais (o personagem sofre penalidade de -2 em testes de Percepção visual)." },
-      { title: "Bomba de Poeira Negra", type: "Alquimia", cost: "4 PE", description: "Ação Padrão. Gaste 4 PE e suprimentos alquímicos. Jogue uma bomba explosiva em alcance curto (raio 3m). Dano: 4d6 de fogo/impacto (testes de Reflexos reduzem o dano à metade). O dano base aumenta em +1d6 a cada 4 níveis de personagem." },
+      { title: "Bomba de Poeira Negra", type: "Alquimia", cost: "6 PE", description: "Ação Completa. Gaste 6 PE e suprimentos alquímicos. Jogue uma bomba explosiva em alcance curto (raio 3m). Dano: 4d6 de fogo/impacto (testes de Reflexos reduzem o dano à metade)." },
       { title: "Reparo de Combate", type: "Poder de Ferreiro", cost: "1 PE", description: "Ação Padrão. Gaste 1 PE e toque em um objeto, arma ou armadura. O equipamento recupera imediatamente 2d10 PV ou perde a condição mecânica 'Quebrado'." },
-      { title: "Pedra de Afiar (Rápida)", type: "Poder de Ferreiro", cost: "1 PE", description: "Ação de Movimento. Gaste 1 PE para amolar e balancear a arma de um aliado adjacente. O aliado adquire +2 nas rolagens de dano até o final da cena de combate." },
-      { title: "Granada de Fumaça/Luz", type: "Alquimia", cost: "1 PE", description: "Gaste 1 PE para arremessar um frasco tático. O frasco cria uma densa nuvem de fumaça (cobertura total em área de 6m) ou dispara um intenso flash de luz (inimigos testam Fortitude ou ficam cegos por uma rodada)." },
+      { title: "Pedra de Afiar (Rápida)", type: "Poder de Ferreiro", cost: "3 PE", description: "Ação de Movimento. Gaste 3 PE para amolar e balancear a arma de um aliado adjacente. O aliado adquire +2d6 nas rolagens de dano até o final da cena de combate." },
+      { title: "Granada de Luz", type: "Alquimia", cost: "3 PE", description: "Gaste 3 PE para arremessar intenso flash de luz que ocupa uma área de 9m (alvos proximos testam reflexos DT 20 ou ficam cegos por uma rodada)." },
       { title: "Armadilha de Urso", type: "Poder de Ferreiro", cost: "2 PE", description: "Ação Completa para armar. Gaste 2 PE e posicione as mandíbulas metálicas. O inimigo que ativar o gatilho sofre 2d8 de dano perfurante e perde a capacidade de deslocamento (testes de Força CD 20 quebram a armadilha)." },
       { title: "Sucateiro", type: "Poder de Ferreiro", cost: "Passivo", description: "Mestre da improvisação. Permite a criação de itens utilitários rudimentares (pé de cabra, corda metálica reforçada, armas simples) a partir de destroços próximos com apenas 1 minuto de trabalho. Os itens desmontam sozinhos após 1 hora de uso." },
       { title: "Injeção de Adrenalina", type: "Alquimia", cost: "2 PE", description: "Ação Padrão. Gaste 2 PE e aplique um tônico cirúrgico instável em si ou num aliado adjacente. O alvo recupera 1d10 PV de imediato e recebe um bônus de +2 em testes de Reflexos pelo resto da cena." },
@@ -184,7 +184,7 @@ const classesData = [
       hp: "16 + Vigor Inicial (+4 + Vig por nível)",
       pe: "4 + Instinto Inicial (+4 por nível)",
       proficiencies: "Armas simples e marciais, armaduras leves, médias e escudos leves.",
-      skills: "Sobrevivência (Inst) e Pontaria (Agi). Mais 3 entre: Furtividade, Percepção, Atletismo, Adestramento, Investigação, Rastrear, Reflexos."
+      skills: "Sobrevivência, Pontaria, Reflexos. Mais 3 entre: Furtividade, Percepção, Atletismo, Adestramento, Investigação, Rastrear."
     },
     fixedAbilities: [
       { title: "Marca da Presa", type: "Habilidade de Classe", cost: "1 PE", description: "Ação Bônus. Gaste 1 PE para analisar e marcar uma criatura visível. Até o fim da cena, os ataques contra ela causam dano extra. Concede Vantagem em testes de Percepção e Sobrevivência para rastrear o alvo marcado.\nEscalonamento do Dano Extra:\n- Nível 1: +1d6.\n- Nível 5: +1d8.\n- Nível 9: +1d10.\n- Nível 13: +1d12.\n- Nível 17: +2d8." },
