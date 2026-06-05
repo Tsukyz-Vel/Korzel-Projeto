@@ -31,7 +31,7 @@ const classesData = [
       { title: "Postura do Anquilossauro", type: "Postura de Combate", cost: "Mov", description: "(Armas Pesadas/Duas Mãos)\nPassivo: Recebe +3 no Dano e ignora 2 pontos de RD do alvo.\nAtivo (Esmagar): Gaste 2 PE ao rolar dano. O alvo faz um teste de Constituição; em caso de falha, você quebra a perna dele e diminui seu deslocamento pela metade." },
       { title: "Postura do Raptor", type: "Postura de Combate", cost: "Mov", description: "(Armas Leves/Ágeis)\nPassivo: Você se move baixo. Ganha +3m de Deslocamento e +1 na Defesa.\nAtivo (Frenesi): Ao usar a ação atacar, gaste 2 PE para fazer um ataque extra imediato." },
       { title: "Postura do Triceratops", type: "Postura de Combate", cost: "Mov", description: "(Escudos)\nPassivo: Você vira uma barreira. Aumenta o bônus de Defesa do escudo em +2.\nAtivo (Escudo Ósseo): Reação. Gaste 1 PE quando um aliado adjacente for atacado. O ataque é redirecionado para o seu escudo (usa a sua Defesa)." },
-      { title: "Postura do Diplodoco", type: "Postura de Combate", cost: "Mov", description: "(Hastes/Lanças/Chicotes)\nPassivo: Aumenta o alcance dos seus ataques em +1,5m.\nAtivo (Bote): Se um inimigo entrar no seu alcance, gaste 1 PE para fazer um Ataque de Oportunidade contra ele." },
+      { title: "Postura do Diplodoco", type: "Postura de Combate", cost: "Mov", description: "(Hastes/Lanças/Chicotes)\nPassivo: Aumenta o alcance dos seus ataques em +1,5m.\nAtivo (Bote): Se um inimigo entrar no seu alcance, gaste 2 PE para fazer uma manobra para tentar derrubar ele." },
       { title: "Desarmar Técnico", type: "Poder de Guerreiro", cost: "2 PE", description: "Ao acertar um ataque, gaste 2 PE. Além do dano, faça um teste de manobra (Força vs Força). Se vencer, o alvo solta a arma, que cai a 3m." },
       { title: "Golpe em Arco", type: "Poder de Guerreiro", cost: "2 PE", description: "Gaste 2 PE. Se reduzir um inimigo a 0 PV com ataque corpo a corpo, realiza imediatamente um ataque extra em outro inimigo adjacente." },
       { title: "Estocada na Junta", type: "Poder de Guerreiro", cost: "2 PE", description: "Gaste 2 PE antes de atacar. Você sofre -2 no teste de ataque, mas o golpe ignora totalmente a Redução de Dano (RD) do alvo." },
@@ -73,7 +73,7 @@ const classesData = [
     powers: [
       { title: "Postura do Vento", type: "Postura Elemental", cost: "Mov", description: "Passivo: Passos leves. Ganha +3m de deslocamento e ignora terreno difícil.\nAtivo (Furacão): Ao Atacar, gaste 2 PE para desferir um ataque extra imediato (penalidade de -2 no acerto)." },
       { title: "Postura da Montanha", type: "Postura Elemental", cost: "Mov ", description: "Passivo: Aterra seu peso. Recebe +2 na Defesa (se não se mover) e imunidade a derrubadas/empurrões.\nAtivo (Fenda): Gaste 2 PE antes de atacar. O golpe ignora totalmente a RD do alvo." },
-      { title: "Postura da Chama", type: "Postura Elemental", cost: "Mov", description: "Passivo: Lâmina agressiva. +2 no dano corpo a corpo e +2 em Intimidação.\nAtivo (Labareda): Reação. Ao sofrer dano adjacente, gaste 2 PE para realizar um ataque imediato de retaliação." },
+      { title: "Postura da Chama", type: "Postura Elemental", cost: "Mov", description: "Passivo: Lâmina agressiva. +2 no ataque corpo a corpo e +2 no dano.\nAtivo (Labareda): Reação. Ao sofrer dano adjacente, gaste 2 PE para realizar um ataque imediato de retaliação." },
       { title: "Postura do Rio", type: "Postura Elemental", cost: "Mov", description: "Passivo: Desengajar vira Ação Bônus. Soma Agilidade em manobras (Desarmar/Derrubar).\nAtivo (Correnteza): Reação. Se o inimigo errar um golpe corpo a corpo, gaste 2 PE para Desarmá-lo com Vantagem." },
       { title: "Saque Rápido", type: "Poder de Espadachim", cost: "Passivo", description: "Saca ou guarda arma como Ação Livre. Recebe +2 no teste do primeiro ataque realizado na mesma rodada do saque (Iaijutsu)." },
       { title: "Lâmina Corta-Céus", type: "Poder de Espadachim", cost: "Padrão / 3 PE", description: "Golpe rápido que cria pressão de ar. Alcance Médio (9m). Dano: Dano da arma + bônus de Agilidade." },
@@ -81,10 +81,10 @@ const classesData = [
       { title: "Estilo de Duas Lâminas", type: "Poder de Espadachim", cost: "Passivo", description: "Ao usar a ação Atacar empunhando duas armas leves, pode realizar um ataque extra com a secundária usando Ação Bônus." },
       { title: "Passo das Sombras", type: "Poder de Espadachim", cost: "Livre / 3 PE", description: "Pré-requisito: Nível 8. Move-se rápido demais. Ganha camuflagem total (50% de chance de erro) contra o próximo ataque que sofrer na rodada." },
       { title: "Lâmina de Aço Frio", type: "Poder de Espadachim", cost: "Livre / 2 PE", description: "Ao confirmar Acerto Crítico com arma de lâmina, gaste 2 PE para aumentar o multiplicador de dano em +1 (ex: x2 vira x3)." },
-      { title: "Corte de Sacrifício", type: "Poder de Espadachim", cost: "Livre", description: "Ao atacar, sofre -4 na Defesa até o próximo turno para adicionar +2 dados de dano na arma do ataque atual." },
+      { title: "Corte de Sacrifício", type: "Poder de Espadachim", cost: "Livre", description: "Ao atacar, sofre -5na Defesa até o próximo turno para adicionar +2 dados de dano na arma do ataque atual." },
       { title: "Golpe de Execução", type: "Poder de Espadachim", cost: "Padrão / 4 PE", description: "Ataque com -5 no acerto. Se atingir alvo com menos da metade dos PVs máximos, o dano do golpe é dobrado." },
       { title: "Aparar Projétil", type: "Poder de Espadachim", cost: "Reação / 2 PE", description: "Teste de Luta oposto ao ataque à distância inimigo (flechas/arpões). Se vencer, você não sofre dano. Inútil contra pólvora ou área." },
-      { title: "Foco de Batalha", type: "Poder de Espadachim", cost: "Bônus / 2 PE", description: "Transe letal por uma rodada inteira. Torna-se imune às condições Abalado, Assustado e Enjoado." },
+      { title: "Foco de Batalha", type: "Poder de Espadachim", cost: "Bônus / 2 PE", description: "Entra em um transe total por uma rodada inteira. Torna-se imune às condições Abalado, Assustado e Enjoado." },
       { title: "Espírito Inabalável", type: "Poder de Espadachim", cost: "Passivo", description: "Pode somar Agilidade (no lugar de Presença/Intelecto) em testes de Vontade." },
       { title: "Meditação Ágil", type: "Poder de Espadachim", cost: "Completa", description: "1 vez por Descanso Longo: Limpa a mente e recupera 1d6 + Agilidade em PE." },
       { title: "Mestre das Emoções", type: "Poder de Espadachim", cost: "Livre / 2 PE", description: "Se tentarem Intimidação contra você, gaste 2 PE. O efeito ricocheteia e o agressor fica Abalado (-2)." },
@@ -112,28 +112,28 @@ const classesData = [
     powers: [
       { title: "Crítico Brutal", type: "Poder de Bárbaro", cost: "1 PE", description: "Ao confirmar um crítico, gaste 1 PE para aumentar o multiplicador da arma em +1 (ex: x2 vira x3)." },
       { title: "Frenesi", type: "Poder de Bárbaro", cost: "2 PE", description: "Pré-requisito: Nível 4. Durante a Fúria, é possível gastar 2 PE para fazer um ataque adicional como uma Ação Bônus." },
-      { title: "Investida Imprudente", type: "Poder de Bárbaro", cost: "Livre", description: "Ataca com Vantagem (rola 2 dados e fica com o melhor), mas os inimigos recebem Vantagem contra você até o próximo turno." },
-      { title: "Sangue por Sangue", type: "Poder de Bárbaro", cost: "1 PE", description: "Reação. Durante a Fúria, se um inimigo adjacente causar dano, gaste 1 PE para desferir um ataque imediato contra ele." },
-      { title: "Golpe Poderoso", type: "Poder de Bárbaro", cost: "1 PE", description: "Ao acertar um ataque, gaste 1 PE para empurrar o inimigo 3m (caso possua tamanho médio ou menor). Se o alvo bater em uma parede ou objeto, sofre +1d6 de dano extra." },
-      { title: "Destruidor", type: "Poder de Bárbaro", cost: "Passivo", description: "Os ataques causam dano dobrado contra objetos e estruturas. Ao destruir um objeto ou abater um inimigo, o personagem ganha PV temporários em quantidade igual à Força." },
-      { title: "Arremesso Titânico", type: "Poder de Bárbaro", cost: "2 PE", description: "Ação Padrão. Gaste 2 PE. Agarra uma criatura (Média ou menor) ou um objeto pesado e arremessa a até 6m de distância. O alvo sofre dano igual ao do ataque desarmado e cai no chão." },
-      { title: "Empunhadura Gigante", type: "Poder de Bárbaro", cost: "Passivo", description: "Permite usar armas de duas mãos com apenas uma mão (com penalidade de -2 no ataque), o que viabiliza o uso de um escudo ou outra arma leve em conjunto." },
-      { title: "Pele Encouraçada", type: "Poder de Bárbaro", cost: "Passivo", description: "Sem armadura, a Defesa aumenta em um valor exato ao modificador de Constituição/Vigor." },
-      { title: "Vigor Primal", type: "Poder de Bárbaro", cost: "4 PE", description: "Ação Completa. Gaste 4 PE para recuperar PV em quantidade igual ao seu nível x 5." },
+      { title: "Investida Imprudente", type: "Poder de Bárbaro", cost: "Livre", description: "Você pode atacar com Vantagem (rola 2 dados, fica com o melhor), mas os inimigos terão Vantagem contra você até seu próximo turno." },
+      { title: "Sangue por Sangue", type: "Poder de Bárbaro", cost: "1 PE", description: " Reação. Enquanto em Fúria, se um inimigo adjacente lhe causar dano, gaste 1 PE para fazer um ataque imediato contra ele." },
+      { title: "Golpe Poderoso", type: "Poder de Bárbaro", cost: "1 PE", description: "Ao acertar um ataque, gaste 1 PE para empurrar o inimigo 3m (se for tamanho médio ou menor). Se ele bater em uma parede ou objeto, sofre +1d6 de dano extra." },
+      { title: "Sanguinário", type: "Poder de Bárbaro", cost: "Passivo", description: "Ao matar um inimigo, você ganha PV temporários igual à sua Força." },
+      { title: "Arremesso Titânico", type: "Poder de Bárbaro", cost: "2 PE", description: "Você agarra uma criatura (Média ou menor teste força anula) ou objeto pesado e arremessa a até 6m. O alvo sofre dano igual ao seu ataque desarmado e cai no chão." },
+      { title: "Empunhadura Gigante", type: "Poder de Bárbaro", cost: "Passivo", description: "Você pode usar armas de duas mãos com apenas uma mão (sofrendo -2 no ataque), permitindo usar escudo ou outra arma junto." },
+      { title: "Pele Encouraçada", type: "Poder de Bárbaro", cost: "Passivo", description: "Enquanto estiver sem armadura, sua Defesa aumenta em um valor igual a sua perícia Constituição." },
+      { title: "Vigor Primal", type: "Poder de Bárbaro", cost: "4 PE", description: "Ação Completa. Gaste 4 PE para recuperar 2d8 de vida." },
       { title: "Superstição", type: "Poder de Bárbaro", cost: "2 PE", description: "Reação. Quando for alvo de uma magia ou efeito sobrenatural, gaste 2 PE para receber Vantagem no teste de resistência ou para reduzir o dano mágico à metade." },
-      { title: "Recusa à Morte", type: "Poder de Bárbaro", cost: "4 PE", description: "Uma vez por descanso, se for reduzido a 0 PV ou menos, gaste 4 PE para permanecer de pé com 1 PV restando." },
-      { title: "Cicatrizes de Batalha", type: "Poder de Bárbaro", cost: "Passivo", description: "Recebe +2 PV por nível de personagem (efeito retroativo) e a RD permanente aumenta em 1 (o efeito acumula com a Fúria)." },
-      { title: "Alma de Bronze", type: "Poder de Bárbaro", cost: "Passivo", description: "Concede imunidade a condições de Medo e Abalado durante a Fúria." },
-      { title: "Espírito Tirano", type: "Poder de Bárbaro", cost: "Passivo", description: "Aumenta a Constituição/Vigor em +1 (é possível escolher este poder até duas vezes, com máximo de +2)." },
-      { title: "Rugido Aterrorizante", type: "Poder de Bárbaro", cost: "2 PE", description: "Ação de Movimento. Gaste 2 PE. Inimigos a curta distância realizam um teste de Vontade (CD baseada em Força). Falhas os deixam abalados (sofrem -2 em ataques) por 1 rodada." },
-      { title: "Presença Predatória", type: "Poder de Bárbaro", cost: "Passivo", description: "Inimigos de nível inferior (lacaios) não atacam o bárbaro se houver outro alvo disponível na área, devido ao terror instintivo. Concede Vantagem em Intimidação." },
-      { title: "Olhar da Morte", type: "Poder de Bárbaro", cost: "1 PE", description: "Gaste 1 PE e encare um inimigo específico. O oponente escolhido sofre penalidade de -2 em todos os testes de resistência contra seus ataques até o fim da cena." },
-      { title: "Carga de Juggernaut", type: "Poder de Bárbaro", cost: "3 PE", description: "Gaste 3 PE. Mova-se o dobro do deslocamento base em linha reta. Atravessa espaços ocupados por inimigos; cada inimigo atravessado sofre dano idêntico ao seu modificador de Força e corre o risco de cair." },
-      { title: "Sentidos Selvagens", type: "Poder de Bárbaro", cost: "Passivo", description: "Concede visão no escuro e Vantagem garantida em testes de Percepção e Iniciativa." },
-      { title: "Rastreador Implacável", type: "Poder de Bárbaro", cost: "Passivo", description: "O personagem utiliza o deslocamento normal durante o rastreio. Consegue rastrear criaturas protegidas por feitiços de disfarce (como invisibilidade) através de faro e som." },
-      { title: "Salto da Montanha", type: "Poder de Bárbaro", cost: "1+ PE", description: "Os testes de Atletismo para saltar possuem resultado dobrado automaticamente. Reduz o dano das quedas em 10m para cada 1 PE que gastar (como reação)." },
-      { title: "Predador Oportunista", type: "Poder de Bárbaro", cost: "Passivo", description: "Os ataques causam +1d8 de dano contra inimigos previamente feridos (com vida abaixo do PV máximo)." },
-      { title: "Força Indomável", type: "Poder de Bárbaro", cost: "Passivo", description: "Pré-requisito: Nível 10+. Se o resultado numérico final de um teste de Força ou Atletismo cair em um valor inferior ao seu atributo Força base, o sistema considera o valor do atributo base como o resultado da rolagem." }
+      { title: "Recusa à Morte", type: "Poder de Bárbaro", cost: "4 PE", description: "Uma vez por descanso, se for reduzido a 0 PV ou menos, gaste 4 PE para ficar com 1 PV e se manter de pé." },
+      { title: "Cicatrizes de Batalha", type: "Poder de Bárbaro", cost: "Passivo", description: " Você recebe +2 PV por nível de personagem (retroativo) e sua RD permanente aumenta em 1 (acumula com Fúria)." },
+      { title: "Alma de Bronze", type: "Poder de Bárbaro", cost: "Passivo", description: " Você se torna imune a condições de Medo e Abalado enquanto estiver em Fúria." },
+      { title: "Espírito Tirano", type: "Poder de Bárbaro", cost: "Passivo", description: " Aumenta sua Constituição em +1 (pode ser pego duas vezes, até o máximo de +2)." },
+      { title: "Rugido Aterrorizante", type: "Poder de Bárbaro", cost: "2 PE", description: "Ação de Movimento. Gaste 2 PE. Inimigos a curta distância devem passar num teste de Vontade (CD baseada em Força). Se falharem, ficam abalados (-2 ataques) por 1 rodada." },
+      { title: "Presença Predatória", type: "Poder de Bárbaro", cost: "Passivo", description: " Inimigos de nível inferior ao seu não conseguem te atacar se houver outro alvo disponível, pois sentem medo instintivo. Vantagem em Intimidação." },
+      { title: "Olhar da Morte", type: "Poder de Bárbaro", cost: "1 PE", description: "Gaste 1 PE. Encare um inimigo. Ele sabe que você vai matá-lo. Ele sofre -2 em todos os testes de resistência contra você até o fim da cena." },
+      { title: "Carga de Juggernaut", type: "Poder de Bárbaro", cost: "3 PE", description: "Gaste 3 PE. Mova-se o dobro do deslocamento em linha reta. Pode atravessar espaços de inimigos; cada inimigo atravessado sofre dano igual à sua Força e pode ser derrubado." },
+      { title: "Sentidos Selvagens", type: "Poder de Bárbaro", cost: "Passivo", description: " Você ganha visão no escuro 18m  e Vantagem em testes de Percepção e Iniciativa." },
+      { title: "Rastreador Implacável", type: "Poder de Bárbaro", cost: "Passivo", description: "Você se move seu deslocamento normal enquanto rastreia e pode rastrear criaturas que usam magia para se esconder (como invisibilidade) através do cheiro/som." },
+      { title: "Salto da Montanha", type: "Poder de Bárbaro", cost: "1+ PE", description: "(requer nível 10) Seus testes de Atletismo para saltar têm o resultado dobrado. Você reduz o dano de queda em 10m para cada 1 PE gasto (como reação)." },
+      { title: "Predador Oportunista", type: "Poder de Bárbaro", cost: "Passivo", description: "Você causa +1d8 de dano contra inimigos que já estejam feridos (abaixo do PV máximo)." },
+      { title: "Força Indomável", type: "Poder de Bárbaro", cost: "Passivo", description: " (Passivo, Nível 10+) Se o resultado total de um teste de Força ou Atletismo for menor que o valor do seu atributo Força, considere o valor do atributo como o resultado." }
     ]
   },
   {
@@ -192,30 +192,30 @@ const classesData = [
       { title: "Predador Apex", type: "Habilidade de Classe", cost: "Passivo", description: "Nvl 20: Permite manter até duas Marcas da Presa ativas simultaneamente em alvos distintos. O primeiro ataque de cada rodada contra uma criatura marcada causa dano máximo automático (sem necessidade de rolar dados)." }
     ],
     powers: [
-      { title: "Disparo Veloz", type: "Poder de Caçador", cost: "2 PE", description: "Ao realizar a ação atacar com um arco, gaste 2 PE para efetuar um ataque adicional. Ambos os disparos sofrem penalidade de -2 no teste de acerto." },
-      { title: "Tiro em Movimento", type: "Poder de Caçador", cost: "Passivo", description: "Anula a penalidade por atirar em movimento e permite dividir o deslocamento antes e depois do disparo. Se o ataque acertar, o caçador adquire +2 na Defesa contra o alvo atacado (Kiting)." },
-      { title: "Chuva de Flechas", type: "Poder de Caçador", cost: "3 PE", description: "Ação Completa. Gaste 3 PE para disparar flechas para o alto que desabam em um cone de 9m. Realize um único teste de ataque e compare com a Defesa de todas as criaturas na área. O dano é o normal da arma." },
-      { title: "Flecha Guiada", type: "Poder de Caçador", cost: "3 PE", description: "Gaste 3 PE. A flecha descreve curvas anormais, ignorando os bônus de camuflagem e cobertura do alvo (exceto em casos de cobertura total)." },
-      { title: "Recarga Rápida", type: "Poder de Caçador", cost: "Passivo", description: "Reduz o tempo de recarga das bestas em uma categoria (Ação Padrão torna-se Ação de Movimento; Ação de Movimento torna-se Ação Livre). Poder vital para besteiros." },
-      { title: "Disparo Perfurante", type: "Poder de Caçador", cost: "2 PE", description: "Ação Padrão. Gaste 2 PE para um disparo linear. A seta atravessa o alvo inicial e atinge uma segunda criatura logo atrás (caso o teste de ataque supere a Defesa de ambos). O disparo ignora 5 pontos de RD." },
-      { title: "Tiro na Cabeça (Sniper)", type: "Poder de Caçador", cost: "4 PE", description: "Ação Completa. Gaste 4 PE. O personagem mira e dispara; em caso de acerto, o dano é crítico automático. Caso o caçador esteja escondido no momento do disparo, o multiplicador do crítico sobe em +1." },
-      { title: "Impacto Pesado", type: "Poder de Caçador", cost: "Passivo", description: "Acertos com a besta empurram o alvo 1,5m para trás. Se o inimigo colidir com um obstáculo físico, sofre atordoamento por 1 rodada (um teste de Fortitude anula o atordoamento)." },
-      { title: "Combate com Duas Armas", type: "Poder de Caçador", cost: "Livre", description: "Ao empunhar duas armas com a propriedade 'Leve', o personagem adquire o direito de atacar com a arma secundária usando uma Ação Bônus." },
-      { title: "Estripador", type: "Poder de Caçador", cost: "Passivo", description: "Ataques corpo a corpo desferidos contra criaturas marcadas com a Marca da Presa aplicam sangramento automático (1d4 de dano extra contínuo por rodada)." },
-      { title: "Guerrailheiro (Skirmisher)", type: "Poder de Caçador", cost: "Passivo", description: "Se o caçador se deslocar pelo menos 3m antes de atacar, ele conquista +2 de Dano e +2 de Defesa até o turno subsequente." },
-      { title: "Corte de Tendão", type: "Poder de Caçador", cost: "2 PE", description: "Gaste 2 PE. Efetue um ataque corpo a corpo. O acerto inflige o dano normal e rompe a mobilidade do alvo (o movimento é reduzido à metade e a criatura perde o uso de reações na rodada)." },
-      { title: "Companheiro Animal", type: "Poder de Caçador", cost: "1 PE", description: "O personagem adota um animal fiel. Gaste 1 PE para ordenar que o animal realize uma Ação Padrão (como Atacar) na mesma rodada. Sem ordens explícitas, o animal foca em evasão e defesa." },
-      { title: "Ataque em Matilha", type: "Poder de Caçador", cost: "Passivo", description: "Se o caçador e o companheiro animal atacarem a mesma criatura no mesmo turno, o alvo fica Caído automaticamente (se for tamanho médio ou menor). Alvos Grandes realizam teste de Força." },
-      { title: "Vínculo Vital", type: "Poder de Caçador", cost: "1 PE", description: "A até 6m de distância, caçador e besta dividem os ferimentos. Danos sofridos pelo caçador podem ser partilhados em 50% com o animal, e vice-versa. Gaste 1 PE para curar o animal em 1d8 + Instinto mediante toque." },
-      { title: "Fera de Combate", type: "Poder de Caçador", cost: "Passivo", description: "Aumenta a letalidade do companheiro animal: o dano físico das presas sobe uma categoria (ex: de 1d6 para 1d8) e a fera ganha RD (Redução de Dano) igual ao modificador de Instinto do caçador." },
-      { title: "Colecionador de Troféus", type: "Poder de Caçador", cost: "1 PE", description: "Gasta 10 minutos para extrair partes de monstros abatidos. Equipar um troféu concede benefícios pela cena (custo de 1 PE para ativar). Garras concedem +3 Dano; Couros concedem +2 RD; Olhos/Glândulas concedem visão no escuro/invisibilidade." },
-      { title: "Conhecimento Anatômico", type: "Poder de Caçador", cost: "Passivo", description: "Realiza um teste de Conhecimento utilizando Intelecto ou Instinto. Em caso de sucesso, o caçador e o esquadrão ganham +5 de Ataque e +5 de Defesa contra a família taxonômica estudada pelo resto do dia." },
-      { title: "Armadilheiro", type: "Poder de Caçador", cost: "2 PE", description: "Gaste 2 PE para disfarçar uma armadilha no solo. O mecanismo inflige 4d6 de dano e impõe o status Imobilizado à criatura." },
-      { title: "Alquimia de Campo", type: "Poder de Caçador", cost: "1 PE", description: "Domínio primitivo da flora. Cria extratos botânicos, antídotos e poções curativas de 2d6. O processo custa 1 PE por frasco confeccionado." },
-      { title: "Camuflagem", type: "Poder de Caçador", cost: "Passivo", description: "O personagem consegue realizar a ação de Furtividade mesmo se estiver sendo monitorado por inimigos, desde que posicionado em terreno com folhagem ou pedras naturais." },
-      { title: "Inimigo Predileto", type: "Poder de Caçador", cost: "Passivo", description: "Elege uma classificação de criatura (ex: bestas marinhas, mortos-vivos). Garante +2 de ataque e +2 de bônus de dano permanente contra essa família biológica." },
-      { title: "Sentidos Aguçados", type: "Poder de Caçador", cost: "Passivo", description: "A percepção extrema anula tentativas inimigas de ataque furtivo contra o caçador. Além disso, o modificador de Instinto é somado ao valor final da Iniciativa." },
-      { title: "Matador de Gigantes", type: "Poder de Caçador", cost: "Passivo", description: "A especialização do Davi contra Golias. Todo ataque contra adversários de tamanho Grande ou superior causa +1d8 de dano suplementar e concede +2 na Defesa do caçador." }
+      { title: "Disparo Veloz", type: "Poder de Caçador", cost: "2 PE", description: "Ao fazer a ação atacar com arco, você pode gastar 2 PE para fazer um ataque adicional. Ambos os ataques sofrem -2 no teste de acerto." },
+      { title: "Tiro em Movimento", type: "Poder de Caçador", cost: "Passivo", description: "Você não sofre penalidade por atirar enquanto se move (normalmente -2) e pode dividir seu movimento antes e depois do tiro. Se acertar o ataque, ganha +2 na Defesa contra o alvo atacado." },
+      { title: "Chuva de Flechas", type: "Poder de Caçador", cost: "4 PE", description: "Ação Completa. Gaste 4 PE 5 flechas . Você dispara flechas para o alto que caem em um cone de 9m. Faça um ataque e compare com a Defesa de todos na área. 3d8." },
+      { title: "Flecha Guiada", type: "Poder de Caçador", cost: "3 PE", description: "Gaste 3 PE. Você ignora camuflagem e cobertura (exceto total) do alvo. Sua flecha faz curvas impossíveis." },
+      { title: "Recarga Rápida", type: "Poder de Caçador", cost: "Passivo", description: "(Passivo) você diminui o tempo de recarga de bestas em um passo (Ação Padrão vira Movimento; Movimento vira Livre). Essencial para besteiros, pode pegar mais de uma vez." },
+      { title: "Disparo Perfurante", type: "Poder de Caçador", cost: "2 PE", description: "Ação Padrão. Gaste 2 PE. Você faz um disparo de linha reta. A seta atravessa o primeiro alvo e atinge um segundo alvo logo atrás (se o ataque superar a defesa de ambos). Ignora 5 pontos de RD." },
+      { title: "Tiro na Cabeça (Sniper)", type: "Poder de Caçador", cost: "5 PE", description: "Ação Completa (Nível 12). Gaste 5 PE. Você mira e atira. Se acertar, o dano é crítico automático. Se você estava escondido, o multiplicador crítico aumenta em +1." },
+      { title: "Impacto Pesado", type: "Poder de Caçador", cost: "Passivo", description: "Quando acerta um ataque com besta, o alvo é empurrado 1,5m para trás. Se ele bater numa parede, fica atordoado por 1 rodada (Fortitude anula)." },
+      { title: "Combate com Duas Armas", type: "Poder de Caçador", cost: "Livre", description: "Se estiver empunhando duas armas leves, você pode fazer um ataque com a secundária como Ação Bônus." },
+      { title: "Estripador", type: "Poder de Caçador", cost: "Passivo", description: "Seus ataques corpo a corpo contra criaturas que tenham a sua Marca da Presa causam sangramento (1d6 dano extra contínuo)" },
+      { title: "Guerrilheiro", type: "Poder de Caçador", cost: "Passivo", description: "Se você se mover pelo menos 3m antes de atacar, recebe +2 no Dano e +2 na Defesa até o próximo turno. O Caçador não tanka parado, ele dança." },
+      { title: "Corte de Tendão", type: "Poder de Caçador", cost: "2 PE", description: "Gaste 2 PE. Faz um ataque corpo a corpo. Se acertar, causa dano normal e o alvo fica lento (movimento reduzido à metade) e não pode usar reações." },
+      { title: "Companheiro Animal", type: "Poder de Caçador", cost: "1 PE", description: "Você ganha um animal fiel (Ave, Réptil, Dinossauros). Ele age na sua iniciativa. Gaste 1 PE para dar uma ordem de Ação Padrão (Atacar). Sem ordem, ele se defende (Evolução: O animal tem metade dos seus PV e sobe de nível com você)." },
+      { title: "Ataque em Matilha", type: "Poder de Caçador", cost: "Passivo", description: " Se você e seu animal atacarem o mesmo alvo na mesma rodada (flanqueando ou não), o alvo fica caído automaticamente se for tamanho médio ou menor. Se for Grande, faz teste de Força." },
+      { title: "Vínculo Vital", type: "Poder de Caçador", cost: "1 PE", description: "Enquanto estiver a até 6m do seu animal, vocês dividem o dano. Se você sofrer 10 de dano, pode passar 5 para o animal (e vice-versa). Gaste 1 PE para curar o animal em 1d8+Instinto (toque)." },
+      { title: "Fera de Combate", type: "Poder de Caçador", cost: "Passivo", description: "O dano do seu animal aumenta em um dado (ex: 1d6 vira 1d8) e ele ganha RD igual ao seu Instinto." },
+      { title: "Colecionador de Troféus", type: "Poder de Caçador", cost: "1 PE", description: "Gasta 10 minutos para extrair partes de monstros abatidos. Equipar um troféu concede benefícios pela cena (custo de 1 PE para ativar). Garras concedem +3 Dano; Couros concedem +2 RD; Olhos/Glândulas concedem visão em alvos camufladol/Escuro." },
+      { title: "Conhecimento Anatômico", type: "Poder de Caçador", cost: "Passivo", description: "Você usa Intelecto ou Instinto para fazer um teste de Conhecimento sobre uma criatura. Se passar, você e seus aliados ganham +5 no Ataque e Defesa contra aquele tipo de criatura até o fim do dia." },
+      { title: "Armadilheiro", type: "Poder de Caçador", cost: "2 PE", description: "Gaste 2 PE e recursos encontrados no chão para montar uma armadilha no chão. Dano 3d6 + 2 Imobilizado." },
+      { title: "Alquimia de Campo", type: "Poder de Caçador", cost: "1 PE", description: "Você pode criar óleos e poções simples com ervas (Curar 2d6, Antídoto, Óleo de Fogo). Gaste 1 PE por frasco criado." },
+      { title: "Esconder-se", type: "Poder de Caçador", cost: "Passivo", description: "Você pode se esconder como ação livre." },
+      { title: "Inimigo Predileto", type: "Poder de Caçador", cost: "Passivo", description: "Escolha um tipo de criatura. Você ganha +2 em ataque e dano permanente contra eles. Pode pegar mais de uma vez." },
+      { title: "Sentidos Aguçados", type: "Poder de Caçador", cost: "Passivo", description: " Você não pode ser surpreendido. Soma Instinto na Iniciativa." },
+      { title: "Matador de Gigantes", type: "Poder de Caçador", cost: "Passivo", description: "Contra criaturas de tamanho Grande ou maior, você ganha +1d8 de dano extra em todos os ataques e +2 na Defesa." }
     ]
   },
   {
@@ -232,36 +232,35 @@ const classesData = [
       { title: "Sombra da Lua", type: "Habilidade de Classe", cost: "Passivo", description: "Nvl 1: O ladino enxerga na escuridão total (não mágica) e soma o modificador de Agilidade à Iniciativa." },
       { title: "Eclipse Final", type: "Habilidade de Classe", cost: "5 PE", description: "Nvl 20: Mestre absoluto da morte. O Ataque Furtivo afeta qualquer criatura, ignorando imunidades a dano de precisão (como construtos e elementais). Ao acertar um Ataque Furtivo, gaste 5 PE para DOBRAR a quantidade de dados extras rolados (ex: de +10d6 para +20d6)." }
     ],
-    powers: [
-      { title: "Lua Nova (O Invisível)", type: "Postura Lunar", cost: "Mov / 2 PE", description: "Passivo: As sombras o abraçam. Recebe +5 em Furtividade.\nAtivo (Vanish): Gaste 2 PE. O personagem torna-se invisível por 1 rodada ou até desferir um ataque. É possível ativar a habilidade mesmo sob observação direta." },
-      { title: "Lua de Sangue (O Executor)", type: "Postura Lunar", cost: "Mov / 1 PE", description: "Passivo: Os Ataques Furtivos causam sangramento contínuo (1d4 de dano por turno).\nAtivo (Crueldade): Ao rolar o dano do Ataque Furtivo, gaste 1 PE para rerrolar todos os dados que apresentarem resultado '1' ou '2'." },
-      { title: "Lua Crescente (O Dançarino)", type: "Postura Lunar", cost: "Mov / 1 PE", description: "Passivo: A velocidade aumenta em +3m e é possível levantar-se da condição 'Caído' como Ação Livre.\nAtivo (Passo Sombrio): Gaste 1 PE. O ladino teleporta-se instantaneamente até 9m para qualquer área sombreada visível, sem gerar ataques de oportunidade." },
-      { title: "Lua Minguante (O Venenoso)", type: "Postura Lunar", cost: "Mov / 1 PE", description: "Passivo: Aumenta a CD para resistir aos venenos aplicados em +2.\nAtivo (Debilitar): Ao acertar um ataque, gaste 1 PE. O alvo fica Enjoado (restrito a apenas uma ação por turno) por 1 rodada devido ao impacto em nervos centrais." },
-      { title: "Assassinar", type: "Poder de Assassino", cost: "Passivo", description: "Ataques realizados contra inimigos que ainda não agiram no combate (Iniciativa menor ou alvos surpresos) convertem-se em Acertos Críticos automáticos." },
-      { title: "Golpe de Misericórdia", type: "Poder de Assassino", cost: "2 PE", description: "Ação Completa. Gaste 2 PE contra um inimigo indefeso (amarrado ou adormecido). O ataque causa dano crítico automático com multiplicador x3, e o alvo testa Fortitude; em caso de falha, morre instantaneamente." },
-      { title: "Combate com Duas Armas", type: "Poder de Assassino", cost: "Livre", description: "O personagem adquire a habilidade de realizar um ataque com a arma secundária utilizando a Ação Bônus da rodada." },
-      { title: "Dilacerar", type: "Poder de Assassino", cost: "1 PE", description: "Pré-requisito: Combate com Duas Armas. Se acertar ambos os golpes no turno, gaste 1 PE para somar os danos e infligir +1d8 extra." },
-      { title: "Lâmina Assassina", type: "Poder de Assassino", cost: "Passivo", description: "Pré-requisito: Nível 8+. A letalidade aumenta e os dados do Ataque Furtivo são elevados de d6 para d8." },
-      { title: "Oportunista", type: "Poder de Assassino", cost: "2 PE", description: "Reação. Se um aliado acertar um inimigo posicionado adjacentemente a você, gaste 2 PE para realizar um ataque corpo a corpo imediato contra ele." },
-      { title: "Envenenamento Rápido", type: "Poder de Assassino", cost: "1 PE", description: "Ação Bônus. Gaste 1 PE para cobrir a lâmina com veneno no meio do combate. O veneno não evapora em caso de ataque fracassado." },
-      { title: "Dose Dupla", type: "Poder de Assassino", cost: "Passivo", description: "O ladino consegue mesclar dois tipos distintos de veneno na mesma arma. O alvo é forçado a realizar dois testes de resistência independentes." },
-      { title: "Nuvem Tóxica", type: "Poder de Assassino", cost: "2 PE", description: "Ação Padrão. Gaste 2 PE para esmagar um frasco químico. Cria uma área nociva de 3m. Oponentes na área sofrem 1d6 de dano de Ácido e ficam Enjoados." },
-      { title: "Areia nos Olhos", type: "Poder de Assassino", cost: "1 PE", description: "Ação Bônus. Gaste 1 PE. Realiza um teste de Ladinagem contra os Reflexos do alvo. A vitória cega o inimigo por 1 rodada, garantindo abertura para Ataque Furtivo." },
-      { title: "Finta Aprimorada", type: "Poder de Assassino", cost: "Movimento", description: "Permite usar a perícia Enganação para realizar uma Finta como Ação de Movimento. Se obtiver sucesso, o inimigo torna-se desprevenido contra o próximo golpe." },
-      { title: "Rolamento Defensivo", type: "Poder de Assassino", cost: "2 PE", description: "Reação. Ao sofrer qualquer dano físico ou de efeito em área, gaste 2 PE para mitigar o dano total à metade." },
-      { title: "Escalar Paredes", type: "Poder de Assassino", cost: "Passivo", description: "Ganha deslocamento de escalada equivalente ao deslocamento terrestre. O ladino pode lutar pendurado em estruturas sem sofrer penalidades." },
-      { title: "Sombra Viva", type: "Poder de Assassino", cost: "1 PE", description: "Ao realizar um Ataque Furtivo à distância (arcos ou facas de arremesso), gaste 1 PE para permanecer oculto (o teste de Furtividade subsequente sofre -10, mas a revelação não é automática)." },
-      { title: "Mestre dos Disfarces", type: "Poder de Assassino", cost: "1 PE", description: "Gaste 1 PE e 1 minuto. Concede um bônus de +10 em Enganação para forjar identidades visuais e assumir o lugar de outras pessoas." },
-      { title: "Sexto Sentido", type: "Poder de Assassino", cost: "Passivo", description: "A intuição paranoica impede que o ladino seja surpreendido em emboscadas inimigas. Soma-se o modificador de Agilidade aos testes de Reflexos." },
-      { title: "Evasão", type: "Poder de Assassino", cost: "Passivo", description: "Pré-requisito: Nível 6. Sempre que for alvo de um efeito que permita teste de Reflexos para reduzir o dano à metade (como o sopro de um dragão), o ladino não sofre dano algum em caso de sucesso (e sofre metade caso falhe)." },
-      { title: "Mestre da Infiltração", type: "Poder de Assassino", cost: "Passivo", description: "O ato de arrombar fechaduras ou desativar armadilhas passa a exigir apenas uma Ação Rápida. O ladino rola dois dados nestes testes e seleciona o melhor resultado." },
-      { title: "Veneno Paralisante", type: "Poder de Assassino", cost: "2 PE", description: "Gaste 2 PE e suprimentos para sintetizar uma toxina letal. O inimigo que falhar no teste de Fortitude contra este veneno sofre a condição Atordoado ou Paralisado." },
-      { title: "Golpe Baixo", type: "Poder de Assassino", cost: "1 PE", description: "Ao confirmar um Ataque Furtivo, gaste 1 PE adicional para impor as condições Caído ou Desarmado instantaneamente ao alvo." },
-      { title: "Arremesso Mortal", type: "Poder de Assassino", cost: "Passivo", description: "Dobra o alcance efetivo dos Ataques Furtivos executados com armas de arremesso. Permite sacar adagas e machadinhas arremessáveis como Ação Livre." },
-      { title: "Imunidade a Venenos", type: "Poder de Assassino", cost: "Passivo", description: "A exposição prolongada a toxinas conferiu ao ladino imunidade fisiológica a todos os venenos e patógenos naturais." },
-      { title: "Avatar da Noite", type: "Poder de Assassino", cost: "Passivo", description: "Pré-requisito: Nível 12 e conhecer duas Posturas Lunares. O ladino pode manter duas Posturas ativas simultaneamente (ex: mesclar Lua Nova com Lua de Sangue para ataques furtivos com sangramento e invisibilidade)." }
+   powers: [
+      { title: "Lua Nova (O Invisível)", type: "Postura Lunar", cost: "Mov / 2 PE", description: "Passivo: As sombras te abraçam. Você recebe +5 em Furtividade.\nAtivo (Vanish): Gaste 2 PE. Você se torna furtivo por 1 rodada ou até atacar. Pode usar isso mesmo estando observado." },
+      { title: "Lua de Sangue (O Executor)", type: "Postura Lunar", cost: "Mov / 1 PE", description: "Passivo: Você sente onde dói mais. Seus Ataques Furtivos causam sangramento (1d4 por turno).\nAtivo (Crueldade): Ao rolar o dano do Ataque Furtivo, gaste 1 PE para rolar novamente quaisquer dados com resultado '1' ou '2'." },
+      { title: "Lua Crescente (O Dançarino)", type: "Postura Lunar", cost: "Mov / 1 PE", description: "Passivo: Sua velocidade aumenta. Ganha +3m de deslocamento e pode se levantar de 'caído' como ação livre.\nAtivo (Passo Sombrio): Gaste 1 PE. Você se teleporta ou se move instantaneamente 9m para um local de sombra que você possa ver, sem gerar ataques de oportunidade." },
+      { title: "Lua Minguante (O Venenoso)", type: "Postura Lunar", cost: "Mov / 1 PE", description: "Passivo: Seus venenos são mais potentes. Aumenta a CD para resistir aos seus venenos em +2.\nAtivo (Debilitar): Ao acertar um ataque, gaste 1 PE. O alvo fica enjoado (só faz uma ação por turno) por 1 rodada devido a um golpe no estômago ou nervo." },
+      { title: "Assassinar", type: "Poder de Assassino", cost: "Passivo", description: "Se você atacar um inimigo que ainda não agiu no combate (Iniciativa menor ou surpresa), seu acerto é um Crítico Automático." },
+      { title: "Golpe de Misericórdia", type: "Poder de Assassino", cost: "2 PE", description: "Ação Completa. Gaste 2 PE. Em um inimigo indefeso (amarrado/dormindo), você causa dano crítico x3 e ele deve salvar Fortitude ou morrer." },
+      { title: "Combate com Duas Armas", type: "Poder de Assassino", cost: "Livre", description: "Ataca com a segunda arma leve como Ação Bônus." },
+      { title: "Dilacerar", type: "Poder de Assassino", cost: "1 PE", description: "Requer Duas Armas. Se acertar os dois ataques, gaste 1 PE para somar os danos e adicionar +1d8 extra." },
+      { title: "Lâmina Assassina", type: "Poder de Assassino", cost: "Passivo", description: "O dado do seu Ataque Furtivo aumenta de d6 para d8. Requer Nível 8." },
+      { title: "Oportunista", type: "Poder de Assassino", cost: "2 PE", description: "Reação. Se um inimigo adjacente for atingido por um aliado seu, gaste 2 PE para fazer um ataque imediato contra ele." },
+      { title: "Envenenamento Rápido", type: "Poder de Assassino", cost: "1 PE", description: "Ação Bônus. Gaste 1 PE. Aplica veneno na arma. Ele não seca se você errar o ataque." },
+      { title: "Dose Dupla", type: "Poder de Assassino", cost: "Passivo", description: "Você pode aplicar dois tipos de veneno na mesma arma. O alvo faz dois testes de resistência." },
+      { title: "Nuvem Tóxica", type: "Poder de Assassino", cost: "2 PE", description: "Ação Padrão. Gaste 2 PE. Quebra frasco no chão. Área 3m. Dano 1d6 ácido + Enjoado." },
+      { title: "Areia nos Olhos", type: "Poder de Assassino", cost: "1 PE", description: "Ação Bônus. Gaste 1 PE. Ladinagem vs reflexos. Se vencer, alvo fica cego por 1 rodada (Garante o furtivo)." },
+      { title: "Finta Aprimorada", type: "Poder de Assassino", cost: "Movimento", description: "Pode usar Enganação para fintar como Ação de Movimento. Se passar, o inimigo fica desprevenido." },
+      { title: "Rolamento Defensivo", type: "Poder de Assassino", cost: "2 PE", description: "Reação. Ao sofrer dano (físico ou área), gaste 2 PE para reduzir à metade." },
+      { title: "Escalar Paredes", type: "Poder de Assassino", cost: "Passivo", description: "Ganha deslocamento de escalada igual ao terrestre. Pode lutar pendurado." },
+      { title: "Sombra Viva", type: "Poder de Assassino", cost: "1 PE", description: "Ao fazer um ataque furtivo à distância (arco/faca), gaste 1 PE para permanecer escondido (com -10 no teste, mas sem se revelar automaticamente)." },
+      { title: "Mestre dos Disfarces", type: "Poder de Assassino", cost: "3 PE", description: "Gaste 3 PE e 5m. +10 em Enganação para se passar por outra pessoa." },
+      { title: "Sexto Sentido", type: "Poder de Assassino", cost: "Passivo", description: "Você nunca fica surpreendido." },
+      { title: "Esconder-se", type: "Poder de Assassino", cost: "Livre", description: "Requer Nível 6. Pode usar furtividade como ação livre pra se esconder." },
+      { title: "Mestre da Infiltração", type: "Poder de Assassino", cost: "Passivo", description: "Rola dois dados para abrir fechaduras/desarmar armadilhas (pega o melhor). Faz isso como ação rápida." },
+      { title: "Veneno Paralisante", type: "Poder de Assassino", cost: "2 PE", description: "Gaste 2 PE. Cria veneno que deixa Atordoado ou Paralisado se falhar na Fortitude." },
+      { title: "Golpe Baixo", type: "Poder de Assassino", cost: "3 PE", description: "Ao acertar ataque furtivo, gaste 3 PE para deixar o alvo Caído ou Desarmado." },
+      { title: "Arremesso Mortal", type: "Poder de Assassino", cost: "Passivo", description: "O alcance para seus ataques furtivos com armas de arremesso dobra. Você saca armas de arremesso como ação livre." },
+      { title: "Imunidade a Venenos", type: "Poder de Assassino", cost: "Passivo", description: "Você é imune a venenos e doenças naturais." },
+      { title: "Avatar da Noite", type: "Poder de Assassino", cost: "Passivo", description: "Requer Nível 12 e duas Posturas. Você pode manter duas Posturas Lunares ativas ao mesmo tempo (Ex: Lua Nova + Lua de Sangue = Invisível e Letal)." }
     ]
-    
   },
 
   {
@@ -274,35 +273,35 @@ const classesData = [
       skills: "Pilotagem (Agi), Atletismo (For), Acrobacia (Agi). Mais 3 entre: Briga, Pontaria, Ofício (Carpintaria/Navegação), Sobrevivência, Intuição, Reflexos."
     },
     fixedAbilities: [
-      { title: "Ginga", type: "Habilidade de Classe", cost: "Passivo / 1 PE", description: "Passivo: Sem armadura ou com armadura leve, soma seu Instinto na Defesa. \nAtivo: Ao mover-se 3m no turno, gaste 1 PE para bônus no Ataque e Defesa até o próximo turno. \nEscalonamento: +2 (Nível 1), +3 (Nível 5), +4 (Nível 9), +5 (Nível 13), +6 (Nível 17)." },
+      { title: "Ginga", type: "Habilidade de Classe", cost: "Passivo / 1 PE", description: "Nvl 1: Passivo: Sem armadura ou com armadura leve, soma seu Instinto na Defesa.\nAtivo: Se você se mover pelo menos 3m antes de atacar, gaste 1 PE para somar o Bônus de Ginga nos seus testes de Ataque, rolagens de Dano e na sua Defesa até o início do seu próximo turno.\nEscalonamento (Bônus): +2 no Nível 1, +3 no Nível 5, +4 no Nível 9, +5 no Nível 13 e +6 no Nível 17." },
       { title: "Vida no Mar", type: "Habilidade de Classe", cost: "Passivo", description: "Nvl 1: Ignora terreno difícil natural, balançante ou escorregadio. Possui deslocamento de natação igual ao terrestre e nunca enjoa." },
       { title: "Rei dos Sete Mares", type: "Habilidade de Classe", cost: "0 PE", description: "Nvl 20: Lacaios fogem ao te ver. Contra chefes, a Ginga custa 0 PE e concede uma Ação de Movimento extra por rodada (pode ser transferida para o veículo ou montaria que estiver pilotando)." }
     ],
     powers: [
-      { title: "Timoneiro Experiente", type: "Poder de Marinheiro", cost: "Passivo", description: "Soma o nível aos testes de Pilotagem. Veículos ou montarias Grandes (dinossauros) sob seu comando ganham +2 na Defesa e +3m de deslocamento." },
-      { title: "Ordens de Batalha", type: "Poder de Marinheiro", cost: "Mov / 2 PE", description: "Grita ordens para aliados. Eles ganham +2 em Percepção e Reflexos por 1 rodada. Se a bordo do seu veículo, ganham +2 no dano com ataques à distância ou cerco." },
-      { title: "Filho da Tempestade", type: "Poder de Marinheiro", cost: "Passivo", description: "Não sofre penalidades em Percepção ou Ataque por clima ruim. Seus veículos ignoram penalidades de terreno causadas pelo clima." },
-      { title: "Navegador das Estrelas", type: "Poder de Marinheiro", cost: "Passivo", description: "Nunca se perde. Concede 'Viagem Rápida' ao grupo (tempo reduzido em 20% e evita encontros aleatórios menores) em ambientes abertos." },
-      { title: "Grito do Capitão", type: "Poder de Marinheiro", cost: "Padrão / 2 PE", description: "Aliados a curto alcance sob medo, atordoamento ou enfeitiçados podem refazer o teste de resistência com bônus de +2." },
-      { title: "Luta Suja", type: "Poder de Marinheiro", cost: "Bônus / 1 PE", description: "Teste de Ladinagem vs Reflexos. Em caso de vitória, o alvo fica Cego ou Atordoado (escolha do marinheiro) por 1 rodada." },
-      { title: "Garrafa na Cara", type: "Poder de Marinheiro", cost: "1 PE", description: "Proficiência com armas improvisadas (dano 1d6). Ao quebrar a arma no inimigo após o acerto, gaste 1 PE para causar +2d6 de dano extra." },
-      { title: "Golpe de Capoeira", type: "Poder de Marinheiro", cost: "Livre", description: "Ao levantar-se da condição 'Caído' (custo de 1,5m), pode realizar um ataque corpo a corpo imediato." },
-      { title: "Provocação Obscena", type: "Poder de Marinheiro", cost: "1 PE", description: "Alvo deve resistir com Vontade. Se falhar, fica enfurecido: ataca apenas você, sofre -2 na Defesa e perde concentração." },
-      { title: "Bêbado Mestre", type: "Poder de Marinheiro", cost: "Passivo", description: "Se consumiu álcool na última hora, recebe +2 de Redução de Dano (RD) e imunidade a Medo." },
-      { title: "Mestre da Rede", type: "Poder de Marinheiro", cost: "Passivo", description: "Sem penalidades pelo uso de redes. O alvo atingido fica Imobilizado e com -2 no ataque. A CD para soltar-se aumenta em +2." },
-      { title: "Tridente Impiedoso", type: "Poder de Marinheiro", cost: "Passivo", description: "Contra alvos enredados, caídos, agarrados ou nadando, o tridente/arpão causa +1d8 de dano e margem de crítico +1." },
-      { title: "Puxar e Furar", type: "Poder de Marinheiro", cost: "1 PE", description: "Ao acertar com arma de haste ou corda, gaste 1 PE para puxar o inimigo 3m ou derrubá-lo (teste de Força oposto)." },
-      { title: "Caçador de Leviatãs", type: "Poder de Marinheiro", cost: "Passivo", description: "Arpões prendem o alvo a você (Médio ou menor) ou você ao alvo (Grande ou maior). +2 de ataque contra Bestas e Monstros Aquáticos." },
-      { title: "Pistoleiro", type: "Poder de Marinheiro", cost: "Passivo", description: "Proficiência com pistolas e mosquetes. A ação de recarregar torna-se uma Ação de Movimento." },
-      { title: "Queima-Roupa", type: "Poder de Marinheiro", cost: "Passivo", description: "Ao atirar em adjacente: sem penalidade, não gera ataque de oportunidade e causa +1 dado de dano." },
-      { title: "Disparo Explosivo", type: "Poder de Marinheiro", cost: "2 PE", description: "O tiro espalha estilhaços. Alvos adjacentes ao alvo principal sofrem metade do dano (Reflexos anula)." },
-      { title: "Cano Duplo", type: "Poder de Marinheiro", cost: "2 PE", description: "Tiro sobrecarregado: Alcance cai pela metade, mas o dano aumenta em +2 dados. Se rolar '1', a arma emperra." },
-      { title: "Acrobacia de Convés", type: "Poder de Marinheiro", cost: "1 PE", description: "Usa o cenário para mover-se voando sobre inimigos. Ataque após o movimento ganha +2 de bônus. Custo 0 PE em barcos ou terreno instável." },
-      { title: "Escalar e Lutar", type: "Poder de Marinheiro", cost: "Passivo", description: "Deslocamento de escalada igual ao terrestre. Recebe +2 na Defesa enquanto estiver pendurado ou escalando cordas/mastros." },
-      { title: "Pés Leves", type: "Poder de Marinheiro", cost: "Passivo", description: "Não deixa pegadas e anda sobre superfícies frágeis (água com destroços, telhados podres, costas de monstros) sem afundar." },
-      { title: "Ginga Evasiva", type: "Poder de Marinheiro", cost: "Passivo", description: "Pré-requisito: Nível 6. Ao ativar a Ginga, recebe o efeito de Evasão (sucesso em Reflexos para meio dano reduz o dano a zero)." },
-      { title: "Sorte de Principiante", type: "Poder de Marinheiro", cost: "Livre", description: "Uma vez por cena, rerrola um teste falho. Se o segundo teste for sucesso, recupera 1 PE." },
-      { title: "Lenda Viva", type: "Poder de Marinheiro", cost: "4 PE", description: "Pré-requisito: Nível 12. Por uma cena, ganha uma Ação Padrão extra por turno para realizar atos arriscados ou heróicos." }
+      { title: "Timoneiro Experiente", type: "Poder de Marinheiro", cost: "Passivo", description: "Você soma seu nível aos testes de Pilotagem. Enquanto você estiver pilotando um veículo (barco, carroça) ou controlando uma montaria Grande (dinossauro), o veículo/montaria ganha +2 na Defesa e +3m de deslocamento." },
+      { title: "Ordens de Batalha", type: "Poder de Marinheiro", cost: "Mov / 2 PE", description: "Você grita ordens. Aliados que te ouvem ganham +2 em Percepção e Reflexos por 1 rodada. Se estiverem a bordo do seu veículo/barco, ganham também +2 no dano com ataques à distância." },
+      { title: "Filho da Tempestade", type: "Poder de Marinheiro", cost: "Passivo", description: "Você não sofre penalidades em Percepção ou Ataque causadas por clima ruim (chuva forte, neblina, ventania). Seus veículos também ignoram penalidades de terreno por clima." },
+      { title: "Navegador das Estrelas", type: "Poder de Marinheiro", cost: "Passivo", description: "Você nunca se perde. Você concede ao grupo 'Viagem Rápida' (reduz o tempo de viagem em 20% e evita encontros aleatórios menores) em qualquer ambiente aberto (mar ou deserto)." },
+      { title: "Grito do Capitão", type: "Poder de Marinheiro", cost: "Padrão / 2 PE", description: "Todos os aliados a curta distância que estiverem com medo, atordoados ou enfeitiçados podem refazer o teste de resistência imediatamente com bônus de +2." },
+      { title: "Luta Suja", type: "Poder de Marinheiro", cost: "Bônus / 1 PE", description: "Jogue areia, cuspa ou chute a canela. Faça um teste de ladinagem vs reflexos. Se vencer, o alvo fica Cego ou Atordoado (sua escolha) por 1 rodada." },
+      { title: "Garrafa na Cara", type: "Poder de Marinheiro", cost: "1 PE", description: "Proficiência com armas improvisadas (garrafas, cadeiras, remos). Causam dano de Clava (1d6) e quebram no acerto. Ao quebrar a arma no inimigo, gaste 1 PE para causar +2d6 de dano extra." },
+      { title: "Golpe de Capoeira", type: "Poder de Marinheiro", cost: "Livre", description: "Se você se levantar de 'Caído', pode fazer um ataque corpo a corpo imediato como Ação Livre." },
+      { title: "Provocação Obscena", type: "Poder de Marinheiro", cost: "1 PE", description: "Insulte um inimigo. Ele deve fazer Vontade. Se falhar, fica enfurecido (só ataca você, sofre -2 na Defesa e perde concentração)." },
+      { title: "Bêbado Mestre", type: "Poder de Marinheiro", cost: "Passivo", description: "Se você consumiu álcool na última hora, recebe +2 de Redução de Dano (RD) e imunidade a Medo." },
+      { title: "Mestre da Rede", type: "Poder de Marinheiro", cost: "Passivo", description: "Você não sofre penalidade por usar rede. Se acertar, o alvo fica enredado (Imobilizado e -2 ataque). A CD para se soltar aumenta em +2." },
+      { title: "Tridente Impiedoso", type: "Poder de Marinheiro", cost: "Passivo", description: "Se atacar um inimigo que esteja enredado, caído, agarrado ou nadando, seu tridente/arpão causa +1d8 de dano e margem de ameaça crítica +1." },
+      { title: "Puxar e Furar", type: "Poder de Marinheiro", cost: "1 PE", description: "Se acertar ataque com arma de Haste ou Corda (Arpão/Chicote), pode gastar 1 PE para puxar o inimigo 3m na sua direção ou derrubá-lo (teste de Força oposto)." },
+      { title: "Caçador de Leviatãs", type: "Poder de Marinheiro", cost: "Passivo", description: "Seus ataques à distância com arpões 'prendem' o alvo a você (se ele for Médio ou menor) ou prendem você ao alvo (se ele for Grande ou maior). Ideal para escalar monstros gigantes. Você ganha +2 de ataque contra Bestas e Monstros Aquáticos." },
+      { title: "Pistoleiro", type: "Poder de Marinheiro", cost: "Passivo", description: "Proficiência com pistolas e mosquetes. Recarregar arma de fogo vira Ação de Movimento para você." },
+      { title: "Queima-Roupa", type: "Poder de Marinheiro", cost: "Passivo", description: "Se atirar em inimigo adjacente, não sofre penalidade, causa +1 dado de dano." },
+      { title: "Disparo Explosivo", type: "Poder de Marinheiro", cost: "2 PE", description: "Seu tiro espalha estilhaços (ou munição grossa). Além do alvo principal, todos adjacentes a ele sofrem metade do dano (Reflexos anula)." },
+      { title: "Cano Duplo", type: "Poder de Marinheiro", cost: "2 PE", description: "Se usar uma arma de fogo, gaste 2 PE para dar um tiro 'sobrecarregado' com o dobro de pólvora. O alcance cai pela metade, mas o dano aumenta em +2 dados. Se rolar '1', a arma emperra." },
+      { title: "Acrobacia de Convés", type: "Poder de Marinheiro", cost: "1 PE", description: "Use o cenário (lustres, cordas, amuradas) para se mover voando por cima de inimigos. Se terminar o movimento atacando, ganha +2 no Ataque. Bônus: Se estiver em um barco ou terreno instável (balançando), o custo de PE é 0." },
+      { title: "Escalar e Lutar", type: "Poder de Marinheiro", cost: "Passivo", description: "Deslocamento de escalada igual ao terrestre. Enquanto estiver pendurado ou escalando (cordas/mastros), recebe +2 na Defesa." },
+      { title: "Pés Leves", type: "Poder de Marinheiro", cost: "Passivo", description: "Você não deixa pegadas e pode andar sobre superfícies frágeis (água com destroços, telhados podres, costas de monstros) sem afundar ou quebrar." },
+      { title: "Ginga Evasiva", type: "Poder de Marinheiro", cost: "Passivo", description: "Requer Nível 6. Quando ativar sua Ginga, você também recebe 'Evasão' (se passar num teste de Reflexos para meio dano, não sofre nenhum dano)." },
+      { title: "Sorte de Principiante", type: "Poder de Marinheiro", cost: "Livre", description: "Uma vez por cena, pode rolar novamente um teste falho. Se tiver sucesso no segundo, recupera 1 PE." },
+      { title: "Lenda Viva", type: "Poder de Marinheiro", cost: "4 PE", description: "Requer Nível 12. Por uma cena, você ganha uma Ação Padrão extra por turno, mas deve usá-la para fazer algo 'arriscado, estúpido ou heroico' (atacar, pular, zombar, pilotar em manobra perigosa)." }
     ]
 },
 
@@ -320,31 +319,31 @@ const classesData = [
       { title: "Olhar de Avaliador", type: "Habilidade de Classe", cost: "Passivo", description: "Nvl 1: Usa Intelecto em vez de Sabedoria para Vontade e Intuição. Possui Vantagem em Intuição para detectar mentiras ou avaliar objetos. Após 1 minuto de conversa, ganha +2 em Diplomacia e Enganação contra o alvo pela próxima hora." },
       { title: "O Dono do Jogo", type: "Habilidade de Classe", cost: "1 PE / 5 PE", description: "Nvl 20: O Incentivo afeta todos os aliados em curto alcance por apenas 1 PE. Uma vez por cena, pode gastar 5 PE para subornar um inimigo: Lacaios mudam de lado; Chefes ficam Atordoados por 1 rodada e sofrem -5 em ataques contra você (Vontade anula)." }
     ],
-    powers: [
-      { title: "Guarda-Costas", type: "Poder de Mercador", cost: "Passivo", description: "Contrata um lacaio (Guerreiro/Bárbaro) que age na sua iniciativa. Exige ações para ser comandado (Padrão para atacar, Movimento para andar). Se morrer, requer 24h e ouro para reposição. Nível do lacaio é o seu -2." },
-      { title: "Profissionalismo", type: "Poder de Mercador", cost: "Passivo", description: "Pré-requisito: Guarda-Costas. Comandar o Guarda-Costas exige apenas Ação de Movimento (ou Livre para ordens simples). Ele recebe +2 na Defesa se estiver adjacente a você." },
-      { title: "Escudo Humano", type: "Poder de Mercador", cost: "Reação / 1 PE", description: "Ao ser alvo de ataque, se houver aliado adjacente, gaste 1 PE para movê-lo para sua frente; ele recebe o ataque em seu lugar." },
-      { title: "Ordens de Patrão", type: "Poder de Mercador", cost: "Padrão / 2 PE", description: "Um aliado ou Guarda-Costas a curta distância realiza uma Ação Padrão extra imediatamente." },
-      { title: "Equipamento Financiado", type: "Poder de Mercador", cost: "Passivo", description: "Escolha um aliado (ou Guarda-Costas): ele recebe +1 no Ataque e Defesa permanentemente enquanto você pagar a manutenção (custo em ouro por nível)." },
-      { title: "Ataque Coordenado", type: "Poder de Mercador", cost: "Passivo", description: "Se você e seu Guarda-Costas atacarem o mesmo alvo na rodada, ou se usar Incentivo nele antes do ataque, ele causa +1d8 de dano extra." },
-      { title: "Mochila de Carga", type: "Poder de Mercador", cost: "1 PE", description: "Carrega o dobro de peso. Pode gastar 1 PE e o valor em ouro para 'gerar' um item mundano (até 100 moedas) que supostamente já estava na mochila." },
-      { title: "Elixir de Qualidade", type: "Poder de Mercador", cost: "1 PE", description: "Ao usar ou administrar poção de cura ou item alquímico, gaste 1 PE para maximizar os resultados numéricos (pega o valor máximo sem rolar)." },
-      { title: "Granadeiro", type: "Poder de Mercador", cost: "Passivo", description: "Proficiência com itens alquímicos arremessáveis. O alcance dobra e a CD para os inimigos resistirem aumenta em +2." },
-      { title: "Arsenal Oculto", type: "Poder de Mercador", cost: "Livre", description: "Ganha +10 em Ladinagem para esconder itens no corpo. Pode sacar itens escondidos como Ação Livre." },
-      { title: "Mercador de Armas", type: "Poder de Mercador", cost: "1 PE", description: "Gasta 1 minuto para ajustar a arma de um aliado. Ela ganha +1 no Dano e +1 na margem de crítico até o próximo descanso." },
-      { title: "Identificar Valor", type: "Poder de Mercador", cost: "Livre", description: "Teste de Intuição contra um monstro. Se passar, descobre uma Vulnerabilidade e aliados ganham +1 no ataque contra ele." },
-      { title: "Suborno Rápido", type: "Poder de Mercador", cost: "Reação / 2 PE", description: "Ao ser atacado por criatura inteligente, oferece ouro. Alvo faz Vontade; se falhar, perde a ação hesitando." },
-      { title: "Língua de Prata", type: "Poder de Mercador", cost: "1 PE", description: "Permite rolar novamente um teste de Carisma (Diplomacia, Enganação, Intimidação) que tenha falhado." },
-      { title: "Chuva de Moedas", type: "Poder de Mercador", cost: "Padrão / 2 PE", description: "Joga moedas em uma área. Inimigos inteligentes ou bestas gananciosas devem passar em Vontade ou perdem a próxima Ação de Movimento e sofrem -2 na Defesa." },
-      { title: "Contatos no Submundo", type: "Poder de Mercador", cost: "1 PE", description: "Acesso a mercado negro (venenos e itens ilegais). Em cidades, pode gastar 1 PE para obter uma informação secreta ou favor local." },
-      { title: "Ameaça Velada", type: "Poder de Mercador", cost: "Padrão / 1 PE", description: "Teste de Intimidação. Se vencer, o alvo fica abalado (-2 em testes) e sofre 1d8 de dano psíquico se tentar te atacar." },
-      { title: "Diplomacia de Combate", type: "Poder de Mercador", cost: "Completa / 4 PE", description: "Força uma trégua de 1 minuto para negociação (inimigos inteligentes). Se a trégua for quebrada por você, os inimigos ficam surpresos." },
-      { title: "Investimento Tático", type: "Poder de Mercador", cost: "Bônus", description: "Transfere até 5 PE do seu próprio total para um aliado adjacente através de conselhos ou tônicos." },
-      { title: "Sócio Majoritário", type: "Poder de Mercador", cost: "Passivo", description: "Pré-requisito: Nível 6. No início de cada aventura, recebe PE temporários extras iguais ao seu Nível + Intelecto." },
-      { title: "Pagar para Vencer", type: "Poder de Mercador", cost: "Livre", description: "Uma vez por rodada, gaste ouro (10% do nível) para ganhar +2 em um teste antes de rolar o dado." },
-      { title: "Golpe de Sorte", type: "Poder de Mercador", cost: "Passivo", description: "Sempre que rolar um '1' natural em qualquer dado de teste ou ataque, você recupera 1 PE." },
-      { title: "Cobiça", type: "Poder de Mercador", cost: "Passivo", description: "Recebe +2 em testes de resistência contra controle mental, leitura de pensamento ou roubo. Sua ganância protege sua mente." },
-      { title: "Magnata", type: "Poder de Mercador", cost: "Passivo", description: "Pré-requisito: Nível 12. Pode usar o atributo Intelecto para testes de Ataque e Dano com armas simples e leves." }
+   powers: [
+      { title: "Guarda-Costas", type: "Poder de Mercador", cost: "Passivo", description: "Você contratou um profissional leal (Guerreiro ou Bárbaro Nível 1) que te protege. Ele age na sua iniciativa. Você gasta suas ações para comandá-lo (Ação Padrão para ele atacar, Movimento para ele andar). Se ele morrer, você precisa de 24h e ouro para contratar outro. O Guarda-Costas sobe de nível com você (sempre 2 níveis abaixo do seu)." },
+      { title: "Profissionalismo", type: "Poder de Mercador", cost: "Passivo", description: "Requer Guarda-Costas. Comandar seu Guarda-Costas agora exige apenas uma Ação de Movimento (ou Livre para falar, mas Movimento para ações complexas). Ele ganha +2 na Defesa enquanto estiver adjacente a você." },
+      { title: "Escudo Humano", type: "Poder de Mercador", cost: "Reação / 1 PE", description: "Se você for alvo de um ataque e houver um aliado (ou seu Guarda-Costas) adjacente, você pode gastar 1 PE para puxá-lo para a frente. Ele recebe o ataque no seu lugar." },
+      { title: "Ordens de Patrão", type: "Poder de Mercador", cost: "Padrão / 4 PE", description: "Um aliado (ou Guarda-Costas) a curta distância pode realizar uma Ação Padrão extra imediatamente." },
+      { title: "Equipamento Financiado", type: "Poder de Mercador", cost: "Passivo", description: "Você investiu pesado no equipamento do seu time. Escolha um aliado (ou seu Guarda-Costas): ele recebe +1 no Ataque e +1 na Defesa permanentemente enquanto você mantiver a manutenção do equipamento dele (custo simbólico em ouro por nível)." },
+      { title: "Ataque Coordenado", type: "Poder de Mercador", cost: "Passivo", description: "Se você e seu Guarda-Costas atacarem o mesmo alvo na mesma rodada (ou se você usar Incentivo nele e ele atacar), o Guarda-Costas causa +1d8 de dano extra." },
+      { title: "Mochila de Carga", type: "Poder de Mercador", cost: "1 PE", description: "Você carrega o dobro de peso sem penalidade. Além disso, pode gastar 1 PE e o valor em ouro do item para 'retirar da mochila' um item mundano qualquer (corda, tocha, pé de cabra, antídoto) que você 'esqueceu que tinha'. (O item deve ser comum e custar menos que 100 moedas)." },
+      { title: "Elixir de Qualidade", type: "Poder de Mercador", cost: "1 PE", description: "Quando você usa (ou administra em alguém) uma poção de cura ou item alquímico benéfico, você pode gastar 1 PE para maximizar o efeito numérico (não rola dados, pega o valor máximo de cura/duração)." },
+      { title: "Granadeiro", type: "Poder de Mercador", cost: "Passivo", description: "Você é proficiente em arremessar itens alquímicos (fogo alquímico, ácido, água benta, granadas de ferreiro). O alcance de arremesso dobra e a CD para resistir ao efeito aumenta em +2." },
+      { title: "Arsenal Oculto", type: "Poder de Mercador", cost: "Livre", description: "Você pode esconder armas pequenas (adagas, bestas de mão) e itens em compartimentos secretos na roupa. Ganha +10 em Ladinagem para esconder itens. Pode sacar esses itens escondidos como Ação Livre." },
+      { title: "Mercador de Armas", type: "Poder de Mercador", cost: "1 PE", description: "Gaste 1 PE e 1 minuto. Você afia a arma de um aliado, ajusta o peso ou aplica óleo de qualidade. A arma ganha +1 no Dano e +1 na margem de ameaça crítica até o próximo descanso." },
+      { title: "Identificar Valor", type: "Poder de Mercador", cost: "Livre", description: "Olhe para um monstro. Faça um teste de Intuição (CD variável). Se passar, você descobre uma Vulnerabilidade dele ou quanto vale a parte mais cara do corpo dele. Seus aliados ganham +1 no ataque contra esse monstro." },
+      { title: "Suborno Rápido", type: "Poder de Mercador", cost: "Reação / 2 PE", description: "Ao ser atacado por uma criatura inteligente, gaste 2 PE e ofereça uma bolsa de ouro. O inimigo faz teste de Vontade. Se falhar, o ataque para e ele perde a ação (hesitando com a oferta)." },
+      { title: "Língua de Prata", type: "Poder de Mercador", cost: "1 PE", description: "Gaste 1 PE para rolar novamente qualquer teste de Carisma (Diplomacia, Enganação, Intimidação) que tenha falhado." },
+      { title: "Chuva de Moedas", type: "Poder de Mercador", cost: "Padrão / 2 PE", description: "Jogue um punhado de moedas valiosas numa área. Inimigos inteligentes ou bestas gananciosas na área devem passar em Vontade ou gastam sua próxima ação de movimento tentando pegar as moedas (-2 na defesa enquanto isso)." },
+      { title: "Contatos no Submundo", type: "Poder de Mercador", cost: "1 PE", description: "Você tem acesso ao mercado negro. Pode comprar venenos, itens ilegais e vender itens roubados pelo valor total. Em cidades, gasta 1 PE para conseguir uma informação secreta ou um favor local." },
+      { title: "Ameaça Velada", type: "Poder de Mercador", cost: "Padrão / 1 PE", description: "Faça um teste de Intimidação contra um inimigo. Se vencer, ele fica abalado (-2 em ataques e testes) até o fim da cena. Se ele tentar te atacar enquanto estiver abalado, sofre 1d8 de dano psíquico (medo das consequências)." },
+      { title: "Diplomacia de Combate", type: "Poder de Mercador", cost: "Completa / 4 PE", description: "Se os inimigos forem inteligentes e falarem seu idioma, você pode forçar uma trégua momentânea. O combate para negociação por 1 rodada. Se você ou seus aliados atacarem, a trégua quebra e os inimigos ficam surpresos na primeira rodada." },
+      { title: "Investimento Tático", type: "Poder de Mercador", cost: "Bônus", description: "Você pode transferir seus próprios pontos de PE para um aliado adjacente (máximo de 5 PE por turno). Você grita conselhos, injeta tônicos caros ou simplesmente motiva a equipe. O aliado recebe os PE imediatamente." },
+      { title: "Sócio Majoritário", type: "Poder de Mercador", cost: "Passivo", description: "Requer Nível 6. Seus negócios prosperam enquanto você viaja. No início de cada aventura, você recebe PE temporários extras iguais ao seu nível + Intelecto." },
+      { title: "Pagar para Vencer", type: "Poder de Mercador", cost: "Livre", description: "Uma vez por rodada, você pode literalmente jogar dinheiro no problema. Gaste um valor em Ouro equivalente a 10% do seu nível (ajustar à economia) para ganhar +2 em um teste qualquer antes de rolar." },
+      { title: "Golpe de Sorte", type: "Poder de Mercador", cost: "Passivo", description: "Se você rolar um '1' natural em um dado de ataque ou teste, você recupera 1 PE. Até o azar gera lucro para você." },
+      { title: "Cobiça", type: "Poder de Mercador", cost: "Passivo", description: "Você tem +2 em todos os testes de resistência contra efeitos que tentem controlar sua mente, ler seus pensamentos ou roubar seus itens. Sua ganância protege sua alma." },
+      { title: "Magnata", type: "Poder de Mercador", cost: "Passivo", description: "Requer Nível 12. Você pode usar o atributo Intelecto para testes de Ataque e Dano com armas simples e leves. (Você luta de forma calculada e eficiente, sem desperdiçar movimentos)." }
     ]
 },
 
@@ -363,30 +362,30 @@ const classesData = [
       { title: "A Última Gargalhada", type: "Habilidade de Classe", cost: "Passivo", description: "Nvl 20: Presença aumenta em +4 (pode exceder 20). Recupera 1 PE em '20 Natural' seu ou '1 Natural' de inimigos. Se morrer, aliados ganham +10 em todos os testes e danos até o fim da cena (Encore)." }
     ],
     powers: [
-      { title: "Insulto Cortante", type: "Poder de Bardo", cost: "Reação / 1 PE", description: "Quando um inimigo falha num ataque contra você, ele deve passar em Vontade ou sofre -2 no próximo ataque e 2d6 de dano psíquico." },
-      { title: "Alvo da Chacota", type: "Performance (Cena)", cost: "Manutenção", description: "Inimigos na área sofrem a penalidade da Performance em testes de Vontade e Percepção." },
-      { title: "Grito de Distração", type: "Poder de Bardo", cost: "Bônus / 1 PE", description: "Um inimigo a 6m fica Desprevenido contra o próximo ataque que receber nesta rodada." },
-      { title: "Desmoralizar", type: "Poder de Bardo", cost: "Padrão", description: "Teste de Atuação vs Vontade. Se vencer, o inimigo fica Abalado (não soma Destreza na Defesa) até o fim da cena." },
-      { title: "Bode Expiatório", type: "Poder de Bardo", cost: "Reação / 2 PE", description: "Ao ser atacado, se houver alguém adjacente, tente redirecionar o ataque (Enganação vs Reflexos do atacante)." },
-      { title: "Ritmo de Guerra", type: "Performance (Cena)", cost: "Manutenção", description: "Aliados que podem ouvir a performance ganham o bônus da Performance em todas as rolagens de Dano." },
-      { title: "Não morra agora, seu idiota!", type: "Poder de Bardo", cost: "Reação / 3 PE", description: "Quando um aliado cai a 0 PV, ele recupera 1d8 + Presença PV imediatamente e levanta-se." },
-      { title: "Canção de Bar", type: "Poder de Bardo", cost: "Ritual", description: "Durante um descanso curto (10 min), todos os aliados recuperam PV ou PE adicionais iguais à sua Presença." },
-      { title: "Comando Tático", type: "Poder de Bardo", cost: "Movimento / 2 PE", description: "Um aliado pode gastar a Reação dele para mover-se metade do deslocamento ou realizar um ataque imediato." },
-      { title: "Aura de Confiança", type: "Performance (Cena)", cost: "Manutenção", description: "Aliados ganham o bônus da Performance em testes de Resistência contra Medo e Charme." },
-      { title: "Golpe Baixo", type: "Poder de Bardo", cost: "Padrão / 1 PE", description: "Ataque com arma leve ou desarmado. Se acertar, alvo deve passar em Fortitude ou fica Enjoado por 1 rodada." },
-      { title: "Areia nos Olhos", type: "Poder de Bardo", cost: "Bônus / 1 PE", description: "Teste de Ladinagem vs Reflexos. Em caso de sucesso, o alvo fica Cego por 1 rodada." },
-      { title: "Improviso Brutal", type: "Poder de Bardo", cost: "Passivo", description: "Se uma arma improvisada quebrar no ataque (crítico ou escolha), o dano é dobrado e o alvo sofre sangramento." },
-      { title: "Escudo Humano", type: "Poder de Bardo", cost: "Passivo", description: "Enquanto agarra uma criatura, você recebe +4 na Defesa. Ataques que errarem você por até 4 pontos atingem a criatura agarrada." },
-      { title: "Finta Aprimorada", type: "Poder de Bardo", cost: "Bônus", description: "Pode Fintar (Enganação) como Ação Bônus. Se tiver sucesso, o próximo ataque causa +2d6 de dano furtivo." },
-      { title: "Acrobacia de Bêbado", type: "Poder de Bardo", cost: "Reação / 2 PE", description: "Quando for atingido por um golpe, você reduz o dano sofrido à metade fingindo um tropeço ou rolamento." },
-      { title: "Língua de Prata", type: "Poder de Bardo", cost: "Passivo", description: "Permite rolar novamente qualquer teste de Diplomacia ou Enganação, mas obriga a aceitar o segundo resultado." },
-      { title: "Mestre dos Disfarces", type: "Poder de Bardo", cost: "1 min", description: "Concede +10 em Enganação para disfarces visuais, permitindo se passar por outras pessoas ou classes sociais." },
-      { title: "Tumulto", type: "Poder de Bardo", cost: "Completa / 2 PE", description: "Em áreas urbanas, incita uma multidão que cria terreno difícil e cobertura em uma área de 9m." },
-      { title: "Ventriloquismo Tático", type: "Poder de Bardo", cost: "Livre", description: "Projeta sua voz para qualquer ponto a até 15m de distância para criar distrações ou falsos alarmes." },
-      { title: "O Show tem que Continuar", type: "Poder de Bardo", cost: "Especial", description: "Ao cair a 0 PV, gaste todos os PE restantes para ficar com 1 PV e ganhar uma Ação Padrão extra neste turno." },
-      { title: "Humilhação Pública", type: "Poder de Bardo", cost: "Completa / 5 PE", description: "Discurso devastador. Alvo faz Vontade; se falhar, larga as armas e abandona o combate ou fica rendido." },
-      { title: "Cena: O Clímax", type: "Performance (Cena)", cost: "4 PE", description: "Aliados ganham +1 Ação por rodada, mas sofrem 1d6 de dano por turno devido à exaustão extrema." },
-      { title: "Trapaceiro Nato", type: "Poder de Bardo", cost: "5 PE", description: "Uma vez por sessão, declare que 'tinha um plano': manifesta um item comum ou revela um suborno feito previamente (sujeito ao mestre)." }
+      { title: "Insulto Cortante", type: "Poder de Bardo", cost: "Reação / 1 PE", description: "Quando um inimigo falha em um ataque contra você, você faz uma piada sobre a mãe dele. Ele deve passar em Vontade ou sofre -2 no próximo ataque e 2d6 de dano psíquico (feriu o ego)." },
+      { title: "Alvo da Chacota", type: "Performance (Cena)", cost: "Manutenção", description: "Inimigos na área têm dificuldade em se concentrar. Sofrem penalidade da Performance em testes de Vontade e Percepção." },
+      { title: "Grito de Distração", type: "Poder de Bardo", cost: "Bônus / 1 PE", description: "Você faz um barulho súbito ou joga um objeto para o alto. Um inimigo a 6m fica Desprevenido contra o próximo ataque que receber." },
+      { title: "Desmoralizar", type: "Poder de Bardo", cost: "Padrão", description: "Você aponta falhas na postura do inimigo. Teste de Atuação vs Vontade. Se vencer, o inimigo fica Abalado (sem somar Destreza na Defesa) até o fim da cena." },
+      { title: "Bode Expiatório", type: "Poder de Bardo", cost: "Reação / 2 PE", description: "Se for atacado e houver um aliado (ou outro inimigo) adjacente, você pode gastar 2 PE para redirecionar o ataque para ele. (Exige teste de Enganação vs Reflexos do atacante)." },
+      { title: "Ritmo de Guerra", type: "Performance (Cena)", cost: "Manutenção", description: "Aliados ouvindo ganham bônus da Performance em rolagens de Dano." },
+      { title: "“Não morra agora, seu idiota!”", type: "Poder de Bardo", cost: "Reação / 3 PE", description: "Quando um aliado cai a 0 PV, você grita uma ordem. Ele recupera 1d8 + Presença PV imediatamente, mas levanta com raiva (ou vergonha)." },
+      { title: "Canção de Bar", type: "Poder de Bardo", cost: "Ritual", description: "Durante um descanso curto (10 min), sua música relaxa o grupo. Todos recuperam PV ou PE adicionais igual à sua Presença." },
+      { title: "Comando Tático", type: "Poder de Bardo", cost: "Movimento / 2 PE", description: "Você grita posições. Um aliado pode gastar a Reação dele para se mover metade do deslocamento ou fazer um ataque imediato." },
+      { title: "Aura de Confiança", type: "Performance (Cena)", cost: "Manutenção", description: "Aliados ganham bônus da Performance em testes de Resistência contra Medo e Charme." },
+      { title: "Golpe Baixo", type: "Poder de Bardo", cost: "Padrão / 1 PE", description: "Ataque desarmado ou com arma leve. Se acertar, causa dano normal e o alvo deve passar em Constituição ou fica Enjoado (pela dor nas partes baixas/estômago) por 1 rodada." },
+      { title: "Areia nos Olhos", type: "Poder de Bardo", cost: "Bônus / 1 PE", description: "Alcance curto. Joga terra, bebida ou pó na cara do inimigo. Teste de Ladinagem vs Reflexos. Sucesso: Inimigo Cego por 1 rodada." },
+      { title: "Improviso Brutal", type: "Poder de Bardo", cost: "Passivo", description: "Quando uma arma improvisada sua quebra num ataque (Crítico ou escolha sua), o dano é dobrado e o alvo sangra." },
+      { title: "Escudo Humano", type: "Poder de Bardo", cost: "Passivo", description: "Se você estiver agarrando uma criatura (Grapple), você recebe +4 na Defesa e, se errarem você por até 4 pontos, acertam a criatura que você está segurando." },
+      { title: "Finta Aprimorada", type: "Poder de Bardo", cost: "Bônus", description: "Você pode fintar (Enganação) como Ação Bônus. Se tiver sucesso, seu próximo ataque causa +2d6 de dano furtivo." },
+      { title: "Acrobacia de Bêbado", type: "Poder de Bardo", cost: "Reação / 2 PE", description: "Quando for atingido, você rola com o golpe fingindo tropeçar. Reduz o dano à metade." },
+      { title: "Língua de Prata", type: "Poder de Bardo", cost: "Passivo", description: "Você pode rolar novamente qualquer teste de Diplomacia ou Enganação, mas deve aceitar o segundo resultado." },
+      { title: "Mestre dos Disfarces", type: "Poder de Bardo", cost: "5 min", description: "Com 5 minutos e um kit de maquiagem, você pode se passar por outra pessoa ou classe social. +10 em Enganação para disfarce." },
+      { title: "Tumulto", type: "Poder de Bardo", cost: "Completa / 2 PE", description: "Em áreas urbanas, você incita a multidão. Cria terreno difícil e cobertura (pessoas correndo) em uma área de 9m." },
+      { title: "Ventriloquismo Tático", type: "Poder de Bardo", cost: "Passivo", description: "Você pode projetar sua voz para qualquer ponto a 15m. Útil para distrair guardas ou fazer parecer que o reforço chegou." },
+      { title: "O Show tem que Continuar", type: "Poder de Bardo", cost: "Especial", description: "Requer Nível 10+. Se você for reduzido a 0 PV, pode gastar todos os seus PE restantes. Você fica com 1 PV e ganha uma Ação Padrão extra neste turno." },
+      { title: "Humilhação Pública", type: "Poder de Bardo", cost: "Completa / 5 PE", description: "Requer Nível 10+. Você faz um discurso tão devastador sobre um inimigo que ele perde a vontade de lutar. Vontade anula. Se falhar, ele larga as armas e vai embora (ou cai de joelhos chorando)." },
+      { title: "Cena: O Clímax", type: "Performance (Cena)", cost: "4 PE", description: "Requer Nível 10+. Todos os aliados ganham +1 Ação por rodada, mas sofrem 1d6 de dano por turno (exaustão extrema)." },
+      { title: "Trapaceiro Nato", type: "Poder de Bardo", cost: "5 PE", description: "Requer Nível 10+. Uma vez por sessão, você pode declarar que 'tinha um plano para isso'. Você revela que tem um item mundano específico no bolso ou que subornou um guarda específico anteriormente (a critério do mestre)." }
     ]
 },
 
@@ -401,14 +400,14 @@ const classesData = [
     },
     fixedAbilities: [
       { title: "Pacto de Equilíbrio", type: "Habilidade de Classe", cost: "Passivo", description: "Nvl 1: Ao ativar um Poder ou Ritual, gaste uma Oferenda (consumível) para reduzir o custo em PV à metade (arredondado para cima). Se o teste de ativação (Sincronia) superar a CD em 5+, você não rola o teste de Corrupção no turno." },
-      { title: "Magia de Sangue (Básico)", type: "Habilidade de Classe", cost: "Passivo", description: "Nvl 1: Acesso à conjuração de magias sacrificiais utilizando os próprios Pontos de Vida (PV)." },
+      { title: "Magia de Sangue (Básico)", type: "Habilidade de Classe", cost: "Padrão / 0 PV", description: "Nvl 1: Acesso à conjuração de magias sacrificiais utilizando os próprios Pontos de Vida (PV). O seu domínio fundamental sobre a essência da vida permite que você ataque sem a necessidade de rituais complexos ou sacrifícios debilitantes.\nEfeito: Você dispara um feixe de energia anímica ou uma agulha de sangue endurecido em um alvo em alcance Curto (9m). Faça um ataque usando sua perícia Sincronia. Se acertar, causa 1d6 + Presença de dano Necrótico ou Espiritual.\nVínculo Menor: A magia do Xamã sempre busca o equilíbrio. Sempre que você acertar este ataque, a energia residual estabiliza a aura de um aliado adjacente a você (ou você mesmo), concedendo 2 PV Temporários que duram até o fim do combate.\nEscalonamento: O dano deste ataque aumenta para 2d6 no Nível 5, 3d6 no Nível 9, 4d6 no Nível 13 e 5d6 no Nível 17." },
       { title: "Caminho dos Espíritos", type: "Habilidade de Classe", cost: "Passivo", description: "Nvl 5: Desperta habilidades avançadas de comunhão espiritual (conforme regras do compêndio)." },
       { title: "Avatar dos Dois Mundos", type: "Habilidade de Classe", cost: "1/Cena", description: "Nvl 20 (Conduíte Perfeito): Ao ativar um poder que custe PV, vincule-se a um inimigo a até 9m. O alvo faz Vontade (CD Presença). Se falhar, ele sofre dano necrótico igual ao custo (ignorando RD) e você não perde PV. Se passar, o vínculo falha e você paga o custo." }
     ],
     powers: [
       { title: "Transferência Vital", type: "Poder de Xamã", cost: "Padrão / 1d8 PV", description: "Toque um aliado. Você sofre 1d8 de dano e cura 1d8 + Vigor PV no aliado. A cura é dobrada se ele estiver inconsciente." },
       { title: "Elo de Sangue", type: "Poder de Xamã", cost: "Mov / 2 PV", description: "Escolha um aliado em alcance curto. Até o fim da cena, todo dano que ele sofrer é dividido igualmente entre vocês." },
-      { title: "Banquete da Vida", type: "Poder de Xamã", cost: "Reação / 2 Corrupção", description: "Quando uma criatura morre a curto alcance, você absorve a energia e cura 1d8 + seu Nível em PV. (Custo de Corrupção automático)." },
+      { title: "Banquete da Vida", type: "Poder de Xamã", cost: "Reação / 2 Corrupção", description: "Quando uma criatura morre a curto alcance, você absorve a energia e cura 1d8 + Constituição em PV. (Custo de Corrupção automático)." },
       { title: "Ritual de Purificação", type: "Poder de Xamã", cost: "Ritual / 2d6 PV", description: "Duração: 1 hora. Gaste PV e Oferendas Valiosas para remover uma condição negativa persistente (doença/maldição) de um alvo." },
       { title: "Mártir Implacável", type: "Poder de Xamã", cost: "Passivo", description: "Enquanto estiver com menos da metade dos seus PV máximos, recebe +2 em todos os testes de resistência e rolagens de dano." },
       { title: "Totem de Proteção", type: "Poder de Xamã", cost: "Completa / 1d4 PV", description: "Invoca um totem com 10 PV no chão. Aliados em curto alcance do totem ganham +2 na Defesa." },
@@ -418,7 +417,7 @@ const classesData = [
       { title: "Solo Sagrado", type: "Poder de Xamã", cost: "Ritual / 5 PV", description: "Duração: 10 min. Prepara uma área de 9m que dura 1 dia. O custo de PV para seus rituais dentro desta área cai em -1 (mínimo 1)." },
       { title: "Agulha Vodu", type: "Poder de Xamã", cost: "Padrão / 2 PV", description: "Ataque à distância com fetiche. Se acertar, você sofre 1d4 de dano e o alvo sofre 3d6 de dano necrótico que ignora RD." },
       { title: "Ferver o Sangue", type: "Poder de Xamã", cost: "Padrão / 1d6 PV", description: "O alvo deve passar em Fortitude. Se falhar, sofre 2d8 de dano e fica Enjoado por 1 rodada com o sangue fervendo." },
-      { title: "Lança de Hemoglobina", type: "Poder de Xamã", cost: "Padrão / 2 PV", description: "Ataque à distância. Dano: 1d10 + Vigor (Perfurante). A lança se desfaz após o ataque." },
+      { title: "Lança de Hemoglobina", type: "Poder de Xamã", cost: "Padrão / 2 PV", description: "Ataque à distância. Dano: 1d10 + Constituição (Perfurante). A lança se desfaz após o ataque." },
       { title: "Praga Contagiosa", type: "Poder de Xamã", cost: "Padrão / 4 PV", description: "Alvo sofre 1d6 de dano por turno (Sangramento mágico). Se ele tocar em outro aliado dele, a praga se espalha." },
       { title: "Explosão Corpórea", type: "Poder de Xamã", cost: "Padrão / 6 PV", description: "Requer um cadáver recente. Explode o corpo causando 4d6 de dano em criaturas adjacentes (Reflexos reduz à metade)." },
       { title: "Vínculo Animal", type: "Poder de Xamã", cost: "Completa / 1d8 PV", description: "Você entra em transe e enxerga pelos olhos de um animal em alcance longo. Seu corpo principal fica indefeso." },
@@ -427,7 +426,7 @@ const classesData = [
       { title: "Espírito Guardião", type: "Poder de Xamã", cost: "3 Corrupção", description: "Entidade possui você na cena. Ganha RD 5 (Dano Físico) e Imunidade a Medo. Custo: não pode falar de forma coerente no processo." },
       { title: "Sussurros dos Mortos", type: "Poder de Xamã", cost: "Passivo / 2 PV", description: "Ganha proficiência em Investigação. Pode gastar 2 PV para rolar novamente qualquer teste baseado em Sabedoria ou Inteligência." },
       { title: "Pele Escarificada", type: "Poder de Xamã", cost: "Passivo / 2 PV", description: "Passivo: +2 na Defesa devido às cicatrizes rituais. Ativo: Ao gastar 2 PV, você ganha RD 5 por uma rodada." },
-      { title: "Forma Bestial", type: "Poder de Xamã", cost: "Completa / 4 PV", description: "Assume garras e presas. Seu dano desarmado vira 1d8 e você ganha +3m de deslocamento." },
+      { title: "Forma Bestial", type: "Poder de Xamã", cost: "Completa / 4 PV", description: "Assume garras e presas. Seu dano desarmado vira 1d8 para garras e 1d12 para mordida e você ganha +3m de deslocamento." },
       { title: "Coração da Floresta", type: "Poder de Xamã", cost: "Passivo", description: "Pré-requisito: Nível 6. Você se torna completamente imune a venenos e doenças naturais." },
       { title: "Sacrifício Final", type: "Poder de Xamã", cost: "Livre", description: "Se cair a 0 PV, pode realizar uma Ação Padrão imediata antes de desmaiar. Se essa ação matar um inimigo, você estabiliza com 1 PV." }
     ]
@@ -444,6 +443,7 @@ const classesData = [
     },
     fixedAbilities: [
       { title: "Canalização Sanguínea", type: "Habilidade de Classe", cost: "Passivo", description: "Nvl 1: Potência: Soma sua Corrupção Atual (máximo +5) ao dano mágico. Preço Alto: Seus poderes custam dados de PV (d6, d8, d10). Vício em Entropia: Ao tirar um Crítico Mágico, você recupera 2d6 PV imediatamente, mas ganha +1 Ponto de Corrupção." },
+      { title: "Maldição Inicial", type: "Habilidade de Classe", cost: "Padrão / 0 PV", description: "Nvl 1: Você não precisa recitar feitiços; o abismo já vive sob a sua pele. Você aprendeu a projetar a radiação profana do seu corpo de forma direcionada, como uma arma.\nEfeito: Você manifesta uma garra fantasmagórica ou um pulso de energia sombria. Faça um ataque corpo a corpo ou à distância (alcance Curto, 9m) usando sua perícia Sincronia. Se acertar, você causa 1d8 + Presença de dano Necrótico bruto.\nRessonância da Queda: Ao usar a Maldição Inicial, a sua passiva Canalização Sanguínea não soma a sua Corrupção Atual no dano. No entanto, se você tirar um Acerto Crítico (20 natural) com este golpe, a mente do alvo é arranhada pelo Plano Antigo: ele sofre -2 na Defesa até o início do seu próximo turno.\nEscalonamento: O dano base aumenta para 2d8 no Nível 5, 3d8 no Nível 9, 4d8 no Nível 13 e 5d8 no Nível 17." },
       { title: "Apoteose do Caído", type: "Habilidade de Classe", cost: "Livre (1/dia)", description: "Nvl 20 (Forma do Pesadelo): Dura 1 minuto (1d6 rodadas). Sua Corrupção conta como 10 para todos os bônus sem as penalidades normais. Seus poderes custam metade do PV e você ganha RD 10 a todo dano. Ao fim da transformação, cai para 1 PV e fica exausto." }
     ],
     powers: [
@@ -982,6 +982,357 @@ const origensKorzel = [
     poder: "Rastreador Especialista: Você ignora penalidades por movimento ao rastrear e pode identificar há quanto tempo uma criatura passou por ali com precisão de minutos."
   }
 ];
+const compendiumEquipment = [
+  // ==========================================
+  // ARMAS SIMPLES
+  // ==========================================
+  { 
+    name: "Adaga", 
+    category: "Arma Simples", 
+    price: 20, 
+    weight: 0.5, 
+    damage: "1d4", 
+    critical: "19", 
+    range: "3m", 
+    damageType: "Perf.", 
+    properties: "Ágil, Arremesso, Leve." 
+  },
+  { 
+    name: "Clava / Porrete", 
+    category: "Arma Simples", 
+    price: 5, 
+    weight: 1.5, 
+    damage: "1d6", 
+    critical: "x2", 
+    range: "—", 
+    damageType: "Imp.", 
+    properties: "Pode ser arremessada." 
+  },
+  { 
+    name: "Lança Curta", 
+    category: "Arma Simples", 
+    price: 30, 
+    weight: 1.5, 
+    damage: "1d6", 
+    critical: "x2", 
+    range: "9m", 
+    damageType: "Perf.", 
+    properties: "Versátil (1d8), Arremesso." 
+  },
+  { 
+    name: "Machadinha", 
+    category: "Arma Simples", 
+    price: 40, 
+    weight: 2.0, 
+    damage: "1d6", 
+    critical: "x3", 
+    range: "6m", 
+    damageType: "Cort.", 
+    properties: "Ágil, Arremesso." 
+  },
+  { 
+    name: "Bordão", 
+    category: "Arma Simples", 
+    price: 10, 
+    weight: 2.0, 
+    damage: "1d6", 
+    critical: "x2", 
+    range: "—", 
+    damageType: "Imp.", 
+    properties: "Duas Mãos, Defesa (+1 na CA)." 
+  },
+  { 
+    name: "Funda", 
+    category: "Arma Simples", 
+    price: 5, 
+    weight: 0.2, 
+    damage: "1d4", 
+    critical: "x2", 
+    range: "15m", 
+    damageType: "Imp.", 
+    properties: "Recarga Livre." 
+  },
+  { 
+    name: "Arco Curto", 
+    category: "Arma Simples", 
+    price: 80, 
+    weight: 1.0, 
+    damage: "1d6", 
+    critical: "x3", 
+    range: "12m", 
+    damageType: "Perf.", 
+    properties: "Duas Mãos." 
+  },
+
+  // ==========================================
+  // ARMAS MARCIAIS
+  // ==========================================
+  { 
+    name: "Espada Longa", 
+    category: "Arma Marcial", 
+    price: 150, 
+    weight: 1.5, 
+    damage: "1d8", 
+    critical: "19", 
+    range: "—", 
+    damageType: "Cort.", 
+    properties: "Versátil (1d10)." 
+  },
+  { 
+    name: "Machado de Batalha", 
+    category: "Arma Marcial", 
+    price: 150, 
+    weight: 2.5, 
+    damage: "1d8", 
+    critical: "x3", 
+    range: "—", 
+    damageType: "Cort.", 
+    properties: "Versátil (1d10)." 
+  },
+  { 
+    name: "Martelo de Guerra", 
+    category: "Arma Marcial", 
+    price: 180, 
+    weight: 3.0, 
+    damage: "1d8", 
+    critical: "x3", 
+    range: "—", 
+    damageType: "Imp.", 
+    properties: "Versátil (1d10). Ignora 2 RD." 
+  },
+  { 
+    name: "Rasga-Carne (Serra)", 
+    category: "Arma Marcial", 
+    price: 250, 
+    weight: 4.0, 
+    damage: "1d8", 
+    critical: "x3", 
+    range: "—", 
+    damageType: "Cort.", 
+    properties: "Brutal (Rola +1 dado no dano máx)." 
+  },
+  { 
+    name: "Glaive / Alabarda", 
+    category: "Arma Marcial", 
+    price: 200, 
+    weight: 4.0, 
+    damage: "1d10", 
+    critical: "x3", 
+    range: "—", 
+    damageType: "Cort.", 
+    properties: "Duas Mãos, Haste (Alcance 3m)." 
+  },
+  { 
+    name: "Grande Machado", 
+    category: "Arma Marcial", 
+    price: 300, 
+    weight: 5.0, 
+    damage: "1d12", 
+    critical: "x3", 
+    range: "—", 
+    damageType: "Cort.", 
+    properties: "Duas Mãos, Brutal." 
+  },
+  { 
+    name: "Montante", 
+    category: "Arma Marcial", 
+    price: 350, 
+    weight: 4.5, 
+    damage: "2d6", 
+    critical: "19", 
+    range: "—", 
+    damageType: "Cort.", 
+    properties: "Duas Mãos, Pesada." 
+  },
+  { 
+    name: "Arco Longo", 
+    category: "Arma Marcial", 
+    price: 250, 
+    weight: 1.5, 
+    damage: "1d8", 
+    critical: "x3", 
+    range: "30m", 
+    damageType: "Perf.", 
+    properties: "Duas Mãos." 
+  },
+  { 
+    name: "Besta Pesada", 
+    category: "Arma Marcial", 
+    price: 300, 
+    weight: 4.0, 
+    damage: "1d12", 
+    critical: "19", 
+    range: "24m", 
+    damageType: "Perf.", 
+    properties: "Duas Mãos, Recarga (Padrão)." 
+  },
+
+  // ==========================================
+  // ARMAS EXÓTICAS
+  // ==========================================
+  { 
+    name: "Shael'thaar", 
+    category: "Arma Exótica", 
+    price: 500, 
+    weight: 1.0, 
+    damage: "1d8", 
+    critical: "19/x2", 
+    range: "3m", 
+    damageType: "Cort./Perf.", 
+    properties: "Ágil, Haste Flexível. +2 em Manobras. Ataca adjacente sem penalidade." 
+  },
+  { 
+    name: "Arco Syl'var", 
+    category: "Arma Exótica", 
+    price: 500, 
+    weight: 3.0, 
+    damage: "1d10", 
+    critical: "x3", 
+    range: "30m", 
+    damageType: "Perf.", 
+    properties: "Duas Mãos. Soma Força no dano. Pode ser usado como bastão (1d6)." 
+  },
+  { 
+    name: "Tridente de Guerra", 
+    category: "Arma Exótica", 
+    price: 300, 
+    weight: 2.5, 
+    damage: "1d8", 
+    critical: "x2", 
+    range: "6m", 
+    damageType: "Perf.", 
+    properties: "Versátil (1d10). Não sofre penalidade na água. +2 para imobilizar." 
+  },
+  { 
+    name: "Disparadora de Lâmina", 
+    category: "Arma Exótica", 
+    price: 800, 
+    weight: 3.5, 
+    damage: "1d6/1d8", 
+    critical: "19/x3", 
+    range: "—", 
+    damageType: "Híbrida", 
+    properties: "Lâmina (1d6) + Tiro (1d8). Recarga Padrão. Dispara sem ataque de oportunidade." 
+  },
+  { 
+    name: "Mosquete de Gancho", 
+    category: "Arma Exótica", 
+    price: 1000, 
+    weight: 5.0, 
+    damage: "2d10", 
+    critical: "x3", 
+    range: "24m", 
+    damageType: "Perf.", 
+    properties: "Pólvora. Ignora 2 Defesa. Falha com '1'. Recarga Completa." 
+  },
+
+  // ==========================================
+  // ARMADURAS
+  // ==========================================
+  { 
+    name: "Gibão de Peles", 
+    category: "Armadura Leve", 
+    price: 50, 
+    weight: 4.0, 
+    defenseBonus: 1, 
+    stealthDisadvantage: false, 
+    description: "Soma Agilidade. Peles de animais comuns." 
+  },
+  { 
+    name: "Couro Batido", 
+    category: "Armadura Leve", 
+    price: 150, 
+    weight: 6.0, 
+    defenseBonus: 2, 
+    stealthDisadvantage: false, 
+    description: "Soma Agilidade. Couro fervido e endurecido." 
+  },
+  { 
+    name: "Couro de Raptor", 
+    category: "Armadura Leve", 
+    price: 400, 
+    weight: 4.5, 
+    defenseBonus: 3, 
+    stealthDisadvantage: false, 
+    description: "Soma Agilidade. Couro nobre, extremamente flexível e letal." 
+  },
+  { 
+    name: "Brunea de Osso", 
+    category: "Armadura Média/Pesada", 
+    price: 150, 
+    weight: 12.0, 
+    defenseBonus: 5, 
+    stealthDisadvantage: true, 
+    description: "Não soma Agilidade. Ossos costurados sobre couro." 
+  },
+  { 
+    name: "Peitoral de Quitina", 
+    category: "Armadura Média/Pesada", 
+    price: 300, 
+    weight: 15.0, 
+    defenseBonus: 6, 
+    stealthDisadvantage: true, 
+    description: "Não soma Agilidade. Casca de inseto gigante endurecida." 
+  },
+  { 
+    name: "Loriga Segmentada", 
+    category: "Armadura Média/Pesada", 
+    price: 600, 
+    weight: 20.0, 
+    defenseBonus: 8, 
+    stealthDisadvantage: true, 
+    description: "Não soma Agilidade. Tiras grossas de metal sobrepostas." 
+  },
+  { 
+    name: "Meia-Armadura", 
+    category: "Armadura Média/Pesada", 
+    price: 1500, 
+    weight: 25.0, 
+    defenseBonus: 9, 
+    stealthDisadvantage: true, 
+    description: "Não soma Agilidade. Placas de metal Thalorim de alta qualidade." 
+  },
+  { 
+    name: "Armadura de Titã", 
+    category: "Armadura Média/Pesada", 
+    price: 3000, 
+    weight: 35.0, 
+    defenseBonus: 14, 
+    stealthDisadvantage: true, 
+    description: "Não soma Agilidade. Ossos colossais de T-Rex. Uso restrito para Korgaths." 
+  },
+
+  // ==========================================
+  // ESCUDOS
+  // ==========================================
+  { 
+    name: "Buckler (Leve)", 
+    category: "Escudo", 
+    price: 50, 
+    weight: 1.5, 
+    defenseBonus: 1, 
+    stealthDisadvantage: false, 
+    description: "Pequeno e ágil. Deixa a mão principal livre para manusear itens pequenos." 
+  },
+  { 
+    name: "Escudo Pipa (Médio)", 
+    category: "Escudo", 
+    price: 100, 
+    weight: 4.0, 
+    defenseBonus: 2, 
+    stealthDisadvantage: false, 
+    description: "Escudo padrão forjado em madeira resistente ou placas de metal." 
+  },
+  { 
+    name: "Escudo Torre (Pesado)", 
+    category: "Escudo", 
+    price: 300, 
+    weight: 10.0, 
+    defenseBonus: 4, 
+    stealthDisadvantage: true, 
+    description: "Uma verdadeira barreira móvel. Impõe desvantagem em Furtividade/Acrobacia pelo tamanho absurdo." 
+  }
+];
 
 export default function Compendio({ handleAddAbility, savedCharacters, activeCharacterName }) {
   const [activeSection, setActiveSection] = useState('lore');
@@ -992,11 +1343,12 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
   const [powerToForge, setPowerToForge] = useState(null);
   const [targetCharId, setTargetCharId] = useState("active");
 
- const handleTabChange = (section) => {
+const handleTabChange = (section) => {
     setActiveSection(section);
     if (section === 'classes') setSelectedTopic(classesData[0]);
     if (section === 'origens') setSelectedTopic(origensData[0]);
-    if (section === 'origensKorzel') setSelectedTopic(origensKorzel[0]); // Define o primeiro antecedente/origem
+    if (section === 'origensKorzel') setSelectedTopic(origensKorzel[0]);
+    if (section === 'equipamentos') setSelectedTopic(null); // Nova linha
   };
 
   const openForgeModal = (power) => {
@@ -1010,7 +1362,7 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
     setForgeModalOpen(false);
   };
 
-  return (
+return (
     <div className="flex flex-col lg:flex-row gap-6 w-full h-full min-h-0 relative">
       
       {/* MODAL DE FORJA */}
@@ -1021,11 +1373,11 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
               Forjar Poder
             </h3>
             <p className="text-zinc-300 text-sm mb-4">
-              O poder <strong className="text-white">"{powerToForge.title || powerToForge.poder}"</strong> será adicionado à aba de habilidades. Escolha o destinatário:
+              O poder <strong className="text-white">"{powerToForge.title || powerToForge.poder || powerToForge.name}"</strong> será adicionado à aba de habilidades. Escolha o destinatário:
             </p>
-            
-            <select 
-              value={targetCharId} 
+
+            <select
+              value={targetCharId}
               onChange={(e) => setTargetCharId(e.target.value)}
               className="w-full bg-black border border-red-900/50 rounded-md p-3 text-white focus:outline-none focus:border-red-500 shadow-inner appearance-none cursor-pointer font-bold mb-6"
             >
@@ -1051,19 +1403,19 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
         </h3>
         <button onClick={() => handleTabChange('lore')} className={`text-left px-4 py-2 text-xs font-bold uppercase tracking-widest rounded transition-colors ${activeSection === 'lore' ? 'bg-amber-900/50 text-amber-400 border border-amber-800/50' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>O Mundo de Korzel</button>
         <button onClick={() => handleTabChange('classes')} className={`text-left px-4 py-2 text-xs font-bold uppercase tracking-widest rounded transition-colors ${activeSection === 'classes' ? 'bg-amber-900/50 text-amber-400 border border-amber-800/50' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>Classes & Poderes</button>
-        {/* BOTÃO ALTERADO AQUI */}
         <button onClick={() => handleTabChange('origens')} className={`text-left px-4 py-2 text-xs font-bold uppercase tracking-widest rounded transition-colors ${activeSection === 'origens' ? 'bg-amber-900/50 text-amber-400 border border-amber-800/50' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>Raças</button>
-        {/* NOVO BOTÃO ADICIONADO AQUI */}
         <button onClick={() => handleTabChange('origensKorzel')} className={`text-left px-4 py-2 text-xs font-bold uppercase tracking-widest rounded transition-colors ${activeSection === 'origensKorzel' ? 'bg-amber-900/50 text-amber-400 border border-amber-800/50' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>Origens do Passado</button>
+        <button onClick={() => handleTabChange('equipamentos')} className={`text-left px-4 py-2 text-xs font-bold uppercase tracking-widest rounded transition-colors ${activeSection === 'equipamentos' ? 'bg-amber-900/50 text-amber-400 border border-amber-800/50' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>Equipamentos</button>
       </div>
 
       {/* CONTEÚDO PRINCIPAL */}
       <div className="flex-1 bg-[#140c08] border-2 border-[#3e2723] rounded-xl overflow-hidden flex flex-col min-h-0 shadow-[inset_0_0_40px_rgba(0,0,0,0.8)] relative z-10">
-        
+
+        {/* ABA DE LORE */}
         {activeSection === 'lore' && (
           <div className="p-8 overflow-y-auto custom-scrollbar h-full flex flex-col animate-fade-in relative">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5 pointer-events-none">
-               <img src={mosasaurusSkull} className="w-[600px] h-[600px] filter invert" alt="Skull BG" />
+              <img src={mosasaurusSkull} className="w-[600px] h-[600px] filter invert" alt="Skull BG" />
             </div>
             <h1 className="text-3xl font-black text-amber-500 uppercase tracking-widest border-b-2 border-amber-900/50 pb-4 mb-6 drop-shadow-md z-10">O Mundo de Korzel</h1>
             <div className="space-y-6 text-zinc-300 leading-relaxed text-lg text-justify font-serif z-10">
@@ -1076,24 +1428,116 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
           </div>
         )}
 
+        {/* ABA DE EQUIPAMENTOS */}
+        {activeSection === 'equipamentos' && (
+          <div className="p-6 lg:p-8 overflow-y-auto custom-scrollbar h-full animate-fade-in relative z-10">
+            <h2 className="text-3xl font-black text-amber-500 uppercase tracking-widest border-b-2 border-amber-900/50 pb-4 mb-6 drop-shadow-md">
+              Arsenal e Armaduras
+            </h2>
+            <p className="text-zinc-400 mb-8 border-l-4 border-amber-700 pl-4 italic text-sm bg-amber-950/10 py-2 rounded-r">
+              A moeda em Korzel é a Lasca (Lc). O peso e o custo são fundamentais para a sobrevivência. Escolha seu equipamento com sabedoria.
+            </p>
+
+            {['Arma Simples', 'Arma Marcial', 'Arma Exótica', 'Armadura Leve', 'Armadura Média/Pesada', 'Escudo'].map(categoria => {
+              const itensCategoria = compendiumEquipment.filter(item => item.category === categoria);
+              if (itensCategoria.length === 0) return null;
+
+              return (
+                <div key={categoria} className="mb-10">
+                  <h3 className="text-xl font-bold text-white uppercase tracking-widest border-b border-[#3e2723] pb-2 mb-4">
+                    {categoria}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {itensCategoria.map((item, idx) => (
+                      <div key={idx} className="bg-black/60 border border-zinc-800/80 hover:border-amber-700/50 rounded-lg p-5 flex flex-col justify-between shadow-md transition-colors group">
+                        <div>
+                          <div className="flex justify-between items-start mb-3 gap-2">
+                            <h4 className="text-amber-400 font-bold text-sm">{item.name}</h4>
+                            <span className="bg-amber-950/40 border border-amber-900/50 px-2 py-1 rounded text-[10px] font-bold text-amber-300 whitespace-nowrap shadow-inner">
+                              {item.price} Lc
+                            </span>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            <span className="text-[10px] bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded border border-zinc-800">
+                              ⚖️ {item.weight} kg
+                            </span>
+                            {item.damage && (
+                              <span className="text-[10px] bg-red-950/30 text-red-400 px-2 py-0.5 rounded border border-red-900/30">
+                                ⚔️ {item.damage} ({item.damageType})
+                              </span>
+                            )}
+                            {item.critical && (
+                              <span className="text-[10px] bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded border border-zinc-800">
+                                🎯 Crit: {item.critical}
+                              </span>
+                            )}
+                            {item.range && item.range !== "—" && (
+                              <span className="text-[10px] bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded border border-zinc-800">
+                                🏹 {item.range}
+                              </span>
+                            )}
+                            {item.defenseBonus !== undefined && (
+                              <span className="text-[10px] bg-blue-950/30 text-blue-400 px-2 py-0.5 rounded border border-blue-900/30">
+                                🛡️ Defesa +{item.defenseBonus}
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-xs text-zinc-400 leading-relaxed mb-4 whitespace-pre-wrap">
+                            {item.properties || item.description}
+                            {item.stealthDisadvantage && (
+                              <span className="block mt-2 text-red-500/80 font-bold">
+                                ⚠️ Desvantagem em Furtividade e Acrobacia
+                              </span>
+                            )}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => openForgeModal({
+                            title: item.name,
+                            type: item.category,
+                            cost: `${item.price} Lc`,
+                            description: `Peso: ${item.weight}kg\n${item.properties || item.description}`,
+                            isEquipment: true,
+                            price: item.price,
+                            weight: item.weight,
+                            damage: item.damage,
+                            defenseBonus: item.defenseBonus
+                          })}
+                          className="w-full mt-auto bg-zinc-900 hover:bg-amber-900/80 text-zinc-400 hover:text-white border border-zinc-700 hover:border-amber-600 text-[10px] uppercase font-bold tracking-widest py-2.5 rounded transition-all shadow-md group-hover:shadow-[0_0_15px_rgba(217,119,6,0.3)]"
+                        >
+                          🛒 Comprar & Adicionar
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ABAS QUE POSSUEM SUB-MENU HORIZONTAL (CLASSES, RAÇAS E ORIGENS) */}
         {(activeSection === 'classes' || activeSection === 'origens' || activeSection === 'origensKorzel') && (
           <div className="flex flex-col h-full animate-fade-in">
-            {/* SUB-MENU HORIZONTAL DE SELEÇÃO ATUALIZADO */}
+            {/* SUB-MENU HORIZONTAL */}
             <div className="bg-[#0a0502] border-b border-[#3e2723] p-4 flex gap-3 overflow-x-auto custom-scrollbar shrink-0 shadow-md z-10">
-              {(activeSection === 'classes' 
-                ? classesData 
-                : activeSection === 'origens' 
-                ? origensData 
-                : origensKorzel
+              {(activeSection === 'classes'
+                ? classesData
+                : activeSection === 'origens'
+                  ? origensData
+                  : origensKorzel
               ).map((item, idx) => {
-                const name = item.name || item.nome; // Suporta as duas chaves de nome
+                const name = item.name || item.nome;
                 return (
-                  <button 
-                    key={idx} 
+                  <button
+                    key={idx}
                     onClick={() => setSelectedTopic(item)}
                     className={`px-4 py-2 whitespace-nowrap text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-md border transition-all ${
-                      (selectedTopic.name === name || selectedTopic.nome === name) 
-                        ? 'bg-red-950/60 border-red-800 text-red-400 shadow-[0_0_10px_rgba(153,27,27,0.5)]' 
+                      (selectedTopic.name === name || selectedTopic.nome === name)
+                        ? 'bg-red-950/60 border-red-800 text-red-400 shadow-[0_0_10px_rgba(153,27,27,0.5)]'
                         : 'bg-black/40 border-zinc-800 text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
@@ -1104,8 +1548,7 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
             </div>
 
             <div className="p-6 lg:p-8 overflow-y-auto custom-scrollbar h-full relative z-10">
-              
-              {/* RENDERIZAÇÃO DA NOVA ABA: ORIGENS KORZEL */}
+              {/* CONTEÚDO ORIGENS KORZEL */}
               {activeSection === 'origensKorzel' ? (
                 <div className="animate-fade-in">
                   <h2 className="text-3xl font-black text-white uppercase tracking-widest mb-2">{selectedTopic.nome}</h2>
@@ -1136,8 +1579,8 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
                       </div>
                       <p className="text-xs text-zinc-400 whitespace-pre-wrap">{selectedTopic.poder}</p>
                     </div>
-                    <button 
-                      onClick={() => openForgeModal({ title: selectedTopic.nome, description: selectedTopic.poder, cost: "Origem" })} 
+                    <button
+                      onClick={() => openForgeModal({ title: selectedTopic.nome, description: selectedTopic.poder, cost: "Origem" })}
                       className="shrink-0 bg-amber-950/40 hover:bg-amber-900 border border-amber-900 text-amber-200 text-[10px] uppercase font-bold tracking-widest px-4 py-2 rounded transition-colors w-full md:w-auto"
                     >
                       ➕ Forjar na Ficha
@@ -1145,7 +1588,7 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
                   </div>
                 </div>
               ) : (
-                /* RENDERIZAÇÃO ANTIGA (CLASSES E RAÇAS) SEGUURAS */
+                /* CONTEÚDO CLASSES E RAÇAS */
                 <>
                   <h2 className="text-3xl font-black text-white uppercase tracking-widest mb-2">{selectedTopic.name}</h2>
                   {selectedTopic.quote ? (
@@ -1174,13 +1617,13 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
                       {selectedTopic.desc}
                     </p>
                   )}
-                  
+
                   {selectedTopic.stats && Object.keys(selectedTopic.stats).length > 0 && (
                     <div className="bg-black/50 border border-[#3e2723] rounded-lg p-5 mb-8 shadow-inner">
                       <h3 className="text-amber-500 font-bold uppercase tracking-widest text-xs border-b border-[#3e2723] pb-2 mb-4">
                         {activeSection === 'classes' ? 'Características Básicas' : '📊 CARACTERÍSTICAS DE RAÇA'}
                       </h3>
-                      
+
                       {activeSection === 'classes' ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                           <div><span className="text-zinc-500 uppercase text-[10px] font-bold block">❤️ Vida (PV)</span><span className="text-zinc-200">{selectedTopic.stats.hp}</span></div>
@@ -1245,8 +1688,8 @@ export default function Compendio({ handleAddAbility, savedCharacters, activeCha
                               </div>
                               <p className="text-sm text-zinc-300 leading-relaxed mb-4 whitespace-pre-wrap">{power.description}</p>
                             </div>
-                            
-                            <button 
+
+                            <button
                               onClick={() => openForgeModal(power)}
                               className="w-full mt-auto bg-zinc-900 hover:bg-amber-900/80 text-zinc-400 hover:text-white border border-zinc-700 hover:border-amber-600 text-[10px] uppercase font-bold tracking-widest py-2.5 rounded transition-all shadow-md group-hover:shadow-[0_0_15px_rgba(217,119,6,0.3)]"
                             >
