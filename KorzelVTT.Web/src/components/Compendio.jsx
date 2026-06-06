@@ -880,7 +880,7 @@ const origensKorzel = [
     nome: "Navegador de Rios",
     descricao: "Você navegou pelos canais e rios perigosos de Korzel, desviando de espinossauros e operando eclusas pesadas.",
     itens: "Remo reforçado, rede de pesca, frasco de óleo repelente.",
-    pericias: "Montaria/Pilotar, Atletismo ou Percepção",
+    pericias: "Oficio: Navegação/Carpintaria, Diplomacia ou Percepção",
     poder: "Leitura das Águas: Você recebe +5 em testes de Pilotagem para navegar em rios e nunca é pego de surpresa por criaturas submersas."
   },
   {
