@@ -1385,15 +1385,16 @@ const handleSaveCatalogItem = () => {
     }
   }, [connection, currentCampaignId, loggedUserName]);
 
-  // 🟢 SINCRONIZAÇÃO AUTOMÁTICA DA LOJA PARA NOVOS JOGADORES
+  // 🟢 SINCRONIZAÇÃO AUTOMÁTICA DA LOJA PARA NOVOS JOGADORES (À PROVA DE FALHAS)
   useEffect(() => {
     // Se eu sou o Mestre e estou conectado em uma campanha...
     if (isMasterMode && connection && currentCampaignId) {
-      // Eu pego a minha loja atual e forço o envio para todos na mesa!
+      // Força o envio do catálogo sempre que a lista de jogadores mudar 
+      // OU sempre que o Mestre trocar de aba (ex: clicar na aba Loja)
       connection.invoke("UpdateCatalog", currentCampaignId.toString(), JSON.stringify(catalog))
         .catch(console.error);
     }
-  }, [onlinePlayers]); // 👈 O gatilho: Isso dispara toda vez que a lista de jogadores online muda (alguém entra ou sai).
+  }, [onlinePlayers, sessionTab, connection, currentCampaignId, isMasterMode]); // 👈 Adicionamos sessionTab e outros gatilhos aqui!
 
   // ==========================================
   // 5. PROPS DO VTT
