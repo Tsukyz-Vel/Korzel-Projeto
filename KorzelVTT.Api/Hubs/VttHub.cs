@@ -139,11 +139,14 @@ namespace KorzelVTT.Api.Hubs
             await Clients.OthersInGroup(campaignId).SendAsync("OnCharactersRefreshed");
         }
 
-        public async Task UpdateCatalog(string campaignId, string catalogJson)
+       public async Task UpdateCatalog(string campaignId, string catalogJson)
         {
-            await Clients.OthersInGroup(campaignId).SendAsync("CatalogUpdated", catalogJson);
-        }
+            // Opcional: Você pode salvar esse catalogJson no banco de dados da Campanha aqui
+            // para que a loja não zere quando o servidor reiniciar.
 
+            // Envia a loja atualizada para todo mundo que está na mesa
+            await Clients.Group(campaignId).SendAsync("CatalogUpdated", catalogJson);
+        }
         // ==========================================
         // ÁUDIO DA SESSÃO (Agora com Volume Sincronizado)
         // ==========================================
