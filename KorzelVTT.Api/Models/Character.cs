@@ -65,6 +65,11 @@ public class Character
     public int Corruption { get; set; } = 0; 
     public int MaxCorruption { get; set; } = 40; 
 
+    public int ArmorBonus { get; set; }
+    public int ShieldBonus { get; set; }
+    public bool IsArmorHeavy { get; set; }
+    public bool IsShieldHeavy { get; set; }
+
     // === ECONOMIA E DEFESA ===
     public int Lascas { get; set; } = 1000; 
     public int BaseDefense { get; set; } = 10; 
