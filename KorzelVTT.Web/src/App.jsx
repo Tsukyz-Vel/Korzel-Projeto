@@ -1111,6 +1111,83 @@ export default function App() {
        showToast("Erro de conexão ao forjar poder.", "error");
     }
   };
+
+  const handleAddEquipmentToSheet = async (equipamento, targetCharId = "active") => { 
+    let charIdToUpdate = null;
+
+    if (targetCharId === "active" || (activeCharId && Number(targetCharId) === activeCharId)) {
+      charIdToUpdate = activeCharId;
+    } else {
+      charIdToUpdate = Number(targetCharId);
+    }
+
+    if (!charIdToUpdate) {
+       showToast("Crie ou selecione um personagem primeiro!", "error");
+       return;
+    }
+
+    try {
+      const res = await fetch(`https://korzel-api.onrender.com/api/characters/${charIdToUpdate}`, { headers: getAuthHeaders() });
+      
+      if (res.ok) {
+        const charData = await res.json();
+        const currentLascas = charData.lascas || 0;
+        
+        // Pega o custoLc do compêndio (remove o " Lc" da string, se houver)
+        const custoString = String(equipamento.custoLc || equipamento.preco || "0").replace(/\D/g, '');
+        const custoItem = parseInt(custoString, 10);
+
+        // 1. Validação financeira
+        if (currentLascas < custoItem) {
+          showToast(`🪙 Lascas insuficientes! O item custa ${custoItem} e você tem ${currentLascas}.`, "error");
+          return;
+        }
+
+        // 2. Deduz as Lascas
+        charData.lascas = currentLascas - custoItem;
+        charData.inventory = charData.inventory || [];
+
+        // 3. Formata pro Inventário
+        const novoItem = {
+          name: equipamento.nome,
+          description: equipamento.dano ? `Dano: ${equipamento.dano} | Crítico: ${equipamento.critico}` : (equipamento.descricao || ""),
+          quantity: 1,
+          weight: parseFloat(String(equipamento.peso).replace(',', '.')) || 1,
+          isEquipped: false,
+          itemType: equipamento.dano ? "Arma" : "Equipamento",
+          armorBonus: 0,
+          armorPenalty: 0
+        };
+
+        charData.inventory.push(novoItem);
+
+        // 4. Salva no banco de dados
+        const updateRes = await fetch(`https://korzel-api.onrender.com/api/characters/${charIdToUpdate}`, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(charData)
+        });
+
+        if (updateRes.ok) {
+           showToast(`🪙 [${novoItem.name}] comprado e adicionado ao Inventário!`, "success");
+           
+           // Atualiza a tela imediatamente se for o seu personagem
+           if (activeCharId === charIdToUpdate) {
+             setLascas(charData.lascas);
+             setInventoryList(prev => [...prev, novoItem]);
+           }
+           
+           if (connection && currentCampaignId) {
+             connection.invoke("RefreshCharacters", currentCampaignId.toString()).catch(console.error);
+           }
+        } else {
+           showToast(`Erro ao salvar equipamento na ficha de ${charData.name}.`, "error");
+        }
+      }
+    } catch(e) {
+       showToast("Erro de conexão ao comprar equipamento.", "error");
+    }
+  };
  // ==========================================
   // 4. USE EFFECTS (EFEITOS E SIGNALR)
   // ==========================================
@@ -1435,7 +1512,7 @@ export default function App() {
               </div>
             )}
 
-             <Compendio handleAddAbility={handleAddAbilityToSheet} savedCharacters={campaignCharacters} activeCharacterName={charName} />
+             <Compendio handleAddAbility={handleAddAbilityToSheet} handleAddEquipment={handleAddEquipmentToSheet} savedCharacters={campaignCharacters} activeCharacterName={charName} />
           </div>
         )}
 

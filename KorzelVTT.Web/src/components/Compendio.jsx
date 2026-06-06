@@ -1334,7 +1334,7 @@ const compendiumEquipment = [
   }
 ];
 
-export default function Compendio({ handleAddAbility, savedCharacters, activeCharacterName }) {
+export default function Compendio({ handleAddAbility, handleAddEquipment, savedCharacters, activeCharacterName }) {
   const [activeSection, setActiveSection] = useState('lore');
   const [selectedTopic, setSelectedTopic] = useState(classesData[0]);
   
@@ -1357,8 +1357,28 @@ const handleTabChange = (section) => {
     setForgeModalOpen(true);
   };
 
-  const confirmForge = () => {
-    handleAddAbility(powerToForge, targetCharId);
+const confirmForge = () => {
+    // 1. Verifica se tem a flag de equipamento que você colocou no botão
+    if (powerToForge.isEquipment) {
+      
+      // 2. Prepara os dados do jeito exato que a nossa nova função lá no App.js gosta
+      const equipamentoFormatado = {
+        nome: powerToForge.title,
+        preco: powerToForge.price, 
+        peso: powerToForge.weight,
+        dano: powerToForge.damage,
+        descricao: powerToForge.description
+      };
+
+      // 3. Manda comprar!
+      handleAddEquipment(equipamentoFormatado, targetCharId);
+
+    } else {
+      // Se não for equipamento, segue a vida normal forjando a habilidade
+      handleAddAbility(powerToForge, targetCharId);
+    }
+    
+    // Fecha o modal no final
     setForgeModalOpen(false);
   };
 
