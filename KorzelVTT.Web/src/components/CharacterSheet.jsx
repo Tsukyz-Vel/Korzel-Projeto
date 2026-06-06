@@ -20,7 +20,7 @@ export default function CharacterSheet({
   showAbilityForm, setShowAbilityForm, editingAbilityIndex, abilityForm, setAbilityForm, abilitiesList, handleOpenNewAbility, handleEditAbility, handleDeleteAbility, handleSaveAbility,
   showItemForm, setShowItemForm, editingItemIndex, itemForm, setItemForm, inventoryList, handleOpenNewItem, handleEditItem, handleDeleteItem, handleSaveItem,
   charDeity, handleDeityChange, mut1, setMut1, mut2, setMut2, mut3, setMut3,
-  notes, activeNoteId, setActiveNoteId, handleAddNote, handleDeleteNote, handleNoteChange, activeNote,
+  notes, activeNoteId, setActiveNoteId, handleAddNote, handleDeleteNote, handleNoteChange, activeNote,armorBonus, setArmorBonus, shieldBonus, setShieldBonus,isArmorHeavy, setIsArmorHeavy, isShieldHeavy, setIsShieldHeavy,
   connection, setChatMessages, showToast, currentCampaignId // 👈 PROPS ESSENCIAIS
 }) {
 
@@ -36,10 +36,7 @@ export default function CharacterSheet({
   // ==========================================
   // ESTADOS DE DEFESA E ARMADURA
   // ==========================================
-  const [armorBonus, setArmorBonus] = useState(0);
-  const [shieldBonus, setShieldBonus] = useState(0);
-  const [isArmorHeavy, setIsArmorHeavy] = useState(false);
-  const [isShieldHeavy, setIsShieldHeavy] = useState(false);
+
   
   const hasDisadvantage = isArmorHeavy || isShieldHeavy;
   const calculatedAC = 10 + (hasDisadvantage ? 0 : Number(attrAgi || 0)) + Number(armorBonus || 0) + Number(shieldBonus || 0);

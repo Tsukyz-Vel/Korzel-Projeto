@@ -51,6 +51,10 @@ export default function App() {
   const [corruption, setCorruption] = useState(0); 
   const [maxCorruption, setMaxCorruption] = useState(40);
   const [lascas, setLascas] = useState(0);
+  const [armorBonus, setArmorBonus] = useState(0);
+  const [shieldBonus, setShieldBonus] = useState(0);
+  const [isArmorHeavy, setIsArmorHeavy] = useState(false);
+  const [isShieldHeavy, setIsShieldHeavy] = useState(false);
 
   const initialItemState = { name: "", description: "", quantity: 1, weight: 0.5 };
   const [inventoryList, setInventoryList] = useState([]);
@@ -63,6 +67,7 @@ export default function App() {
     { name: "Arremesso", attrShort: "for", color: "red", trainingLevel: 0 },
     { name: "Atletismo", attrShort: "vig", color: "green", trainingLevel: 0 },
     { name: "Constituição", attrShort: "vig", color: "green", trainingLevel: 0 },
+    { name: "Diplomacia", attrShort: "pre", color: "purple", trainingLevel: 0 },
     { name: "Enganação", attrShort: "pre", color: "purple", trainingLevel: 0 },
     { name: "Erudição", attrShort: "int", color: "yellow", trainingLevel: 0 },
     { name: "Furtividade", attrShort: "agi", color: "blue", trainingLevel: 0 },
@@ -293,6 +298,10 @@ export default function App() {
         setInventoryList(data.inventory || []); setAttacksList(data.weapons || []); setAbilitiesList(data.abilities || []); setNotes(data.notes || []); setResistances(data.resistances || "");
         setOficioText(data.oficioText || "");
         setCurrentPage('ficha'); showToast("Ficha carregada!", "success");
+        setArmorBonus(data.armorBonus || 0);
+        setShieldBonus(data.shieldBonus || 0);
+        setIsArmorHeavy(data.isArmorHeavy || false);
+        setIsShieldHeavy(data.isShieldHeavy || false);
       }
     } catch (error) {}
   };
@@ -302,12 +311,13 @@ export default function App() {
       id: activeCharId || 0, 
       campaignId: currentCampaignId || 0,
       name: charName, origin: charOrigin, race: charRace, class: charClass, age: charAge, level: charLevel, deity: charDeity, mut1, mut2, mut3, intellect: attrInt, presence: attrPre, agility: attrAgi, vigor: attrVig, strength: attrFor, instinct: attrIns, currentHP: hp, maxHP: maxHp, currentPE: pe, maxPE: maxPe, corruption, maxCorruption, lascas, baseDefense: 10,resistances: resistances,
-      oficioText: oficioText, 
+      oficioText: oficioText, lascas: lascas, armorBonus: Number(armorBonus), shieldBonus: Number(shieldBonus), isArmorHeavy: isArmorHeavy, isShieldHeavy: isShieldHeavy, baseDefense: 10,
       skills: skillsList.map(s => ({ name: s.name, trainingLevel: s.trainingLevel, others: s.others || 0 })), 
       inventory: inventoryList.map(i => ({ name: i.name, description: i.description, quantity: i.quantity, weight: i.weight, isEquipped: i.isEquipped || false, itemType: i.itemType || "Consumível", armorBonus: i.armorBonus || 0, armorPenalty: i.armorPenalty || 0 })), 
       weapons: attacksList.map(w => ({ name: w.name, damage: w.damage, critMargin: w.critMargin, critMultiplier: w.critMultiplier, type: w.type, skill: w.skill, isRanged: w.isRanged || false, ammo: w.ammo || 0 })), 
       abilities: abilitiesList.map(a => ({ title: a.title, type: a.type, cost: a.cost, description: a.description })), 
       notes: notes.map(n => ({ title: n.title || "Sem título", content: n.content || "" })) 
+      
     };
     try {
       if (activeCharId) {
@@ -1521,7 +1531,7 @@ export default function App() {
           <button onClick={saveCharacterToDb} className="whitespace-nowrap shrink-0 bg-red-900/80 hover:bg-red-700 text-white font-bold py-2 px-6 rounded border border-red-500 transition-colors text-sm uppercase tracking-widest shadow-[0_0_15px_rgba(153,27,27,0.5)]">💾 Salvar Ficha Completa</button>
           <button onClick={() => setCurrentPage('sessao')} className="whitespace-nowrap shrink-0 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white font-bold py-2 px-6 rounded border border-zinc-600 transition-colors text-sm uppercase tracking-widest">✖ Fechar e Voltar</button>
         </div>
-          <CharacterSheet charName={charName} setCharName={setCharName} charOrigin={charOrigin} setCharOrigin={setCharOrigin} charRace={charRace} setCharRace={setCharRace} charClass={charClass} setCharClass={setCharClass} charAge={charAge} setCharAge={setCharAge} charLevel={charLevel} setCharLevel={setCharLevel} attrInt={attrInt} setAttrInt={setAttrInt} attrPre={attrPre} setAttrPre={setAttrPre} attrAgi={attrAgi} setAttrAgi={setAttrAgi} attrVig={attrVig} setAttrVig={setAttrVig} attrFor={attrFor} setAttrFor={setAttrFor} attrIns={attrIns} setAttrIns={setAttrIns} hp={hp} setHp={setHp} maxHp={maxHp} setMaxHp={setMaxHp} pe={pe} setPe={setPe} maxPe={maxPe} setMaxPe={setMaxPe} corruption={corruption} setCorruption={setCorruption} maxCorruption={maxCorruption} setMaxCorruption={setMaxCorruption} lascas={lascas} setLascas={setLascas} currentWeight={currentWeight} maxWeight={maxWeight} skillsList={skillsList} setSkillsList={setSkillsList} executeRoll={executeRoll} getSkillTotal={getSkillTotal} activeFichaTab={activeFichaTab} setActiveFichaTab={setActiveFichaTab} showWeaponForm={showWeaponForm} setShowWeaponForm={setShowWeaponForm} editingWeaponIndex={editingWeaponIndex} weaponForm={weaponForm} setWeaponForm={setWeaponForm} attacksList={attacksList} handleOpenNewWeapon={handleOpenNewWeapon} handleEditWeapon={handleEditWeapon} handleDeleteWeapon={handleDeleteWeapon} handleSaveWeapon={handleSaveWeapon} showAbilityForm={showAbilityForm} setShowAbilityForm={setShowAbilityForm} editingAbilityIndex={editingAbilityIndex} abilityForm={abilityForm} setAbilityForm={setAbilityForm} abilitiesList={abilitiesList} handleOpenNewAbility={handleOpenNewAbility} handleEditAbility={handleEditAbility} handleDeleteAbility={handleDeleteAbility} handleSaveAbility={handleSaveAbility} showItemForm={showItemForm} setShowItemForm={setShowItemForm} editingItemIndex={editingItemIndex} itemForm={itemForm} setItemForm={setItemForm} inventoryList={inventoryList} handleOpenNewItem={handleOpenNewItem} handleEditItem={handleEditItem} handleDeleteItem={handleDeleteItem} handleSaveItem={handleSaveItem} charDeity={charDeity} handleDeityChange={handleDeityChange} mut1={mut1} setMut1={setMut1} mut2={mut2} setMut2={setMut2} mut3={mut3} setMut3={setMut3} notes={notes} activeNoteId={activeNoteId} setActiveNoteId={setActiveNoteId} handleAddNote={handleAddNote} handleDeleteNote={handleDeleteNote} handleNoteChange={handleNoteChange} activeNote={activeNote} connection={connection} setChatMessages={setChatMessages} showToast={showToast} resistances={resistances} setResistances={setResistances} oficioText={oficioText} setOficioText={setOficioText} currentCampaignId={currentCampaignId} />
+          <CharacterSheet charName={charName} setCharName={setCharName} charOrigin={charOrigin} setCharOrigin={setCharOrigin} charRace={charRace} setCharRace={setCharRace} charClass={charClass} setCharClass={setCharClass} charAge={charAge} setCharAge={setCharAge} charLevel={charLevel} setCharLevel={setCharLevel} attrInt={attrInt} setAttrInt={setAttrInt} attrPre={attrPre} setAttrPre={setAttrPre} attrAgi={attrAgi} setAttrAgi={setAttrAgi} attrVig={attrVig} setAttrVig={setAttrVig} attrFor={attrFor} setAttrFor={setAttrFor} attrIns={attrIns} setAttrIns={setAttrIns} hp={hp} setHp={setHp} maxHp={maxHp} setMaxHp={setMaxHp} pe={pe} setPe={setPe} maxPe={maxPe} setMaxPe={setMaxPe} corruption={corruption} setCorruption={setCorruption} maxCorruption={maxCorruption} setMaxCorruption={setMaxCorruption} lascas={lascas} setLascas={setLascas} currentWeight={currentWeight} maxWeight={maxWeight} skillsList={skillsList} setSkillsList={setSkillsList} executeRoll={executeRoll} getSkillTotal={getSkillTotal} activeFichaTab={activeFichaTab} setActiveFichaTab={setActiveFichaTab} showWeaponForm={showWeaponForm} setShowWeaponForm={setShowWeaponForm} editingWeaponIndex={editingWeaponIndex} weaponForm={weaponForm} setWeaponForm={setWeaponForm} attacksList={attacksList} handleOpenNewWeapon={handleOpenNewWeapon} handleEditWeapon={handleEditWeapon} handleDeleteWeapon={handleDeleteWeapon} handleSaveWeapon={handleSaveWeapon} showAbilityForm={showAbilityForm} setShowAbilityForm={setShowAbilityForm} editingAbilityIndex={editingAbilityIndex} abilityForm={abilityForm} setAbilityForm={setAbilityForm} abilitiesList={abilitiesList} handleOpenNewAbility={handleOpenNewAbility} handleEditAbility={handleEditAbility} handleDeleteAbility={handleDeleteAbility} handleSaveAbility={handleSaveAbility} showItemForm={showItemForm} setShowItemForm={setShowItemForm} editingItemIndex={editingItemIndex} itemForm={itemForm} setItemForm={setItemForm} inventoryList={inventoryList} handleOpenNewItem={handleOpenNewItem} handleEditItem={handleEditItem} handleDeleteItem={handleDeleteItem} handleSaveItem={handleSaveItem} charDeity={charDeity} handleDeityChange={handleDeityChange} mut1={mut1} setMut1={setMut1} mut2={mut2} setMut2={setMut2} mut3={mut3} setMut3={setMut3} notes={notes} activeNoteId={activeNoteId} setActiveNoteId={setActiveNoteId} handleAddNote={handleAddNote} handleDeleteNote={handleDeleteNote} handleNoteChange={handleNoteChange} activeNote={activeNote} connection={connection} setChatMessages={setChatMessages} showToast={showToast} resistances={resistances} setResistances={setResistances} oficioText={oficioText} setOficioText={setOficioText} currentCampaignId={currentCampaignId} armorBonus={armorBonus} setArmorBonus={setArmorBonus}shieldBonus={shieldBonus} setShieldBonus={setShieldBonus}isArmorHeavy={isArmorHeavy} setIsArmorHeavy={setIsArmorHeavy}isShieldHeavy={isShieldHeavy} setIsShieldHeavy={setIsShieldHeavy}/>
         </div>
       </main>
     </div>
