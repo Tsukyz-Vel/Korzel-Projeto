@@ -1385,6 +1385,16 @@ const handleSaveCatalogItem = () => {
     }
   }, [connection, currentCampaignId, loggedUserName]);
 
+  // 🟢 SINCRONIZAÇÃO AUTOMÁTICA DA LOJA PARA NOVOS JOGADORES
+  useEffect(() => {
+    // Se eu sou o Mestre e estou conectado em uma campanha...
+    if (isMasterMode && connection && currentCampaignId) {
+      // Eu pego a minha loja atual e forço o envio para todos na mesa!
+      connection.invoke("UpdateCatalog", currentCampaignId.toString(), JSON.stringify(catalog))
+        .catch(console.error);
+    }
+  }, [onlinePlayers]); // 👈 O gatilho: Isso dispara toda vez que a lista de jogadores online muda (alguém entra ou sai).
+
   // ==========================================
   // 5. PROPS DO VTT
   // ==========================================
