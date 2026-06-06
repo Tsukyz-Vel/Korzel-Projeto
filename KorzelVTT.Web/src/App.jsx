@@ -599,12 +599,12 @@ export default function App() {
     setShowCatalogForm(true); 
   };
 
- const handleDeleteCatalogItem = (index) => { 
+const handleDeleteCatalogItem = (index) => { 
     if (window.confirm("Remover da Loja?")) {
       const updatedCatalog = catalog.filter((_, i) => i !== index);
       setCatalog(updatedCatalog); 
       
-      // 👇 Sincroniza a remoção com todos os jogadores
+      // 👇 Sincroniza a remoção com os jogadores
       if (connection && currentCampaignId) {
         connection.invoke("UpdateCatalog", currentCampaignId.toString(), JSON.stringify(updatedCatalog))
           .catch(console.error);
@@ -612,7 +612,7 @@ export default function App() {
     }
   };
 
-  const handleSaveCatalogItem = () => { 
+const handleSaveCatalogItem = () => { 
     if (!catalogForm.name) return alert("Precisa de nome!"); 
     
     let updatedCatalog;
@@ -628,7 +628,7 @@ export default function App() {
     setEditingCatalogIndex(null);
     setCatalogForm({ name: "", type: "Consumível", price: 10, weight: 0.1, desc: "" });
 
-    // 👇 Sincroniza a criação ou edição com todos os jogadores
+    // 👇 O SEGREDO: Manda a lista nova para o C# espalhar na mesa
     if (connection && currentCampaignId) {
       connection.invoke("UpdateCatalog", currentCampaignId.toString(), JSON.stringify(updatedCatalog))
         .catch(console.error);
