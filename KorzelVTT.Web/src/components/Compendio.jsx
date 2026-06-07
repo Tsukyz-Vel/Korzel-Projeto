@@ -1173,7 +1173,7 @@ const compendiumEquipment = [
   { 
     name: "Shael'thaar", 
     category: "Arma Exótica", 
-    price: 500, 
+    price: 300, 
     weight: 1.0, 
     damage: "1d8", 
     critical: "19/x2", 
@@ -1184,7 +1184,7 @@ const compendiumEquipment = [
   { 
     name: "Arco Syl'var", 
     category: "Arma Exótica", 
-    price: 500, 
+    price: 300, 
     weight: 3.0, 
     damage: "1d10", 
     critical: "x3", 
@@ -1261,7 +1261,7 @@ const compendiumEquipment = [
     category: "Armadura Média/Pesada", 
     price: 150, 
     weight: 12.0, 
-    defenseBonus: 5, 
+    defenseBonus: 4, 
     stealthDisadvantage: true, 
     description: "Não soma Agilidade. Ossos costurados sobre couro." 
   },
