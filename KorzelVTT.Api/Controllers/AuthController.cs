@@ -151,7 +151,36 @@ public class AuthController : ControllerBase
 
         return Ok(new { message = "Dados forjados com sucesso!", username = user.Username });
     }
-} // FIM DA CLASSE DO CONTROLADOR
+
+    // ==========================================
+    // ROTA 5: REDEFINIR SENHA RÁPIDO (ESQUECI A SENHA)
+    // ==========================================
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        // 1. Busca o aventureiro pelo e-mail
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        
+        if (user == null) 
+        {
+            return BadRequest(new { message = "Este e-mail não consta nos registros de Korzel." });
+        }
+
+        if (user.IsBlocked)
+        {
+            return StatusCode(403, new { message = "Não é possível forjar nova senha para uma conta banida." });
+        }
+
+        // 2. Criptografa a nova senha com BCrypt e salva
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+
+        // 3. Salva no banco de dados
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Nova senha forjada com sucesso! Você já pode entrar." });
+    }
+
+} // <--- AQUI FICA O VERDADEIRO FIM DA CLASSE DO CONTROLADOR!
 
 // ==========================================
 // DTOs: Colocados FORA do Controlador
@@ -174,4 +203,10 @@ public class UpdateUserDto
     public string Username { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string? NewPassword { get; set; }
+}
+
+public class ResetPasswordRequest
+{
+    public string Email { get; set; } = string.Empty;
+    public string NewPassword { get; set; } = string.Empty;
 }
