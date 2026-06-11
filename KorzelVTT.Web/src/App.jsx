@@ -171,7 +171,7 @@ export default function App() {
   const [targetAudioCat, setTargetAudioCat] = useState('uploads'); 
   const [connection, setConnection] = useState(null);
 
-  // ==========================================
+ // ==========================================
   // 2. VARIÁVEIS DERIVADAS
   // ==========================================
   let isAdmin = false;
@@ -183,8 +183,18 @@ export default function App() {
     } catch (e) {}
   }
 
+  // 1. Calcula o peso base (Força)
   let calculatedMaxWeight = 20 + (Number(attrFor) * 10);
+  
+  // 2. Aplica o bônus racial dos Korgath
   if (charRace && charRace.toLowerCase().includes('korgath')) { calculatedMaxWeight *= 2; }
+
+  // 👇 NOVA LÓGICA: Verifica se tem o Kit de Aventureiro na bolsa
+  const temMochila = inventoryList.some(item => item.name && item.name.toLowerCase().includes('kit de aventureiro'));
+  if (temMochila) {
+    calculatedMaxWeight += 10; // Adiciona +10kg de espaço pela mochila!
+  }
+
   const maxWeight = Math.max(5, calculatedMaxWeight);
   const currentWeight = inventoryList.reduce((total, item) => total + ((Number(item.quantity) || 0) * (Number(item.weight) || 0)), 0);
   const currentSceneObj = scenes.find(s => String(s.id) === String(isMasterMode ? gmActiveSceneId : playerActiveSceneId));
@@ -199,16 +209,33 @@ export default function App() {
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
-    const url = authMode === 'login' ? 'https://korzel-api.onrender.com/api/auth/login' : 'https://korzel-api.onrender.com/api/auth/register';
+    
+    // Define para qual porta da API os dados vão
+    let url = 'https://korzel-api.onrender.com/api/auth/login';
+    if (authMode === 'register') url = 'https://korzel-api.onrender.com/api/auth/register';
+    if (authMode === 'forgot') url = 'https://korzel-api.onrender.com/api/auth/reset-password';
+
+    // Se for redefinição, mandamos os campos com os nomes que o C# espera
+    const bodyData = authMode === 'forgot' 
+      ? { email: authForm.email, newPassword: authForm.password }
+      : authForm;
+
     try {
-      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) });
+      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(bodyData) });
       const contentType = res.headers.get("content-type");
       let data;
       if (contentType && contentType.indexOf("application/json") !== -1) data = await res.json();
       else data = await res.text();
 
       if (res.ok) {
-        if (authMode === 'register') { showToast(data.message || "Conta forjada!", "success"); setAuthMode('login'); } 
+        if (authMode === 'register') { 
+          showToast(data.message || "Conta forjada!", "success"); 
+          setAuthMode('login'); 
+        } 
+        else if (authMode === 'forgot') { 
+          showToast(data.message || "Nova senha forjada!", "success"); 
+          setAuthMode('login'); // Volta pro login automaticamente
+        } 
         else {
           localStorage.setItem('korzel_token', data.token); localStorage.setItem('korzel_username', data.username);
           setAuthToken(data.token); setLoggedUserName(data.username); showToast(`Bem-vindo(a), ${data.username}!`, "success");
@@ -1426,29 +1453,84 @@ const handleSaveCatalogItem = () => {
       <div className="h-screen w-screen bg-[#0a0a0a] flex items-center justify-center font-sans" style={{ colorScheme: 'dark' }}>
         <div className="bg-[#140c08] border border-red-900/50 p-8 rounded-xl shadow-2xl w-full max-w-sm flex flex-col gap-6">
           <h1 className="text-2xl font-bold text-red-500 text-center tracking-widest uppercase">Korzel VTT</h1>
+          
           <form onSubmit={handleAuthSubmit} className="flex flex-col gap-4">
-            {authMode === 'register' && (
-              <div>
-                <label className="text-xs text-zinc-400 uppercase tracking-widest mb-1 block">Nome de Usuário</label>
-                <input required type="text" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white focus:border-red-900 outline-none" />
-              </div>
+            {authMode === 'forgot' ? (
+              // ==========================================
+              // TELA: ESQUECI A SENHA
+              // ==========================================
+              <>
+                <div>
+                  <label className="text-xs text-zinc-400 uppercase tracking-widest mb-1 block">E-mail da Conta</label>
+                  <input required type="email" value={authForm.email} onChange={e => setAuthForm({...authForm, email: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white focus:border-red-900 outline-none" />
+                </div>
+                <div>
+                  <label className="text-xs text-zinc-400 uppercase tracking-widest mb-1 block">Forjar Nova Senha</label>
+                  <div className="relative">
+                    <input required type={showPassword ? "text" : "password"} value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 pr-10 text-white focus:border-red-900 outline-none" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
+                      {showPassword ? "👁️" : "🙈"}
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              // ==========================================
+              // TELA: LOGIN E REGISTRO
+              // ==========================================
+              <>
+                {authMode === 'register' && (
+                  <div>
+                    <label className="text-xs text-zinc-400 uppercase tracking-widest mb-1 block">Nome de Usuário</label>
+                    <input required type="text" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white focus:border-red-900 outline-none" />
+                  </div>
+                )}
+                <div>
+                  <label className="text-xs text-zinc-400 uppercase tracking-widest mb-1 block">Email</label>
+                  <input required type="email" value={authForm.email} onChange={e => setAuthForm({...authForm, email: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white focus:border-red-900 outline-none" />
+                </div>
+                <div>
+                  <div className="flex justify-between items-end mb-1">
+                    <label className="text-xs text-zinc-400 uppercase tracking-widest block">Senha</label>
+                    {authMode === 'login' && (
+                      <button type="button" onClick={() => setAuthMode('forgot')} className="text-[10px] text-zinc-500 hover:text-amber-500 transition-colors uppercase font-bold tracking-widest">
+                        Esqueci minha senha
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <input required type={showPassword ? "text" : "password"} value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 pr-10 text-white focus:border-red-900 outline-none" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
+                      {showPassword ? "👁️" : "🙈"}
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
-            <div>
-              <label className="text-xs text-zinc-400 uppercase tracking-widest mb-1 block">Email</label>
-              <input required type="email" value={authForm.email} onChange={e => setAuthForm({...authForm, email: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white focus:border-red-900 outline-none" />
-            </div>
-            <div>
-              <label className="text-xs text-zinc-400 uppercase tracking-widest mb-1 block">Senha</label>
-              <input required type="password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} className="w-full bg-black/50 border border-zinc-800 rounded p-2 text-white focus:border-red-900 outline-none" />
-            </div>
+
             <button type="submit" className="w-full bg-red-900 hover:bg-red-800 text-white font-bold uppercase tracking-widest py-3 rounded mt-2 transition-colors shadow-lg">
-              {authMode === 'login' ? 'Entrar' : 'Forjar Conta'}
+              {authMode === 'login' ? 'Entrar' : authMode === 'register' ? 'Forjar Conta' : 'Redefinir Senha'}
             </button>
           </form>
-          <button onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')} className="text-xs text-zinc-500 hover:text-red-400 transition-colors uppercase">
-            {authMode === 'login' ? 'Não tem conta? Forjar nova' : 'Já tem conta? Entrar'}
-          </button>
+
+          {/* ========================================== */}
+          {/* BOTÕES DE RODAPÉ (Navegação) */}
+          {/* ========================================== */}
+          <div className="flex justify-between mt-[-10px]">
+            {authMode !== 'login' && (
+              <button onClick={() => setAuthMode('login')} className="text-xs text-zinc-500 hover:text-red-400 transition-colors uppercase w-full">
+                Voltar para o Login
+              </button>
+            )}
+            {authMode === 'login' && (
+              <button onClick={() => setAuthMode('register')} className="text-xs text-zinc-500 hover:text-red-400 transition-colors uppercase w-full">
+                Não tem conta? Forjar nova
+              </button>
+            )}
+          </div>
+
         </div>
+
         {toast.show && (
           <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[99999] px-6 py-3 rounded-lg shadow-xl border flex items-center gap-3 transition-all ${toast.type === 'error' ? 'bg-red-950/90 border-red-900 text-red-200' : 'bg-green-950/90 border-green-900 text-green-200'}`}>
             <span className="text-xl">{toast.type === 'error' ? '💀' : '🪙'}</span>
@@ -1458,7 +1540,6 @@ const handleSaveCatalogItem = () => {
       </div>
     );
   }
-
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#0a0a0a] flex flex-col font-sans relative" style={{ colorScheme: 'dark' }} onMouseMove={handleMapMouseMove} onMouseUp={handleMapMouseUp} onMouseLeave={handleMapMouseUp}>
       <DiceRollerOverlay isRolling={rollModal.isRolling} result={rollModal.show && !rollModal.isRolling ? rollModal : null} onDismiss={() => setRollModal({ ...rollModal, show: false })} />
