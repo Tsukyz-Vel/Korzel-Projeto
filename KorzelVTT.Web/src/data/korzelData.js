@@ -121,11 +121,14 @@ export const panteaoKorzel = {
     ] 
   },
   
- "Aeon, O Guardião das Areias": { 
+"Aeon, O Guardião das Areias": { 
     mascara: "Deus do Destino, Tempo e História. Traz consolo de que tudo tem um propósito e uma hora certa.", 
     verdade: "O Ciclo, onde o tempo está quebrado e o universo deseja repetir seus traumas congelados para sempre.", 
-    obrigacao: "A linha do tempo não deve ser reescrita e o destino é inevitável. Você nunca pode recuar ou fugir de um combate após rolar a Iniciativa. Além disso, é proibido usar habilidades (suas ou de aliados) que forcem um inimigo a rolar um dado novamente (cancelando o destino dele) ou que permitam a você rolar novamente uma falha sua.", 
-    punicao: "Cronologia Fragmentada. Você fica dessincronizado da realidade. Seu Deslocamento cai pela metade e você perde sua Ação Bônus e sua Reação todos os turnos. Para apaziguar a entidade, você deve aceitar a passagem do tempo: pule o seu turno completamente (sem fazer ações, movimentos ou falas), permitindo que a linha do tempo alcance o seu corpo.", 
+    
+    // 👇 OBRIGAÇÃO REFINADA 👇
+    obrigacao: "Você é o executor do tempo, mas não está imune a ele; sua linha do tempo pessoal é inflexível. Você nunca pode recuar ou fugir de um combate após rolar a Iniciativa. Além disso, é estritamente proibido tentar reescrever as próprias falhas: você nunca pode usar habilidades ou aceitar efeitos de aliados que permitam a você rolar novamente um dado de teste seu que já resultou em falha.", 
+    
+    punicao: "Cronologia Fragmentada. Você fica dessincronizado da realidade. Seu Deslocamento cai pela metade e você perde sua Ação Bônus e sua Reação todos os turnos. Para apaziguar a entidade, você deve aceitar a passagem impiedosa do tempo: pule o seu turno em combate completamente (sem fazer ações, movimentos ou falas), permitindo que a linha do tempo alcance o seu corpo.", 
     poderes: [
       { title: "Déjà Vu", cost: "Reação (1 PV)", desc: "Uma vez por combate, obriga uma criatura a refazer uma rolagem vital e acatar o segundo resultado. Inimigos sofrem 1d6 de dano psíquico na refação." }, 
       { title: "Passo Fora do Tempo", cost: "2 PV", desc: "Ação de Movimento. Se move muito rápido para qualquer espaço livre a até 9m como se estivesse teletransportando, ignorando armadilhas no caminho e ataques de oportunidade." }, 
