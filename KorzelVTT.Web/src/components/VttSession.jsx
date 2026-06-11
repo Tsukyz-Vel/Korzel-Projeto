@@ -353,17 +353,17 @@ export default function VttSession(props) {
         <style>{weatherStyles}</style>
 
         <div 
-  ref={mapRef} 
-  className={`flex-1 relative bg-[#0f0f0f] overflow-hidden select-none touch-none ${getCursorClass()}`} 
-  style={{ cursor: getDynamicCursor() }} 
-  onMouseDown={localMouseDown} 
-  onMouseMove={localMouseMove} 
-  onMouseUp={localMouseUp} 
-  onMouseLeave={localMouseUp} 
-  onWheel={handleMapWheel} 
-  onDrop={handleDropOnMap}
-  onDragOver={(e) => e.preventDefault()}
->
+            ref={mapRef} 
+            className={`flex-1 relative bg-[#0f0f0f] overflow-hidden select-none touch-none ${getCursorClass()}`} 
+            style={{ cursor: getDynamicCursor() }} 
+            onMouseDown={localMouseDown} 
+            onMouseMove={localMouseMove} 
+            onMouseUp={localMouseUp} 
+            onMouseLeave={localMouseUp} 
+            onWheel={handleMapWheel} 
+            onDrop={handleDropOnMap}
+            onDragOver={(e) => e.preventDefault()}
+          >
           {weather === 'night' && <div className="absolute inset-0 pointer-events-none z-[9995] bg-[#020617]/70 mix-blend-multiply"></div>}
           {weather === 'rain' && <div className="absolute inset-0 pointer-events-none z-[9995] bg-slate-600/50 mix-blend-multiply" style={{ backdropFilter: 'grayscale(50%)' }}></div>}
           {/* 👇 Camada de overlay para o Pôr do Sol 👇 */}
@@ -404,100 +404,130 @@ export default function VttSession(props) {
             ))}
 
            {sceneTokens.filter(t => t.sceneId == currentSceneObj?.id).map(token => {
-              const statuses = token.statuses || [];
-              const isBleeding = statuses.includes('bleeding');
-              const isPoisoned = statuses.includes('poisoned');
-              const isCamouflaged = statuses.includes('camouflaged');
-              // 👇 Verificação da nova condição morto 👇
-              const isDead = statuses.includes('dead');
-              
-              const statusSize = Math.max(16, (token.size || 80) * 0.12);
-              
-              let shadowClass = "shadow-[0_5px_10px_rgba(0,0,0,0.8)]";
-              let dropShadowImg = "drop-shadow-[0_5px_10px_rgba(0,0,0,0.8)]";
-              
-              if (isBleeding && isPoisoned) {
-                shadowClass = "shadow-[0_0_15px_rgba(220,38,38,0.9),0_0_15px_rgba(34,197,94,0.9)]";
-                dropShadowImg = "drop-shadow-[0_0_10px_rgba(220,38,38,0.9)] drop-shadow-[0_0_10px_rgba(34,197,94,0.9)]";
-              } else if (isBleeding) {
-                 shadowClass = "shadow-[0_0_15px_rgba(220,38,38,0.9)]";
-                 dropShadowImg = "drop-shadow-[0_0_15px_rgba(220,38,38,0.9)]";
-              } else if (isPoisoned) {
-                 shadowClass = "shadow-[0_0_15px_rgba(34,197,94,0.9)]";
-                 dropShadowImg = "drop-shadow-[0_0_15px_rgba(34,197,94,0.9)]";
-              }
+  const statuses = token.statuses || [];
+  const isBleeding = statuses.includes('bleeding');
+  const isPoisoned = statuses.includes('poisoned');
+  const isCamouflaged = statuses.includes('camouflaged');
+  // 👇 Verificação da nova condição morto 👇
+  const isDead = statuses.includes('dead');
+  
+  const statusSize = Math.max(16, (token.size || 80) * 0.12);
+  
+  let shadowClass = "shadow-[0_5px_10px_rgba(0,0,0,0.8)]";
+  let dropShadowImg = "drop-shadow-[0_5px_10px_rgba(0,0,0,0.8)]";
+  
+  if (isBleeding && isPoisoned) {
+    shadowClass = "shadow-[0_0_15px_rgba(220,38,38,0.9),0_0_15px_rgba(34,197,94,0.9)]";
+    dropShadowImg = "drop-shadow-[0_0_10px_rgba(220,38,38,0.9)] drop-shadow-[0_0_10px_rgba(34,197,94,0.9)]";
+  } else if (isBleeding) {
+     shadowClass = "shadow-[0_0_15px_rgba(220,38,38,0.9)]";
+     dropShadowImg = "drop-shadow-[0_0_15px_rgba(220,38,38,0.9)]";
+  } else if (isPoisoned) {
+     shadowClass = "shadow-[0_0_15px_rgba(34,197,94,0.9)]";
+     dropShadowImg = "drop-shadow-[0_0_15px_rgba(34,197,94,0.9)]";
+  }
 
-            return (
+  return (
+    <div 
+      key={token.id} 
+      // 🔒 CADEADO DO ARRASTE (Mover no mapa)
+      onMouseDown={(e) => { 
+        if (activeTool === 'select' && !isSpacePressed) { 
+          e.stopPropagation(); 
+          const dono = token.controlledBy ? token.controlledBy.toString().trim().toLowerCase() : "";
+          const jogador = loggedUserName ? loggedUserName.toString().trim().toLowerCase() : "";
+          const podeControlar = isMasterMode || (dono !== "" && dono === jogador);
+          
+          if (podeControlar) {
+            setDraggingToken(token.id); 
+          } else {
+            showToast(`Bloqueado. Este token pertence a: ${token.controlledBy || "Ninguém"}`, "error");
+          }
+        } 
+      }} 
+      // 🔒 CADEADO DO CLIQUE DIREITO (Menu de opções)
+      onContextMenu={(e) => { 
+        e.preventDefault(); 
+        e.stopPropagation(); 
+        
+        const dono = token.controlledBy ? token.controlledBy.toString().trim().toLowerCase() : "";
+        const jogador = loggedUserName ? loggedUserName.toString().trim().toLowerCase() : "";
+        const podeControlar = isMasterMode || (dono !== "" && dono === jogador);
+        
+        if (podeControlar) {
+          setTokenContextMenu({ show: true, x: e.clientX, y: e.clientY, tokenId: token.id }); 
+        } else {
+          showToast(`Bloqueado. Este token pertence a: ${token.controlledBy || "Ninguém"}`, "error");
+        }
+      }}
+      // 🔒 CADEADO DO CLIQUE DUPLO (Opcional, para abrir fichas)
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        const dono = token.controlledBy ? token.controlledBy.toString().trim().toLowerCase() : "";
+        const jogador = loggedUserName ? loggedUserName.toString().trim().toLowerCase() : "";
+        const podeControlar = isMasterMode || (dono !== "" && dono === jogador);
+        
+        if (!podeControlar) {
+          showToast(`Bloqueado. Este token pertence a: ${token.controlledBy || "Ninguém"}`, "error");
+          return;
+        }
+        
+        // Se usar função de abrir ficha ao dar clique duplo, coloque aqui!
+      }}
+      style={{ top: `${token.y}px`, left: `${token.x}px`, width: `${token.size}px`, height: `${token.size}px`, zIndex: draggingToken === token.id ? 9999 : (token.zIndex || 10) }} 
+      // 👇 Adicionado opacidade 40% se camuflado e escala de cinza se morto 👇
+      className={`absolute flex items-center justify-center transition-transform duration-100 cursor-grab ${isCamouflaged ? 'opacity-40' : ''} ${isDead ? 'grayscale' : ''}`} 
+      title={token.controlledBy ? `${token.name} (Controlado por: ${token.controlledBy})` : token.name}
+    >
+      {token.image ? (
+        <img src={token.image} alt={token.name} className={`w-full h-full object-contain pointer-events-none ${dropShadowImg} ${token.flipX ? '-scale-x-100' : ''}`} draggable="false" />
+      ) : (
+        <span className={`text-white text-xl font-bold pointer-events-none ${token.flipX ? '-scale-x-100 block' : ''}`}>{token.name.charAt(0)}</span>
+      )}
+      
+      {statuses.length > 0 && (
         <div 
-          key={token.id} 
-          onMouseDown={(e) => { 
-            if (activeTool === 'select' && !isSpacePressed) { 
-              e.stopPropagation(); 
-              const dono = token.controlledBy ? token.controlledBy.toString().trim().toLowerCase() : "";
-              const jogador = loggedUserName ? loggedUserName.toString().trim().toLowerCase() : "";
-              const podeControlar = isMasterMode || (dono !== "" && dono === jogador);
-              if (podeControlar) {
-                setDraggingToken(token.id); 
-              } else {
-                showToast(`Bloqueado. Este token pertence a: ${token.controlledBy || "Ninguém"}`, "error");
-              }
-            } 
-          }} 
-          onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setTokenContextMenu({ show: true, x: e.clientX, y: e.clientY, tokenId: token.id }); }} 
-          style={{ top: `${token.y}px`, left: `${token.x}px`, width: `${token.size}px`, height: `${token.size}px`, zIndex: draggingToken === token.id ? 9999 : (token.zIndex || 10) }} 
-          // 👇 Adicionado opacidade 40% se camuflado e escala de cinza se morto 👇
-          className={`absolute flex items-center justify-center transition-transform duration-100 cursor-grab ${isCamouflaged ? 'opacity-40' : ''} ${isDead ? 'grayscale' : ''}`} 
-          title={token.controlledBy ? `${token.name} (Controlado por: ${token.controlledBy})` : token.name}
+          className="absolute flex flex-row-reverse flex-nowrap whitespace-nowrap gap-1 pointer-events-none z-20"
+          style={{ top: `-${statusSize * 0.1}px`, right: `-${statusSize * 0.1}px` }}
         >
-                 {token.image ? (
-                    <img src={token.image} alt={token.name} className={`w-full h-full object-contain pointer-events-none ${dropShadowImg} ${token.flipX ? '-scale-x-100' : ''}`} draggable="false" />
-                  ) : (
-                    <span className={`text-white text-xl font-bold pointer-events-none ${token.flipX ? '-scale-x-100 block' : ''}`}>{token.name.charAt(0)}</span>
-                  )}
-                  
-                  {statuses.length > 0 && (
-                    <div 
-                      className="absolute flex flex-row-reverse flex-nowrap whitespace-nowrap gap-1 pointer-events-none z-20"
-                      style={{ top: `-${statusSize * 0.1}px`, right: `-${statusSize * 0.1}px` }}
-                    >
-                      {isBleeding && (
-                        <span 
-                          style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
-                          className="bg-black/80 rounded-full flex items-center justify-center border border-red-900 shadow-md"
-                        >
-                          🩸
-                        </span>
-                      )}
-                      {isPoisoned && (
-                        <span 
-                          style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
-                          className="bg-black/80 rounded-full flex items-center justify-center border border-green-900 shadow-md"
-                        >
-                          ☠️
-                        </span>
-                      )}
-                      {isCamouflaged && (
-                        <span 
-                          style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
-                          className="bg-black/80 rounded-full flex items-center justify-center border border-zinc-500 shadow-md"
-                        >
-                          🌫️
-                        </span>
-                      )}
-                      {/* 👇 Ícone miniatura para informar o status morto 👇 */}
-                      {isDead && (
-                        <span 
-                          style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
-                          className="bg-black/80 rounded-full flex items-center justify-center border border-zinc-700 shadow-md grayscale-0"
-                        >
-                          🪦
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+          {isBleeding && (
+            <span 
+              style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
+              className="bg-black/80 rounded-full flex items-center justify-center border border-red-900 shadow-md"
+            >
+              🩸
+            </span>
+          )}
+          {isPoisoned && (
+            <span 
+              style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
+              className="bg-black/80 rounded-full flex items-center justify-center border border-green-900 shadow-md"
+            >
+              ☠️
+            </span>
+          )}
+          {isCamouflaged && (
+            <span 
+              style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
+              className="bg-black/80 rounded-full flex items-center justify-center border border-zinc-500 shadow-md"
+            >
+              🌫️
+            </span>
+          )}
+          {/* 👇 Ícone miniatura para informar o status morto 👇 */}
+          {isDead && (
+            <span 
+              style={{ width: `${statusSize}px`, height: `${statusSize}px`, fontSize: `${statusSize * 0.6}px` }} 
+              className="bg-black/80 rounded-full flex items-center justify-center border border-zinc-700 shadow-md grayscale-0"
+            >
+              🪦
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+})}
             {isFogEnabled && (
               <svg className="absolute inset-0 w-full h-full pointer-events-none z-[9999]" style={{ overflow: 'visible' }}>
                 <defs>

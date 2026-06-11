@@ -943,8 +943,65 @@ const handleSaveCatalogItem = () => {
     }
   };
 
-  const bringToFront = () => { const maxZ = Math.max(...sceneTokens.map(t => t.zIndex || 10)); setSceneTokens(prev => prev.map(t => t.id === tokenContextMenu.tokenId ? { ...t, zIndex: maxZ + 1 } : t)); setTokenContextMenu({ show: false, x: 0, y: 0, tokenId: null }); };
-  const sendToBack = () => { const minZ = Math.min(...sceneTokens.map(t => t.zIndex || 10)); setSceneTokens(prev => prev.map(t => t.id === tokenContextMenu.tokenId ? { ...t, zIndex: minZ - 1 } : t)); setTokenContextMenu({ show: false, x: 0, y: 0, tokenId: null }); };
+const bringToFront = async () => { 
+    if (!tokenContextMenu.tokenId) return;
+
+    const maxZ = Math.max(...sceneTokens.map(t => t.zIndex || 10)); 
+    const newZIndex = maxZ + 1;
+
+    // 1. Encontra o token alvo
+    const tokenToUpdate = sceneTokens.find(t => t.id === tokenContextMenu.tokenId);
+    if (!tokenToUpdate) return;
+
+    // 2. Prepara o objeto atualizado e muda na tela local
+    const updatedToken = { ...tokenToUpdate, zIndex: newZIndex };
+    setSceneTokens(prev => prev.map(t => t.id === tokenContextMenu.tokenId ? updatedToken : t)); 
+    setTokenContextMenu({ show: false, x: 0, y: 0, tokenId: null }); 
+
+    // 3. Salva no banco e avisa a mesa inteira via SignalR
+    try {
+      await fetch(`https://korzel-api.onrender.com/api/scenes/tokens/${updatedToken.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedToken)
+      });
+      if (connection && currentCampaignId) {
+        connection.invoke("UpdateToken", currentCampaignId.toString(), JSON.stringify(updatedToken)).catch(console.error);
+      }
+    } catch (e) {
+      console.error("Erro ao trazer peça para frente:", e);
+    }
+  };
+
+  const sendToBack = async () => { 
+    if (!tokenContextMenu.tokenId) return;
+
+    const minZ = Math.min(...sceneTokens.map(t => t.zIndex || 10)); 
+    const newZIndex = minZ - 1;
+
+    // 1. Encontra o token alvo
+    const tokenToUpdate = sceneTokens.find(t => t.id === tokenContextMenu.tokenId);
+    if (!tokenToUpdate) return;
+
+    // 2. Prepara o objeto atualizado e muda na tela local
+    const updatedToken = { ...tokenToUpdate, zIndex: newZIndex };
+    setSceneTokens(prev => prev.map(t => t.id === tokenContextMenu.tokenId ? updatedToken : t)); 
+    setTokenContextMenu({ show: false, x: 0, y: 0, tokenId: null }); 
+
+    // 3. Salva no banco e avisa a mesa inteira via SignalR
+    try {
+      await fetch(`https://korzel-api.onrender.com/api/scenes/tokens/${updatedToken.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedToken)
+      });
+      if (connection && currentCampaignId) {
+        connection.invoke("UpdateToken", currentCampaignId.toString(), JSON.stringify(updatedToken)).catch(console.error);
+      }
+    } catch (e) {
+      console.error("Erro ao enviar peça para trás:", e);
+    }
+  };
   
   const assignPermission = async () => { 
     const playerName = window.prompt("Nome de usuário do jogador (deixe em branco para remover o controle):"); 
@@ -977,12 +1034,19 @@ const handleSaveCatalogItem = () => {
     }
   };
 
- const toggleTokenStatus = async (statusName) => { 
+const toggleTokenStatus = async (statusName) => { 
       if (!tokenContextMenu.tokenId) return; 
 
-      // 1. Encontra o token alvo ANTES de atualizar o estado
+      // 1. Encontra o token alvo
       const tokenToUpdate = sceneTokens.find(t => t.id === tokenContextMenu.tokenId);
       if (!tokenToUpdate) return;
+
+      // 👇 BARREIRA DE SEGURANÇA MÁXIMA 👇
+      if (!isMasterMode && tokenToUpdate.controlledBy !== loggedUserName) {
+          showToast("🛑 Você não tem permissão para alterar os status desta miniatura!", "error");
+          setTokenContextMenu({ ...tokenContextMenu, show: false }); // Fecha o menu
+          return; // Aborta a função na hora
+      }
 
       // 2. Calcula as novas condições
       const currentStatuses = tokenToUpdate.statuses || [];
@@ -1012,7 +1076,7 @@ const handleSaveCatalogItem = () => {
         console.error("Erro ao salvar o status da peça:", e);
       }
     };
-
+    
  const handleAddAudioLink = async (specificCategory = null) => {
     // 1. Resolve o bug de "cair na pasta errada"
     // Se o botão mandar o nome da pasta, usa ela. Senão, usa a padrão (Meus Uploads).
