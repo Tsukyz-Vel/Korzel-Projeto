@@ -18,11 +18,11 @@ export const panteaoKorzel = {
     poderes: [] 
   },
   
-  "Krognar, O Quebra-Ossos": { 
+ "Krognar, O Quebra-Ossos": { 
     mascara: "Deus da Força, da Superação e da Guerra. Seus seguidores acreditam que a dor é o cinzel que esculpe o forte.", 
     verdade: "A Carne Viva, uma força de evolução biológica descontrolada que quer criar o organismo supremo através de estresse e fúria.", 
-    obrigacao: "A dor é o único mestre. Você não pode usar armaduras médias ou pesadas, nem empunhar escudos (a carne deve sofrer para evoluir). Você também rejeita curas místicas rápidas, podendo recuperar PV apenas por descanso natural ou consumindo o sangue/carne de inimigos formidáveis recém-abatidos.", 
-    punicao: "A biologia do seu corpo entra em colapso punitivo. Seus ossos crescem tortos e seus músculos entram em espasmo. Você sofre Desvantagem em todas as rolagens de ataque corpo a corpo e seu Deslocamento é reduzido pela metade. A maldição só é quebrada quando o seu golpe reduzir a 0 PV um inimigo de nível igual ou superior ao seu, sem que nenhum aliado tenha causado dano a ele no combate.", 
+    obrigacao: "A inércia é a morte. Em combate, você não pode terminar o seu turno sem ter causado dano a um inimigo ou sofrido dano. Se você passar um turno inteiro apenas correndo, se escondendo ou se defendendo sem derramar sangue (seu ou do inimigo), você quebra o dogma.", 
+    punicao: "Atrofia Punitiva. Seus músculos travam e a evolução regride. Você sofre -2 em todos os testes de Força e Vigor, e seus ataques corpo a corpo perdem o bônus de atributo no dano. Para apaziguar a entidade e curar a maldição, você deve voluntariamente conceder Vantagem ao próximo ataque de um inimigo contra você e sofrer o dano sem usar reações de defesa.", 
     poderes: [
       { title: "Carapaça Reativa", cost: "3 PV", desc: "Sua devoção calcifica sua pele. Você recebe +1 na Defesa e RD 2 permanente. Ao sofrer um Acerto Crítico, a carapaça explode, causando 2d6 de dano perfurante nos inimigos adjacentes." }, 
       { title: "Fúria Mutante", cost: "2 PV", desc: "Seus braços hipertrofiam e estalam por uma rodada. Seu ataque ganha Alcance +1,5m e causa +1d8 de dano de Impacto bônus." }, 
@@ -31,11 +31,11 @@ export const panteaoKorzel = {
     ] 
   },
   
-  "Slyph, A Sra. dos Sussurros": { 
+"Slyph, A Sra. dos Sussurros": { 
     mascara: "Deusa do Conhecimento, da Magia e das Estrelas. Dizem que ela sussurra inspiração para artistas e segredos para espiões.", 
     verdade: "O Caos cognitivo e a informação pura que o cérebro não aguenta, buscando dissolver a realidade em um pesadelo.", 
-    obrigacao: "A previsibilidade é um insulto ao Caos. Você é proibido de participar de planejamentos táticos estruturados (como emboscadas perfeitas). Se você descobrir o ponto fraco ou segredo de um inimigo, deve gritar essa informação no meio do combate, mesmo que isso alerte os alvos de que você os descobriu.", 
-    punicao: "A entidade despeja o universo na sua mente, causando alucinações severas. No início de todo combate, você deve rolar 1d6. Se cair 1 ou 2, a confusão te domina e você é obrigado a usar sua ação mais forte contra a criatura mais próxima (aliado ou inimigo). Para quebrar a maldição, você deve passar uma rodada inteira de combate sofrendo a condição 'Cego' voluntariamente (fechando os olhos) e queimar 3 PE para purgar a mente.", 
+    obrigacao: "A ignorância e a mentira são pecados capitais. Você é incapaz de contar uma mentira direta (embora possa omitir). Além disso, se você deparar com uma runa, símbolo mágico ou idioma desconhecido, você é obrigado a gastar sua primeira ação disponível para tentar decifrá-lo, mesmo que o combate já tenha começado.", 
+    punicao: "Ecos do Abismo. O caos invade sua percepção. Você não consegue se concentrar: torna-se imune a magias e efeitos benéficos de aliados e é considerado 'Desprevenido' (-2 na Defesa) contra todos os ataques, pois ouve vozes o tempo todo. Para apaziguar a entidade, você deve queimar permanentemente um pergaminho, livro ou documento que contenha conhecimento útil, ou sofrer 2d6 de Dano Psíquico direto meditando no caos.", 
     poderes: [
       { title: "Mente Labiríntica", cost: "Passivo", desc: "Resistência a Dano Psíquico 5. Se um inimigo tentar feitiços mentais contra você, ele sofre 2d6 de dano psíquico e fica Atordoado (1 rodada)." }, 
       { title: "Sussurros da Sorte", cost: "2 PV", desc: "Uma vez por combate, se você falhar em um ataque ou teste, uma voz te diz onde não golpear. Role o teste novamente e some +1d6 ao resultado novo." }, 
@@ -44,11 +44,11 @@ export const panteaoKorzel = {
     ] 
   },
   
-  "Mekhan, O Grande Arquiteto": { 
+ "Mekhan, O Grande Arquiteto": { 
     mascara: "Deus da Ordem, da Construção e da Proteção. Ele é a estrutura que impede o mundo de desabar no caos.", 
     verdade: "A Estase, o desejo de entropia zero, um universo congelado onde nada nasce, morre ou muda.", 
     obrigacao: "O caos tático deve ser erradicado. Você é proibido de usar táticas de Enganação, Furtividade ou de utilizar itens alquímicos instáveis (como a perigosa pólvora negra). Ao atacar um alvo em combate, você não pode mudar de alvo até que você ou ele caiam.", 
-    punicao: "A ordem absoluta cobra seu preço. Suas juntas enrijecem como metal enferrujado. Você perde completamente a capacidade de usar Ações de Movimento e Reações (não pode esquivar, reposicionar ou fazer ataques de oportunidade). Para restaurar a estase, você deve gastar uma Ação Completa no meio de um combate para 'recalcular sua posição', recebendo um acerto automático e Crítico do próximo ataque que sofrer.", 
+    punicao: "A ordem absoluta cobra seu preço. Suas juntas enrijecem como metal enferrujado. Você perde completamente a capacidade de usar Ações de Movimento e Reações (não pode esquivar, reposicionar ou fazer ataques de oportunidade). Para apaziguar a entidade e recuperar seus movimentos, você deve gastar seu turno inteiro (Ação Padrão e Movimento) perfeitamente parado, construindo um pequeno altar ou pilar de pedras/sucata no mapa, abdicando de qualquer defesa.", 
     poderes: [
       { title: "Estrutura Imóvel", cost: "Passivo", desc: "Imune a empurrões e derrubadas. Se terminar seu turno sem se mover nenhum quadrado, ganha RD 5 absoluta contra todo tipo de dano na próxima rodada." }, 
       { title: "Geometria Perfeita", cost: "2 PV", desc: "Gasto antes de atacar. Você calcula o ângulo cirúrgico. Seu ataque ignora qualquer penalidade de Cobertura e ignora toda a Redução de Dano (RD) do alvo." }, 
@@ -56,7 +56,6 @@ export const panteaoKorzel = {
       { title: "Marcha Inexorável", cost: "Passivo", desc: "O espaço se endireita. Ignora totalmente magias de lentidão, paralisia ou terreno difícil. Seu Deslocamento nunca pode ser reduzido contra a sua vontade." }
     ] 
   },
-  
   "Arak-Nul, A Mãe da Caçada": { 
     mascara: "Deusa da Natureza, das Feras e da Fertilidade. A protetora do ciclo da vida e da morte.", 
     verdade: "O Enxame, o instinto predatório sem fim que deseja que a vida devore tudo em reprodução frenética.", 
@@ -122,11 +121,11 @@ export const panteaoKorzel = {
     ] 
   },
   
-  "Aeon, O Guardião das Areias": { 
+ "Aeon, O Guardião das Areias": { 
     mascara: "Deus do Destino, Tempo e História. Traz consolo de que tudo tem um propósito e uma hora certa.", 
     verdade: "O Ciclo, onde o tempo está quebrado e o universo deseja repetir seus traumas congelados para sempre.", 
-    obrigacao: "A mudança não existe. Se você falhar em um ataque ou teste de perícia na batalha, você é proibido de tentar realizar aquela mesma ação ou golpear aquele mesmo alvo novamente durante a rodada (o ciclo negou essa possibilidade). Você deve colecionar um pequeno fetiche cadavérico de toda falha crítica do grupo.", 
-    punicao: "Sua mente fica presa em um loop existencial doloroso. Em combate, sempre que você sofrer dano, você é forçado a usar sua próxima Ação Padrão para repetir mecanicamente a exata mesma ação que fez na rodada anterior. Caso a ação repetida seja fisicamente impossível (sem alvo vivo ou sem PE), o loop entra em colapso: você sofre 2d6 de Dano Psíquico irredutível e encerra o turno. O colapso do loop anula a maldição.", 
+    obrigacao: "A linha do tempo não deve ser reescrita e o destino é inevitável. Você nunca pode recuar ou fugir de um combate após rolar a Iniciativa. Além disso, é proibido usar habilidades (suas ou de aliados) que forcem um inimigo a rolar um dado novamente (cancelando o destino dele) ou que permitam a você rolar novamente uma falha sua.", 
+    punicao: "Cronologia Fragmentada. Você fica dessincronizado da realidade. Seu Deslocamento cai pela metade e você perde sua Ação Bônus e sua Reação todos os turnos. Para apaziguar a entidade, você deve aceitar a passagem do tempo: pule o seu turno completamente (sem fazer ações, movimentos ou falas), permitindo que a linha do tempo alcance o seu corpo.", 
     poderes: [
       { title: "Déjà Vu", cost: "Reação (1 PV)", desc: "Uma vez por combate, obriga uma criatura a refazer uma rolagem vital e acatar o segundo resultado. Inimigos sofrem 1d6 de dano psíquico na refação." }, 
       { title: "Passo Fora do Tempo", cost: "2 PV", desc: "Ação de Movimento. Se move muito rápido para qualquer espaço livre a até 9m como se estivesse teletransportando, ignorando armadilhas no caminho e ataques de oportunidade." }, 
@@ -134,12 +133,11 @@ export const panteaoKorzel = {
       { title: "Atraso Existencial", cost: "5 PV", desc: "Ao atingir um inimigo, a vítima fica atrasada. Perde a Reação neste turno e, na próxima rodada inteira, é obrigatoriamente a última a agir." }
     ] 
   },
-  
-  "Varish, O Senhor das Estações": { 
+ "Varish, O Senhor das Estações": { 
     mascara: "Deus do Clima, das Estações e da Mudança. Ele representa a adaptação necessária para sobreviver.", 
     verdade: "O Cataclisma, que odeia o equilíbrio e deseja a turbulência e destruição termal absoluta.", 
     obrigacao: "A constância é um pecado que deve ser quebrado. Você não pode dormir no mesmo local ou estrutura duas noites seguidas. Em combate, é proibido usar o mesmo tipo de ataque, arma ou poder mágico em dois turnos seguidos, sendo forçado à mutação tática extrema.", 
-    punicao: "A atmosfera local se volta brutalmente contra sua existência. No início de cada um dos seus turnos, a temperatura flutua em espasmos de destruição: jogue 1d6. Ímpar, sofre 1d6 de Dano Elétrico; Par, sofre 1d6 de Dano de Frio. Você também perde a capacidade de causar Acertos Críticos. Para apaziguar o cataclisma, você precisa destruir permanentemente uma de suas armas ou sofrer 3d8 de dano elemental voluntário (sem testes de resistência) no início de um descanso.", 
+    punicao: "A atmosfera local se volta brutalmente contra sua existência. No início de cada um dos seus turnos, a temperatura flutua em espasmos de destruição: jogue 1d6. Ímpar, sofre 1d6 de Dano Elétrico; Par, sofre 1d6 de Dano de Frio. Para apaziguar a entidade, você precisa destruir permanentemente uma arma ou armadura sua (esmigalhando-a), ou sofrer 3d8 de dano elemental voluntário aceitando a ira da tempestade.", 
     poderes: [
       { title: "Carga Estática", cost: "Passivo", desc: "Ao se deslocar pelo menos 6m antes de atacar, o ar estala e seu ataque causa +2d6 de Dano Elétrico. Se rolar um Acerto Crítico, a descarga atordoa o alvo." }, 
       { title: "Adaptação Letal", cost: "2 PV", desc: "Ação Bônus. A lâmina da arma arde, congela ou solta faíscas. Escolha Fogo, Frio ou Elétrico: seus ataques causam +1d6 extra desse elemento na cena." }, 
