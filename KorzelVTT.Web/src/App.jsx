@@ -27,8 +27,6 @@ export default function App() {
   const [showPassword, setShowPassword] = useState(false);
   
   const [charName, setCharName] = useState("");
-  
-  const [charName, setCharName] = useState("");
   const [charOrigin, setCharOrigin] = useState(""); 
   const [charRace, setCharRace] = useState("");
   const [charClass, setCharClass] = useState("");
