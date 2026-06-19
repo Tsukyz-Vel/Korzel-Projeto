@@ -24,6 +24,9 @@ export default function App() {
   const [loggedUserName, setLoggedUserName] = useState(localStorage.getItem('korzel_username') || "");
   const [authMode, setAuthMode] = useState('login'); 
   const [authForm, setAuthForm] = useState({ username: "", email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  
+  const [charName, setCharName] = useState("");
   
   const [charName, setCharName] = useState("");
   const [charOrigin, setCharOrigin] = useState(""); 
