@@ -15,7 +15,7 @@ export default function App() {
   // ==========================================
   // 1. ESTADOS (STATES) E REFS
   // ==========================================
-  const [onlinePlayers, setOnlinePlayers] = useState([]);
+ const [onlinePlayers, setOnlinePlayers] = useState([]);
   const [currentPage, setCurrentPage] = useState('início'); 
   const [isMasterMode, setIsMasterMode] = useState(false); 
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
@@ -24,8 +24,11 @@ export default function App() {
   const [loggedUserName, setLoggedUserName] = useState(localStorage.getItem('korzel_username') || "");
   const [authMode, setAuthMode] = useState('login'); 
   const [authForm, setAuthForm] = useState({ username: "", email: "", password: "" });
+  
+  // ✅ Variável de senha adicionada corretamente
   const [showPassword, setShowPassword] = useState(false);
   
+  // ✅ Apenas UMA declaração do charName
   const [charName, setCharName] = useState("");
   const [charOrigin, setCharOrigin] = useState(""); 
   const [charRace, setCharRace] = useState("");
