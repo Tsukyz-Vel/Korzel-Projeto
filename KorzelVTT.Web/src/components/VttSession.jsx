@@ -385,14 +385,30 @@ export default function VttSession(props) {
               {activeTool === 'draw' && currentDrawing && !isSpacePressed && (
                 <polyline points={currentDrawing.map(p => `${p.x},${p.y}`).join(' ')} fill="none" stroke="#ef4444" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="opacity-80 drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]" />
               )}
-              {activeTool === 'measure' && measureStart && measureEnd && !isSpacePressed && (
-                <>
-                  <line x1={measureStart.x} y1={measureStart.y} x2={measureEnd.x} y2={measureEnd.y} stroke="#f59e0b" strokeWidth="4" strokeDasharray="8 4" className="opacity-80" />
-                  <circle cx={measureStart.x} cy={measureStart.y} r="6" fill="#f59e0b" />
-                  <circle cx={measureEnd.x} cy={measureEnd.y} r="6" fill="#f59e0b" />
-                  <rect x={(measureStart.x + measureEnd.x) / 2 - 30} y={(measureStart.y + measureEnd.y) / 2 - 15} width="60" height="30" rx="4" fill="#3e2723" opacity="0.9" />
-                  <text x={(measureStart.x + measureEnd.x) / 2} y={(measureStart.y + measureEnd.y) / 2 + 5} fill="#fcd34d" fontSize="16" fontWeight="bold" textAnchor="middle">{getDistanceInMeters()}m</text>
-                </>
+             {activeTool === 'measure' && measureStart && measureEnd && !isSpacePressed && (
+                (() => {
+                  // Calculamos o meio da linha
+                  const midX = (measureStart.x + measureEnd.x) / 2;
+                  const midY = (measureStart.y + measureEnd.y) / 2;
+                  
+                  // O Segredo: O Fator de Escala Reverso
+                  const uiScale = 1 / mapScale; 
+
+                  return (
+                    <>
+                      {/* A linha e as bolinhas também crescem junto para não sumirem */}
+                      <line x1={measureStart.x} y1={measureStart.y} x2={measureEnd.x} y2={measureEnd.y} stroke="#f59e0b" strokeWidth={4 * uiScale} strokeDasharray={`${8 * uiScale} ${4 * uiScale}`} className="opacity-80" />
+                      <circle cx={measureStart.x} cy={measureStart.y} r={6 * uiScale} fill="#f59e0b" />
+                      <circle cx={measureEnd.x} cy={measureEnd.y} r={6 * uiScale} fill="#f59e0b" />
+                      
+                      {/* A caixinha de fundo e o texto se ajustam matematicamente ao zoom */}
+                      <rect x={midX - (30 * uiScale)} y={midY - (15 * uiScale)} width={60 * uiScale} height={30 * uiScale} rx={4 * uiScale} fill="#3e2723" opacity="0.9" />
+                      <text x={midX} y={midY + (5 * uiScale)} fill="#fcd34d" fontSize={16 * uiScale} fontWeight="bold" textAnchor="middle">
+                        {getDistanceInMeters()}m
+                      </text>
+                    </>
+                  );
+                })()
               )}
             </svg>
 

@@ -742,7 +742,7 @@ const handleSaveCatalogItem = () => {
         img.onload = async () => {
           const canvas = document.createElement("canvas");
           
-          const MAX_SIZE = 1024; 
+          const MAX_SIZE = 2048; 
           let width = img.width;
           let height = img.height;
           
