@@ -24,7 +24,7 @@ export default function SessionSidebar(props) {
       
       {/* ABAS DA SIDEBAR */}
       <div className="flex flex-wrap border-b border-[#3e2723] bg-[#0a0502] shrink-0">
-        {(isMasterMode ? ['Chat', 'Tokens', 'Áudio', 'Fichas', 'Loja'] : ['Chat', 'Fichas', 'Loja']).map(t => (
+        {(isMasterMode ? ['Chat', 'Tokens', 'Áudio', 'Fichas', 'Loja'] : ['Chat', 'Áudio', 'Fichas', 'Loja']).map(t => (
           <button key={t} onClick={() => setSessionTab(t.toLowerCase())} className={`flex-1 py-3 text-[9px] lg:text-[10px] font-bold tracking-widest uppercase transition-colors ${sessionTab === t.toLowerCase() ? 'bg-[#140c08] text-amber-500 border-b-2 border-amber-500' : 'text-zinc-500 hover:text-zinc-300'}`}>
             {t}
           </button>
@@ -136,67 +136,112 @@ export default function SessionSidebar(props) {
         </div>
       )}
 
-    {/* 2. ABA ÁUDIO (Apenas Mestre) */}
-      {isMasterMode && sessionTab === 'áudio' && (
+   {/* 2. ABA ÁUDIO (Mestre e Jogadores) */}
+      {sessionTab === 'áudio' && (
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 min-h-0">
           <div className="flex justify-between items-center border-b border-zinc-800 pb-2 shrink-0">
             <h4 className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Mesa de Som</h4>
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <span className="text-[9px] uppercase font-bold tracking-widest text-zinc-500 group-hover:text-amber-500 transition-colors">Loop</span>
-              <input type="checkbox" checked={isLooping} onChange={e=>setIsLooping(e.target.checked)} className="accent-amber-500 w-3 h-3" />
-            </label>
+            {isMasterMode && (
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <span className="text-[9px] uppercase font-bold tracking-widest text-zinc-500 group-hover:text-amber-500 transition-colors">Loop</span>
+                <input type="checkbox" checked={isLooping} onChange={e=>setIsLooping(e.target.checked)} className="accent-amber-500 w-3 h-3" />
+              </label>
+            )}
           </div>
-          
-          {/* APENAS BOTÃO DE LINK */}
-          <button onClick={handleAddAudioLink} className="w-full bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 text-[10px] font-bold uppercase tracking-widest py-2 mb-2 rounded border border-indigo-700 transition-colors shadow-md shrink-0">
-            🔗 Adicionar Link Direto (.mp3)
-          </button>
 
-          <div className="flex flex-col gap-4">
-            {audioCategories.map(category => (
-              <div key={category.id} className="flex flex-col gap-2">
-                <div className="flex justify-between items-center border-b border-amber-900/30 pb-1">
-                  <h5 className="text-[10px] text-amber-600 uppercase tracking-widest font-bold">{category.name}</h5>
-                 <button onClick={() => handleAddAudioLink(category.id)} className="text-[10px] text-zinc-400 hover:text-amber-500 transition-colors" title="Adicionar link nesta pasta">➕</button>
-                </div>
-                {category.tracks.length === 0 ? (
-                  <p className="text-[9px] text-zinc-600 italic">Nenhuma faixa nesta pasta.</p>
-                ) : (
-                  category.tracks.map(track => (
-                    <div key={track.id} className={`p-3 rounded-lg border flex flex-col gap-3 transition-colors ${activeAudioId === track.id ? 'bg-amber-950/20 border-amber-800/50' : 'bg-black/40 border-zinc-800 hover:border-zinc-600'}`}>
-                      <div className="flex justify-between items-center group/track relative">
-                        <span className={`text-xs font-bold truncate pr-2 ${activeAudioId === track.id ? 'text-amber-500' : 'text-zinc-300'}`}>{track.name}</span>
-                        <div className="flex items-center gap-3">
-                          {isMasterMode && (
-                            <button onClick={() => props.handleDeleteAudioTrack(track.id, category.id)} className="text-[11px] opacity-40 hover:opacity-100 hover:text-red-500 transition-all" title="Excluir link do banco">🗑️</button>
-                          )}
-                          <button onClick={() => togglePlayAudio(track.id)} className={`w-8 h-8 rounded flex items-center justify-center text-lg ${activeAudioId === track.id && isPlaying ? 'bg-amber-600 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
-                            {activeAudioId === track.id && isPlaying ? '⏸' : '▶'}
-                          </button>
-                        </div>
-                      </div>
-                      
-                      {activeAudioId === track.id && (
-                        <div className="flex items-center gap-3 border-t border-amber-900/30 pt-2 animate-fade-in">
-                          <span className="text-xs">🔈</span>
-                       <input 
-                            type="range" 
-                            min="0" max="1" step="0.05" 
-                            value={volume} 
-                            onChange={(e) => {
-                              // 1. Atualiza o som para você instantaneamente enquanto arrasta
-                              setVolume(parseFloat(e.target.value)); 
-                            }} 
-                            className="w-full h-1 bg-amber-950 rounded-lg appearance-none cursor-pointer accent-amber-500" 
-                          />
-                        </div>
-                      )}
+          {isMasterMode ? (
+            // ==========================================
+            // VISÃO DO MESTRE (Biblioteca de Músicas)
+            // ==========================================
+            <>
+              <button onClick={handleAddAudioLink} className="w-full bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 text-[10px] font-bold uppercase tracking-widest py-2 mb-2 rounded border border-indigo-700 transition-colors shadow-md shrink-0">
+                🔗 Adicionar Link Direto (.mp3)
+              </button>
+
+              <div className="flex flex-col gap-4">
+                {audioCategories.map(category => (
+                  <div key={category.id} className="flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-amber-900/30 pb-1">
+                      <h5 className="text-[10px] text-amber-600 uppercase tracking-widest font-bold">{category.name}</h5>
+                      <button onClick={() => handleAddAudioLink(category.id)} className="text-[10px] text-zinc-400 hover:text-amber-500 transition-colors" title="Adicionar link nesta pasta">➕</button>
                     </div>
-                  ))
-                )}
+                    {category.tracks.length === 0 ? (
+                      <p className="text-[9px] text-zinc-600 italic">Nenhuma faixa nesta pasta.</p>
+                    ) : (
+                      category.tracks.map(track => (
+                        <div key={track.id} className={`p-3 rounded-lg border flex flex-col gap-3 transition-colors ${activeAudioId === track.id ? 'bg-amber-950/20 border-amber-800/50' : 'bg-black/40 border-zinc-800 hover:border-zinc-600'}`}>
+                          <div className="flex justify-between items-center group/track relative">
+                            <span className={`text-xs font-bold truncate pr-2 ${activeAudioId === track.id ? 'text-amber-500' : 'text-zinc-300'}`}>{track.name}</span>
+                            <div className="flex items-center gap-3">
+                              <button onClick={() => props.handleDeleteAudioTrack(track.id, category.id)} className="text-[11px] opacity-40 hover:opacity-100 hover:text-red-500 transition-all" title="Excluir link do banco">🗑️</button>
+                              <button onClick={() => togglePlayAudio(track.id)} className={`w-8 h-8 rounded flex items-center justify-center text-lg ${activeAudioId === track.id && isPlaying ? 'bg-amber-600 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
+                                {activeAudioId === track.id && isPlaying ? '⏸' : '▶'}
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {activeAudioId === track.id && (
+                            <div className="flex items-center gap-3 border-t border-amber-900/30 pt-2 animate-fade-in">
+                              <span className="text-xs">🔈</span>
+                              <input 
+                                type="range" 
+                                min="0" max="1" step="0.05" 
+                                value={volume} 
+                                onChange={(e) => setVolume(parseFloat(e.target.value))} 
+                                className="w-full h-1 bg-amber-950 rounded-lg appearance-none cursor-pointer accent-amber-500" 
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            // ==========================================
+            // VISÃO DOS JOGADORES (Player Local)
+            // ==========================================
+            <div className="flex flex-col gap-4 mt-2">
+              {activeAudioId && isPlaying ? (
+                <div className="bg-amber-950/20 border border-amber-800/50 p-4 rounded-lg flex flex-col gap-3 shadow-[0_0_15px_rgba(217,119,6,0.1)]">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] text-amber-500 uppercase tracking-widest font-bold">Tocando Agora 🎵</span>
+                    <div className="flex gap-1">
+                      <span className="w-1 h-3 bg-amber-500 animate-pulse"></span>
+                      <span className="w-1 h-4 bg-amber-500 animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                      <span className="w-1 h-2 bg-amber-500 animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                    </div>
+                  </div>
+                  
+                  {/* Busca o nome da música ativa mapeando as pastas */}
+                  <span className="text-sm text-white font-bold block truncate">
+                    {audioCategories.flatMap(c => c.tracks).find(t => t.id === activeAudioId)?.name || "Música Ambiente"}
+                  </span>
+                  
+                  <div className="flex items-center gap-3 border-t border-amber-900/30 pt-4 mt-2">
+                    <span className="text-xs">🔈</span>
+                    <input 
+                      type="range" 
+                      min="0" max="1" step="0.05" 
+                      value={volume} 
+                      onChange={(e) => setVolume(parseFloat(e.target.value))} 
+                      className="w-full h-1.5 bg-amber-950 rounded-lg appearance-none cursor-pointer accent-amber-500" 
+                    />
+                  </div>
+                  <span className="text-[9px] text-zinc-500 text-center mt-2 uppercase tracking-widest">
+                    Ajuste seu volume local
+                  </span>
+                </div>
+              ) : (
+                <div className="text-center py-10 opacity-50 border border-dashed border-zinc-800 rounded-lg">
+                  <span className="text-3xl mb-3 block">🔇</span>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest">A taverna está silenciosa...</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
       {/* 3. ABA FICHAS (COM DIVISÓRIAS) */}
@@ -253,6 +298,11 @@ export default function SessionSidebar(props) {
                               <button onClick={() => loadCharacterFromDb(char.id)} className="flex-1 bg-blue-950/40 hover:bg-blue-900 text-blue-300 border border-blue-900 text-[9px] uppercase font-bold tracking-widest py-2 rounded transition-colors">
                                 📖 Inspecionar
                               </button>
+                              {/* 👇 NOVO BOTÃO AQUI 👇 */}
+                                <button onClick={() => window.open(`/?ficha=${char.id}&campanha=${currentCampaignId}`, '_blank')} className="bg-purple-950/40 hover:bg-purple-900 text-purple-300 border border-purple-900 text-[10px] px-3 rounded transition-colors" title="Abrir em Nova Guia">
+                                  🔗
+                                </button>
+                                {/* 👆 NOVO BOTÃO AQUI 👆 */}
                               
                               {/* 👇 O BOTÃO QUE FALTAVA PARA O MESTRE 👇 */}
                               <button onClick={() => handleDeleteCharacter(char.id, char.name)} className="bg-zinc-900/80 hover:bg-red-900 text-zinc-500 hover:text-red-200 border border-zinc-800 hover:border-red-900 text-[10px] px-3 rounded transition-colors" title="Apagar Ficha do Jogador">

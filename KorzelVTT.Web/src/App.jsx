@@ -355,6 +355,8 @@ export default function App() {
         const res = await fetch(`https://korzel-api.onrender.com/api/characters/${activeCharId}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(characterData) });
         if(res.ok) {
            showToast("Ficha atualizada!", "success");
+           const channel = new BroadcastChannel('korzel_sync');
+           channel.postMessage({ type: 'RELOAD_SHEET', charId: activeCharId });
            if (connection && currentCampaignId) connection.invoke("RefreshCharacters", currentCampaignId.toString()).catch(console.error);
         } else showToast(`Erro ${res.status}.`, "error");
       } else {
@@ -1301,6 +1303,30 @@ const toggleTokenStatus = async (statusName) => {
   
   useEffect(() => { if (audioRef.current) audioRef.current.loop = isLooping; }, [isLooping]);
 
+  // 👇 1. NOVO: LÊ A URL E ABRE A FICHA ISOLADA 👇
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const fichaId = params.get('ficha');
+    const campId = params.get('campanha');
+
+    if (fichaId && campId && authToken) {
+      setCurrentCampaignId(Number(campId));
+      loadCharacterFromDb(Number(fichaId));
+      setCurrentPage('ficha-isolada'); 
+    }
+  }, [authToken]);
+
+  // 👇 2. NOVO: TELEPATIA ENTRE AS ABAS 👇
+  useEffect(() => {
+    const channel = new BroadcastChannel('korzel_sync');
+    channel.onmessage = (event) => {
+      if (event.data.type === 'RELOAD_SHEET' && activeCharId === event.data.charId) {
+        loadCharacterFromDb(event.data.charId);
+      }
+    };
+    return () => channel.close();
+  }, [activeCharId]);
+
   // 🟢 1. CÉREBRO DE TROCA DE MÚSICA E PLAY/PAUSE
   const currentTrackUrl = audioCategories.flatMap(c => c.tracks).find(t => t.id === activeAudioId)?.url;
 
@@ -1601,6 +1627,36 @@ const toggleTokenStatus = async (statusName) => {
 
         {toast.show && (
           <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[99999] px-6 py-3 rounded-lg shadow-xl border flex items-center gap-3 transition-all ${toast.type === 'error' ? 'bg-red-950/90 border-red-900 text-red-200' : 'bg-green-950/90 border-green-900 text-green-200'}`}>
+            <span className="text-xl">{toast.type === 'error' ? '💀' : '🪙'}</span>
+            <span className="font-bold tracking-widest uppercase text-xs">{toast.message}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+  if (currentPage === 'ficha-isolada') {
+    return (
+      <div className="h-screen w-screen bg-[#0a0a0a] overflow-y-auto custom-scrollbar relative" style={{ colorScheme: 'dark' }}>
+        <DiceRollerOverlay isRolling={rollModal.isRolling} result={rollModal.show && !rollModal.isRolling ? rollModal : null} onDismiss={() => setRollModal({ ...rollModal, show: false })} />
+        
+        <div className="max-w-7xl mx-auto p-4 lg:p-8">
+          <div className="flex justify-between items-center bg-[#140c08] border border-red-900/50 p-4 mb-6 rounded-xl sticky top-4 z-50 shadow-[0_5px_20px_rgba(0,0,0,0.8)]">
+            <h1 className="text-red-500 font-bold uppercase tracking-widest text-sm">⚔️ Ficha Isolada: {charName}</h1>
+            <div className="flex gap-4">
+                <button onClick={saveCharacterToDb} className="bg-red-900 hover:bg-red-700 text-white font-bold py-2 px-6 rounded border border-red-500 transition-colors text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(153,27,27,0.5)]">
+                  💾 Salvar Alterações
+                </button>
+                <button onClick={() => window.close()} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white font-bold py-2 px-4 rounded border border-zinc-600 transition-colors text-xs uppercase tracking-widest">
+                  ✖ Fechar Guia
+                </button>
+            </div>
+          </div>
+          
+          <CharacterSheet charName={charName} setCharName={setCharName} charOrigin={charOrigin} setCharOrigin={setCharOrigin} charRace={charRace} setCharRace={setCharRace} charClass={charClass} setCharClass={setCharClass} charAge={charAge} setCharAge={setCharAge} charLevel={charLevel} setCharLevel={setCharLevel} attrInt={attrInt} setAttrInt={setAttrInt} attrPre={attrPre} setAttrPre={setAttrPre} attrAgi={attrAgi} setAttrAgi={setAttrAgi} attrVig={attrVig} setAttrVig={setAttrVig} attrFor={attrFor} setAttrFor={setAttrFor} attrIns={attrIns} setAttrIns={setAttrIns} hp={hp} setHp={setHp} maxHp={maxHp} setMaxHp={setMaxHp} pe={pe} setPe={setPe} maxPe={maxPe} setMaxPe={setMaxPe} corruption={corruption} setCorruption={setCorruption} maxCorruption={maxCorruption} setMaxCorruption={setMaxCorruption} lascas={lascas} setLascas={setLascas} currentWeight={currentWeight} maxWeight={maxWeight} skillsList={skillsList} setSkillsList={setSkillsList} executeRoll={executeRoll} getSkillTotal={getSkillTotal} activeFichaTab={activeFichaTab} setActiveFichaTab={setActiveFichaTab} showWeaponForm={showWeaponForm} setShowWeaponForm={setShowWeaponForm} editingWeaponIndex={editingWeaponIndex} weaponForm={weaponForm} setWeaponForm={setWeaponForm} attacksList={attacksList} handleOpenNewWeapon={handleOpenNewWeapon} handleEditWeapon={handleEditWeapon} handleDeleteWeapon={handleDeleteWeapon} handleSaveWeapon={handleSaveWeapon} showAbilityForm={showAbilityForm} setShowAbilityForm={setShowAbilityForm} editingAbilityIndex={editingAbilityIndex} abilityForm={abilityForm} setAbilityForm={setAbilityForm} abilitiesList={abilitiesList} handleOpenNewAbility={handleOpenNewAbility} handleEditAbility={handleEditAbility} handleDeleteAbility={handleDeleteAbility} handleSaveAbility={handleSaveAbility} showItemForm={showItemForm} setShowItemForm={setShowItemForm} editingItemIndex={editingItemIndex} itemForm={itemForm} setItemForm={setItemForm} inventoryList={inventoryList} handleOpenNewItem={handleOpenNewItem} handleEditItem={handleEditItem} handleDeleteItem={handleDeleteItem} handleSaveItem={handleSaveItem} charDeity={charDeity} handleDeityChange={handleDeityChange} mut1={mut1} setMut1={setMut1} mut2={mut2} setMut2={setMut2} mut3={mut3} setMut3={setMut3} notes={notes} activeNoteId={activeNoteId} setActiveNoteId={setActiveNoteId} handleAddNote={handleAddNote} handleDeleteNote={handleDeleteNote} handleNoteChange={handleNoteChange} activeNote={activeNote} connection={connection} setChatMessages={setChatMessages} showToast={showToast} resistances={resistances} setResistances={setResistances} oficioText={oficioText} setOficioText={setOficioText} currentCampaignId={currentCampaignId} armorBonus={armorBonus} setArmorBonus={setArmorBonus} shieldBonus={shieldBonus} setShieldBonus={setShieldBonus} isArmorHeavy={isArmorHeavy} setIsArmorHeavy={setIsArmorHeavy} isShieldHeavy={isShieldHeavy} setIsShieldHeavy={setIsShieldHeavy} />
+        </div>
+
+        {toast.show && (
+          <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] px-6 py-3 rounded-lg shadow-xl border flex items-center gap-3 transition-all ${toast.type === 'error' ? 'bg-red-950/90 border-red-900 text-red-200' : 'bg-green-950/90 border-green-900 text-green-200'}`}>
             <span className="text-xl">{toast.type === 'error' ? '💀' : '🪙'}</span>
             <span className="font-bold tracking-widest uppercase text-xs">{toast.message}</span>
           </div>
