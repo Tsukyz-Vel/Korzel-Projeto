@@ -93,4 +93,38 @@ public class ScenesController : ControllerBase
         
         return NoContent();
     }
+    // ==========================================
+    // ROTA PARA ATUALIZAR A CENA (Nome e Status)
+    // ==========================================
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateScene(int id, Scene updatedScene)
+    {
+        if (id != updatedScene.Id) return BadRequest("ID incompatível.");
+
+        var scene = await _context.Scenes.FindAsync(id);
+        if (scene == null) return NotFound("Cena não encontrada.");
+
+        // Atualiza apenas os campos permitidos
+        scene.Name = updatedScene.Name;
+        scene.IsActive = updatedScene.IsActive;
+
+        await _context.SaveChangesAsync();
+        return Ok(scene);
+    }
+
+    // ==========================================
+    // ROTA PARA DELETAR A CENA
+    // ==========================================
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteScene(int id)
+    {
+        var scene = await _context.Scenes.FindAsync(id);
+        if (scene == null) return NotFound("Cena não encontrada.");
+
+        _context.Scenes.Remove(scene);
+        await _context.SaveChangesAsync();
+
+        // O padrão para exclusão no REST é retornar NoContent (Status 204)
+        return NoContent();
+    }
 }
