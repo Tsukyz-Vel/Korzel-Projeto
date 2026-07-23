@@ -125,22 +125,57 @@ export default function VttSession(props) {
   const [editSceneName, setEditSceneName] = useState("");
 
   const startEditingScene = (scene) => { setEditingSceneId(scene.id); setEditSceneName(scene.name); };
-  const saveSceneName = (id) => {
+ const saveSceneName = async (id) => {
     if(editSceneName.trim() === "") { setEditingSceneId(null); return; }
+    
+    // 1. Atualiza visualmente na tela primeiro (para parecer instantâneo)
     setScenes(prev => prev.map(s => s.id === id ? { ...s, name: editSceneName } : s));
     setEditingSceneId(null);
+    
+    // 2. Manda a alteração para salvar no banco de dados!
+    try {
+      const sceneToUpdate = scenes.find(s => s.id === id);
+      if (sceneToUpdate) {
+        await fetch(`https://korzel-api.onrender.com/api/scenes/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...sceneToUpdate, name: editSceneName })
+        });
+      }
+    } catch (err) {
+      console.error("Erro ao renomear cena no banco:", err);
+      showToast("Erro de conexão ao renomear a cena.", "error");
+    }
   };
+
   const handleKeyDown = (e, id) => { if (e.key === 'Enter') saveSceneName(id); if (e.key === 'Escape') setEditingSceneId(null); };
 
-  const handleDeleteScene = (e, id) => {
+  const handleDeleteScene = async (e, id) => {
     e.stopPropagation(); 
     if (scenes.length <= 1) { showToast("Você precisa ter pelo menos uma cena na campanha!", "error"); return; }
+    
     if (window.confirm("Tem certeza que deseja apagar esta cena? Isso não pode ser desfeito.")) {
+      // 1. Apaga visualmente da tela
       const remainingScenes = scenes.filter(s => s.id !== id);
       setScenes(remainingScenes);
       if (gmActiveSceneId === id) setGmActiveSceneId(remainingScenes[0].id);
       if (playerActiveSceneId === id) setPlayerActiveSceneId(remainingScenes[0].id);
-      showToast("Cena apagada com sucesso.", "success");
+      
+      // 2. Apaga definitivamente do banco de dados!
+      try {
+        const res = await fetch(`https://korzel-api.onrender.com/api/scenes/${id}`, {
+          method: 'DELETE'
+        });
+        
+        if (res.ok) {
+           showToast("Cena apagada com sucesso.", "success");
+        } else {
+           showToast(`Erro ao apagar do banco (Erro ${res.status}).`, "error");
+        }
+      } catch (err) {
+        console.error("Erro ao apagar cena:", err);
+        showToast("Erro de conexão ao apagar.", "error");
+      }
     }
   };
 
