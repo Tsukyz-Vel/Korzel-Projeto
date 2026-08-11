@@ -66,35 +66,34 @@ export default function App() {
   const [abilitiesList, setAbilitiesList] = useState([]);
   const [notes, setNotes] = useState([]);
   const [skillsList, setSkillsList] = useState([
-    { name: "Acrobacia", attrShort: "agi", color: "blue", trainingLevel: 0 },
-    { name: "Adestramento", attrShort: "ins", color: "amber", trainingLevel: 0 },
-    { name: "Arremesso", attrShort: "for", color: "red", trainingLevel: 0 },
-    { name: "Atletismo", attrShort: "vig", color: "green", trainingLevel: 0 },
-    { name: "Constituição", attrShort: "vig", color: "green", trainingLevel: 0 },
-    { name: "Diplomacia", attrShort: "pre", color: "purple", trainingLevel: 0 },
-    { name: "Enganação", attrShort: "pre", color: "purple", trainingLevel: 0 },
-    { name: "Erudição", attrShort: "int", color: "yellow", trainingLevel: 0 },
-    { name: "Furtividade", attrShort: "agi", color: "blue", trainingLevel: 0 },
-    { name: "Influência", attrShort: "pre", color: "purple", trainingLevel: 0 },
-    { name: "Intimidação", attrShort: "pre", color: "purple", trainingLevel: 0 },
-    { name: "Intuição", attrShort: "ins", color: "amber", trainingLevel: 0 },
-    { name: "Investigação", attrShort: "int", color: "yellow", trainingLevel: 0 },
-    { name: "Ladinagem", attrShort: "agi", color: "blue", trainingLevel: 0 },
-    { name: "Luta", attrShort: "for", color: "red", trainingLevel: 0 },
-    { name: "Medicina", attrShort: "int", color: "yellow", trainingLevel: 0 },
-    { name: "Misticismo", attrShort: "int", color: "yellow", trainingLevel: 0 },
-    { name: "Montaria/Pilotar", attrShort: "agi", color: "blue", trainingLevel: 0 },
-    { name: "Ofício", attrShort: "int", color: "yellow", trainingLevel: 0 },
-    { name: "Percepção", attrShort: "ins", color: "amber", trainingLevel: 0 },
-    { name: "Pontaria", attrShort: "agi", color: "blue", trainingLevel: 0 },
-    { name: "Rastrear", attrShort: "ins", color: "amber", trainingLevel: 0 },
-    { name: "Reflexos", attrShort: "agi", color: "blue", trainingLevel: 0 },
-    { name: "Religião", attrShort: "int", color: "yellow", trainingLevel: 0 },
-    { name: "Sincronia", attrShort: "pre", color: "purple", trainingLevel: 0 },
-    { name: "Sobrevivência", attrShort: "ins", color: "amber", trainingLevel: 0 },
-    { name: "Vontade", attrShort: "pre", color: "purple", trainingLevel: 0 }
+    { name: "Acrobacia", attrShort: "agi", color: "blue", trainingLevel: 0, others: 0 },
+    { name: "Adestramento", attrShort: "ins", color: "amber", trainingLevel: 0, others: 0 },
+    { name: "Arremesso", attrShort: "for", color: "red", trainingLevel: 0, others: 0 },
+    { name: "Atletismo", attrShort: "vig", color: "green", trainingLevel: 0, others: 0 },
+    { name: "Constituição", attrShort: "vig", color: "green", trainingLevel: 0, others: 0 },
+    { name: "Diplomacia", attrShort: "pre", color: "purple", trainingLevel: 0, others: 0 },
+    { name: "Enganação", attrShort: "pre", color: "purple", trainingLevel: 0, others: 0 },
+    { name: "Erudição", attrShort: "int", color: "yellow", trainingLevel: 0, others: 0 },
+    { name: "Furtividade", attrShort: "agi", color: "blue", trainingLevel: 0, others: 0 },
+    { name: "Influência", attrShort: "pre", color: "purple", trainingLevel: 0, others: 0 },
+    { name: "Intimidação", attrShort: "pre", color: "purple", trainingLevel: 0, others: 0 },
+    { name: "Intuição", attrShort: "ins", color: "amber", trainingLevel: 0, others: 0 },
+    { name: "Investigação", attrShort: "int", color: "yellow", trainingLevel: 0, others: 0 },
+    { name: "Ladinagem", attrShort: "agi", color: "blue", trainingLevel: 0, others: 0 },
+    { name: "Luta", attrShort: "for", color: "red", trainingLevel: 0, others: 0 },
+    { name: "Medicina", attrShort: "int", color: "yellow", trainingLevel: 0, others: 0 },
+    { name: "Misticismo", attrShort: "int", color: "yellow", trainingLevel: 0, others: 0 },
+    { name: "Montaria/Pilotar", attrShort: "agi", color: "blue", trainingLevel: 0, others: 0 },
+    { name: "Ofício", attrShort: "int", color: "yellow", trainingLevel: 0, others: 0 },
+    { name: "Percepção", attrShort: "ins", color: "amber", trainingLevel: 0, others: 0 },
+    { name: "Pontaria", attrShort: "agi", color: "blue", trainingLevel: 0, others: 0 },
+    { name: "Rastrear", attrShort: "ins", color: "amber", trainingLevel: 0, others: 0 },
+    { name: "Reflexos", attrShort: "agi", color: "blue", trainingLevel: 0, others: 0 },
+    { name: "Religião", attrShort: "int", color: "yellow", trainingLevel: 0, others: 0 },
+    { name: "Sincronia", attrShort: "pre", color: "purple", trainingLevel: 0, others: 0 },
+    { name: "Sobrevivência", attrShort: "ins", color: "amber", trainingLevel: 0, others: 0 },
+    { name: "Vontade", attrShort: "pre", color: "purple", trainingLevel: 0, others: 0 }
   ]);
-
   const [activeFichaTab, setActiveFichaTab] = useState('perícias'); 
   const [activeNoteId, setActiveNoteId] = useState(1);
   const [sheetModalOpen, setSheetModalOpen] = useState(false);
@@ -134,7 +133,18 @@ export default function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [sessionTab, setSessionTab] = useState('chat');
-  const [secretRoll, setSecretRoll] = useState(false);
+  // Lemos o armazenamento local para a nova aba já nascer com o escudo certo
+  const [secretRoll, setSecretRoll] = useState(localStorage.getItem('korzel_secret') === 'true');
+  const secretRollRef = useRef(secretRoll);
+
+  useEffect(() => { 
+    secretRollRef.current = secretRoll; 
+    localStorage.setItem('korzel_secret', secretRoll); // Salva no PC
+    
+    // Avisa na hora para qualquer outra aba aberta que o escudo mudou!
+    const channel = new BroadcastChannel('korzel_sync');
+    channel.postMessage({ type: 'SHIELD_SYNC', value: secretRoll });
+  }, [secretRoll]);
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState([{ id: 1, sender: "Sistema", text: "A névoa cobre as docas de Verantis. A sessão começou.", type: "info" }]);
   
@@ -436,18 +446,19 @@ export default function App() {
         let newChatMsg = { id: Date.now(), sender: isMasterMode && secretRoll ? "Mestre" : (charName || loggedUserName), type: isMasterMode && secretRoll ? "secret" : "roll", text: "" };
         newChatMsg.text = `🎲 **Rolagem Avulsa (${customExp})**\nResultado: **${total}**\n${detailText}`;
         
-        // 👇 A MÁGICA DA SINCRONIZAÇÃO DA ROLAGEM AVULSA 👇
-        if (isMasterMode && secretRoll) {
-          newChatMsg.text = `[Rolagem Oculta]\n${newChatMsg.text}`;
-          setChatMessages(prev => [...prev, newChatMsg]); // Oculto: Fica só na tela do Mestre
-        } else if (connection && currentCampaignId) {
-          connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newChatMsg)).catch(console.error); // Público: Vai pro C# espalhar
-        }
+        // 👇 A MÁGICA DA SINCRONIZAÇÃO DA FICHA 👇
+      const isOcultoFicha = isMasterMode && secretRollRef.current;
 
-        setRollModal(prev => ({ ...prev, isRolling: false, total: total, detail: detailText }));
-      }, 200);
-      return;
-    }
+      if (isOcultoFicha) { 
+        newChatMsg.text = `[Rolagem Oculta]\n${newChatMsg.text}`; 
+        newChatMsg.type = "secret"; // Força a cor roxa (segredo) no chat
+        setChatMessages(prev => [...prev, newChatMsg]); // Oculto: Fica só na tela do Mestre
+      } else if (connection && currentCampaignId) { 
+        connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newChatMsg)).catch(console.error); // Público: Vai pro C# espalhar
+      } 
+
+    }, 1000); 
+  };
 
     // ==========================================
     // 2. DESCONTO DE MUNIÇÃO
@@ -704,17 +715,20 @@ const handleSaveCatalogItem = () => {
       type: "msg" 
     }; 
     
-    if (secretRoll && isMasterMode) { 
+    // 👇 O BLOQUEIO ACONTECE AQUI 👇
+    if (secretRollRef.current && isMasterMode) { 
       newMessage.text = `[Oculto]\n${newMessage.text}`; 
       newMessage.type = "secret"; 
+      
+      // Salva apenas na tela do mestre e ABORTA o envio para os jogadores
+      setChatMessages(prev => [...prev, newMessage]);
+      setChatInput(""); 
+      return; // 👈 Esse return é a barreira que impede o envio pro C#
     } 
-    
-    // 👇 REMOVIDO: setChatMessages([...chatMessages, newMessage]);
     
     setChatInput(""); // Apenas limpa o campo de texto
     
-    // Envia para o C#. Como arrumamos o Hub para usar Clients.Group, 
-    // ele vai devolver a mensagem para o seu "connection.on" e renderizar na tela!
+    // Envia para o C#.
     if (connection && currentCampaignId) { 
       connection.invoke("SendChatMessage", currentCampaignId.toString(), JSON.stringify(newMessage)).catch(console.error); 
     } 
@@ -1317,16 +1331,20 @@ const toggleTokenStatus = async (statusName) => {
   }, [authToken]);
 
   // 👇 2. NOVO: TELEPATIA ENTRE AS ABAS 👇
-  useEffect(() => {
+ useEffect(() => {
     const channel = new BroadcastChannel('korzel_sync');
     channel.onmessage = (event) => {
+      // Ouve quando pedem para recarregar a ficha
       if (event.data.type === 'RELOAD_SHEET' && activeCharId === event.data.charId) {
         loadCharacterFromDb(event.data.charId);
+      }
+      // Ouve quando o Mestre liga ou desliga o escudo na outra aba
+      if (event.data.type === 'SHIELD_SYNC') {
+        setSecretRoll(event.data.value);
       }
     };
     return () => channel.close();
   }, [activeCharId]);
-
   // 🟢 1. CÉREBRO DE TROCA DE MÚSICA E PLAY/PAUSE
   const currentTrackUrl = audioCategories.flatMap(c => c.tracks).find(t => t.id === activeAudioId)?.url;
 
