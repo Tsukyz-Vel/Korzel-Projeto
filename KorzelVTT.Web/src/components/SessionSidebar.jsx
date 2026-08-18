@@ -335,7 +335,7 @@ export default function SessionSidebar(props) {
                             📖 Abrir
                           </button>
                           {/* 👇 AQUI ESTÁ O BOTÃO DA NOVA GUIA PARA OS JOGADORES 👇 */}
-                            <button onClick={() => window.open(`/?ficha=${char.id}&campanha=${currentCampaignId}`, '_blank')} className="bg-purple-950/40 hover:bg-purple-900 text-purple-300 border border-purple-900 text-[10px] px-3 rounded transition-colors" title="Abrir em Nova Guia">
+                            <button onClick={() => window.open(`/?ficha=${char.id}&campanha=${currentCampaignId}&master=${isMasterMode}`, '_blank')} className="bg-purple-950/40 hover:bg-purple-900 text-purple-300 border border-purple-900 text-[10px] px-3 rounded transition-colors" title="Abrir em Nova Guia">
                               🔗
                             </button>
                           <button onClick={() => handleDeleteCharacter(char.id, char.name)} className="bg-zinc-900/80 hover:bg-red-900 text-zinc-500 hover:text-red-200 border border-zinc-800 hover:border-red-900 text-[10px] px-3 rounded transition-colors" title="Apagar Ficha">

@@ -82,7 +82,7 @@ export default function App() {
     { name: "Ladinagem", attrShort: "agi", color: "blue", trainingLevel: 0, others: 0 },
     { name: "Luta", attrShort: "for", color: "red", trainingLevel: 0, others: 0 },
     { name: "Medicina", attrShort: "int", color: "yellow", trainingLevel: 0, others: 0 },
-    { name: "Misticismo", attrShort: "int", color: "yellow", trainingLevel: 0, others: 0 },
+    { name: "Misticismo", attrShort: "pre", color: "purple", trainingLevel: 0, others: 0 },
     { name: "Montaria/Pilotar", attrShort: "agi", color: "blue", trainingLevel: 0, others: 0 },
     { name: "Ofício", attrShort: "int", color: "yellow", trainingLevel: 0, others: 0 },
     { name: "Percepção", attrShort: "ins", color: "amber", trainingLevel: 0, others: 0 },
@@ -353,7 +353,7 @@ export default function App() {
       campaignId: currentCampaignId || 0,
       name: charName, origin: charOrigin, race: charRace, class: charClass, age: charAge, level: charLevel, deity: charDeity, mut1, mut2, mut3, intellect: attrInt, presence: attrPre, agility: attrAgi, vigor: attrVig, strength: attrFor, instinct: attrIns, currentHP: hp, maxHP: maxHp, currentPE: pe, maxPE: maxPe, corruption, maxCorruption, lascas, baseDefense: 10,resistances: resistances,
       oficioText: oficioText, lascas: lascas, armorBonus: Number(armorBonus), shieldBonus: Number(shieldBonus), isArmorHeavy: isArmorHeavy, isShieldHeavy: isShieldHeavy, baseDefense: 10,
-      skills: skillsList.map(s => ({ name: s.name, trainingLevel: s.trainingLevel, others: s.others || 0 })), 
+      skills: skillsList.map(s => ({ name: s.name, trainingLevel: s.trainingLevel, others: Number(s.others) || 0 })),
       inventory: inventoryList.map(i => ({ name: i.name, description: i.description, quantity: i.quantity, weight: i.weight, isEquipped: i.isEquipped || false, itemType: i.itemType || "Consumível", armorBonus: i.armorBonus || 0, armorPenalty: i.armorPenalty || 0 })), 
       weapons: attacksList.map(w => ({ name: w.name, damage: w.damage, critMargin: w.critMargin, critMultiplier: w.critMultiplier, type: w.type, skill: w.skill, isRanged: w.isRanged || false, ammo: w.ammo || 0 })), 
       abilities: abilitiesList.map(a => ({ title: a.title, type: a.type, cost: a.cost, description: a.description })), 
@@ -490,11 +490,14 @@ export default function App() {
         newChatMsg.text = `Rolou Dano (${weapon.name}): ${res.total}\nDetalhes: [${res.log}]`; 
         if(isCrit) newChatMsg.text += "\n💥 DANO CRÍTICO!"; 
       } 
-      else if (type === 'sincronia') {
+     else if (type === 'sincronia') {
         const d20 = Math.floor(Math.random() * 20) + 1; 
         const total = d20 + Number(bonus); 
-        const dtSincronia = 20 + Number(corruption || 0); 
-        let detailText = `Dado de Sincronia: [ ${d20} ] + Bônus: ${bonus}\nTotal: ${total} vs DT ${dtSincronia} (20 base + ${corruption} Corrupção)\n\n`; 
+        
+        // 👇 DT BASE REDUZIDA PARA 10 AQUI 👇
+        const dtSincronia = 10 + Number(corruption || 0); 
+        let detailText = `Dado de Sincronia: [ ${d20} ] + Bônus: ${bonus}\nTotal: ${total} vs DT ${dtSincronia} (10 base + ${corruption} Corrupção)\n\n`; 
+        
         if (total >= dtSincronia) { 
           detailText += "✨ SUCESSO! A magia flui com segurança."; 
           newChatMsg.text = `🔮 **Teste de Sincronia**\nResultado: **${total}** (DT ${dtSincronia})\n✨ SUCESSO! A magia flui com segurança.`; 
@@ -505,7 +508,7 @@ export default function App() {
           newChatMsg.text = `🔮 **Teste de Sincronia**\nResultado: **${total}** (DT ${dtSincronia})\n💀 **VOCÊ FALHOU!**\nSofreu +${danoCorrupcao} de Corrupção!`; 
         } 
         setRollModal(prev => ({ ...prev, isRolling: false, d20, total, detail: detailText, isCombined: false })); 
-      } 
+      }
       else { 
         const d20 = Math.floor(Math.random() * 20) + 1; 
         const total = d20 + Number(bonus); 
@@ -1322,9 +1325,11 @@ const toggleTokenStatus = async (statusName) => {
     const params = new URLSearchParams(window.location.search);
     const fichaId = params.get('ficha');
     const campId = params.get('campanha');
+    const isMaster = params.get('master') === 'true'; // LÊ A CARTEIRADA DE MESTRE AQUI
 
     if (fichaId && campId && authToken) {
       setCurrentCampaignId(Number(campId));
+      if (isMaster) setIsMasterMode(true); // ATIVA O MODO MESTRE NA ABA NOVA
       loadCharacterFromDb(Number(fichaId));
       setCurrentPage('ficha-isolada'); 
     }
