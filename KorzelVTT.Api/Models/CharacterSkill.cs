@@ -19,5 +19,5 @@ public class CharacterSkill
     public int TrainingLevel { get; set; } = 0; 
     
     // Bônus vindos de itens ou situações externas
-    public int Others { get; set; } = 0; 
+    public int Others { get; set; }
 }
